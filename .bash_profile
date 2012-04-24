@@ -37,6 +37,9 @@ if [ -f "$HOME/.bash_aliases" ]; then
     source "$HOME/.bash_aliases"
 fi
 
+# Autocompletion of SSH hosts for `mosh`
+complete -W "$(echo `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)" mosh
+
 # Autocompletion for Homebrew packages
 brew --version >/dev/null 2>&1
 if [ $? == 0 ]; then
