@@ -38,6 +38,9 @@ if [ -f "$HOME/.bash_aliases" ]; then
 fi
 
 # Autocompletion for Homebrew packages
-if [ -f "`brew --prefix`/etc/bash_completion" ]; then
-    source "`brew --prefix`/etc/bash_completion"
+brew --version >/dev/null 2>&1
+if [ $? == 0 ]; then
+    if [ -f "`brew --prefix`/etc/bash_completion" ]; then
+        source "`brew --prefix`/etc/bash_completion"
+    fi
 fi
