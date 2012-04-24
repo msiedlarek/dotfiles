@@ -1,0 +1,16 @@
+# Make Tab autocomplete regardless of filename case
+set completion-ignore-case on
+
+# Don’t prompt unless there are over 500 possible completions
+set completion-query-items 500
+
+# List all matches in case multiple possible completions are possible
+set show-all-if-ambiguous on
+
+# Immediately show all possible completions
+set show-all-if-ambiguous on
+
+# Allow UTF-8 input and output, instead of showing stuff like $'\0123\0456'
+set input-meta on
+set output-meta on
+set convert-meta off
