@@ -5,6 +5,9 @@ if [ -e "/usr/local/bin/vim" ]; then
     alias vim="/usr/local/bin/vim"
 fi
 
+# Better color support in tmux sessions
+alias tmux="TERM=screen-256color-bce tmux"
+
 # Always use color output for `ls`
 if [[ "$OSTYPE" =~ ^darwin ]]; then
     alias ls="command ls -G"
