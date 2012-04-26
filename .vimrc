@@ -24,6 +24,7 @@ set history=32
 
 " Enhance command-line completion
 set wildmenu
+set wildmode=list:longest,full
 
 " Override the 'ignorecase' option if the search pattern contains upper case
 " characters
