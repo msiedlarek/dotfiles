@@ -160,5 +160,8 @@ au BufWritePre * call TrimTrailingEmptyLines()
 " Set GUI font
 set guifont=Inconsolata:h16
 
+" Hide GUI toolbar
+set guioptions-=T
+
 " Jump to the last position when opening a file
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
