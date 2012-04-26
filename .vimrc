@@ -103,6 +103,12 @@ if $TERM != "screen"
     colorscheme mustang
 endif
 
+" Move though windows using Ctrl+<movement key>
+map <c-j> <c-w>j
+map <c-k> <c-w>k
+map <c-l> <c-w>l
+map <c-h> <c-w>h
+
 " Turn line-numbering on/off
 nnoremap <silent> <F3> :set invnumber<CR>
 
