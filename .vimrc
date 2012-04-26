@@ -88,6 +88,15 @@ filetype plugin on
 " Use normal \t tabs for Makefiles
 autocmd FileType make setlocal noexpandtab
 
+" Commenting blocks of code
+let b:comment_leader = '#'
+autocmd FileType haskell,vhdl,ada let b:comment_leader = '--'
+autocmd FileType tex              let b:comment_leader = '%'
+autocmd FileType mail             let b:comment_leader = '>'
+autocmd FileType vim              let b:comment_leader = '"'
+noremap <silent> <leader>k :s/^/<C-R>=b:comment_leader<CR>/<CR>:nohl<CR>
+noremap <silent> <leader>j :s/^<C-R>=b:comment_leader<CR>//e<CR>:nohl<CR>
+
 " Enable mouse
 set mouse=a
 
