@@ -1,3 +1,4 @@
+alias -- -="cd -"
 alias ..="cd .."
 
 # Use custom-compiled Vim if available
