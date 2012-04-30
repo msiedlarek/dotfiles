@@ -91,6 +91,7 @@ autocmd FileType make setlocal noexpandtab
 
 " Commenting blocks of code
 let b:comment_leader = '#'
+autocmd FileType c,cpp            let b:comment_leader = '\/\/'
 autocmd FileType haskell,vhdl,ada let b:comment_leader = '--'
 autocmd FileType tex              let b:comment_leader = '%'
 autocmd FileType mail             let b:comment_leader = '>'
