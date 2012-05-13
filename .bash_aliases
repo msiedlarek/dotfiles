@@ -1,6 +1,8 @@
 alias -- -="cd -"
 alias ..="cd .."
 
+alias pss="ps aux | grep"
+
 # Use custom-compiled Vim if available
 if [ -e "/usr/local/bin/vim" ]; then
     alias vim="/usr/local/bin/vim"
