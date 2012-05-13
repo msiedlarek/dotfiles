@@ -36,3 +36,5 @@
 [user]
 	name = Mikołaj Siedlarek
 	email = m.siedlarek@nctz.net
+[mergetool]
+	keepBackup = true
