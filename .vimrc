@@ -68,9 +68,11 @@ set ignorecase
 
 " Number of spaces that a <Tab> in the file counts for.
 set tabstop=4
+autocmd FileType txt set tabstop=3
 
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
+autocmd FileType txt set shiftwidth=3
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -81,10 +83,14 @@ set showmode
 " Number of spaces that a <Tab> counts for while performing editing
 " operations, like inserting a <Tab> or using <BS>.
 set softtabstop=4
+autocmd FileType txt set softtabstop=3
 
 " Enable filetype plugins
 filetype on
 filetype plugin on
+
+" Set filetype to `txt` for default
+autocmd BufEnter * if &filetype == "" | setlocal ft=txt | endif
 
 " Use normal \t tabs for Makefiles
 autocmd FileType make setlocal noexpandtab
