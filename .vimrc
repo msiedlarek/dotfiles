@@ -5,6 +5,13 @@ set nocompatible
 " Show the filename in the window titlebar
 set title
 
+" Turn on automatic indentation
+set autoindent
+
+" Set formatting options for text blocks
+set textwidth=79
+set formatoptions=tcqron
+
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
 set backspace=indent,eol,start
@@ -58,13 +65,6 @@ nmap <silent> <leader>/ :nohlsearch<CR>
 
 " Ignore case of searches
 set ignorecase
-
-" Put Vim in Paste mode.  This is useful if you want to cut or copy
-" some text from one window and paste it in Vim.  This will avoid
-" unexpected effects.
-" Setting this option is useful when using Vim in a terminal, where Vim
-" cannot distinguish between typed text and pasted text.
-set paste
 
 " Number of spaces that a <Tab> in the file counts for.
 set tabstop=4
