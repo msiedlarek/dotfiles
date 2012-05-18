@@ -10,7 +10,7 @@ set autoindent
 
 " Set formatting options for text blocks
 set textwidth=79
-autocmd FileType txt set textwidth=72
+autocmd FileType txt,plaintex set textwidth=72
 set formatoptions=tcqron
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
@@ -69,11 +69,11 @@ set ignorecase
 
 " Number of spaces that a <Tab> in the file counts for.
 set tabstop=4
-autocmd FileType txt set tabstop=3
+autocmd FileType txt,plaintex set tabstop=3
 
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
-autocmd FileType txt set shiftwidth=3
+autocmd FileType txt,plaintex set shiftwidth=3
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -84,7 +84,7 @@ set showmode
 " Number of spaces that a <Tab> counts for while performing editing
 " operations, like inserting a <Tab> or using <BS>.
 set softtabstop=4
-autocmd FileType txt set softtabstop=3
+autocmd FileType txt,plaintex set softtabstop=3
 
 " Enable filetype plugins
 filetype on
@@ -100,7 +100,7 @@ autocmd FileType make setlocal noexpandtab
 let b:comment_leader = '#'
 autocmd FileType c,cpp            let b:comment_leader = '\/\/'
 autocmd FileType haskell,vhdl,ada let b:comment_leader = '--'
-autocmd FileType tex              let b:comment_leader = '%'
+autocmd FileType plaintex         let b:comment_leader = '%'
 autocmd FileType mail             let b:comment_leader = '>'
 autocmd FileType vim              let b:comment_leader = '"'
 noremap <silent> <leader>k :s/^/<C-R>=b:comment_leader<CR>/<CR>:nohl<CR>
@@ -138,8 +138,8 @@ let NERDTreeIgnore=['\.py[co]$', '\.svn$', '\.git$', '\~$']
 
 " Columns soft-limit (highlighting)
 highlight ColorColumn ctermbg=235 guibg=#363636
-set colorcolumn=80
-autocmd FileType txt set colorcolumn=72
+set colorcolumn=81
+autocmd FileType txt,plaintex set colorcolumn=73
 
 " Highlight trailing whitespaces
 match ErrorMsg /\s\+$/
