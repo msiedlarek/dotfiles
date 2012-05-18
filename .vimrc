@@ -10,6 +10,7 @@ set autoindent
 
 " Set formatting options for text blocks
 set textwidth=79
+autocmd FileType txt set textwidth=72
 set formatoptions=tcqron
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
@@ -135,9 +136,10 @@ nnoremap <silent> <F4> :NERDTreeToggle<CR>
 " Set NERDTree ignored file patterns
 let NERDTreeIgnore=['\.py[co]$', '\.svn$', '\.git$', '\~$']
 
-" 100-columns soft-limit (highlighting)
+" Columns soft-limit (highlighting)
 highlight ColorColumn ctermbg=235 guibg=#363636
-set colorcolumn=80,100
+set colorcolumn=80
+autocmd FileType txt set colorcolumn=72
 
 " Highlight trailing whitespaces
 match ErrorMsg /\s\+$/
