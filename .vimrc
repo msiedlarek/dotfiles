@@ -18,7 +18,8 @@ set formatoptions=tcqron
 set backspace=indent,eol,start
 
 " Start scrolling three lines before the horizontal window border
-set scrolloff=3
+set scrolloff=5
+set sidescrolloff=5
 
 " Do not make a backup before overwriting a file.
 set nobackup
@@ -60,6 +61,9 @@ set incsearch
 " Don’t show the intro message when starting vim
 set shortmess=atI
 
+" Remap leader to comma
+let mapleader = ","
+
 " Highlight searches (clear with \/)
 set hlsearch
 nmap <silent> <leader>/ :nohlsearch<CR>
@@ -80,6 +84,23 @@ set expandtab
 
 " Show the current mode
 set showmode
+
+" Turn off arrow keys
+nnoremap <up> <nop>
+nnoremap <down> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+inoremap <up> <nop>
+
+" Navigate through splits with Ctrk+<direction>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Reselect visual after indent/outdent
+vnoremap < <gv
+vnoremap > >gv
 
 " Number of spaces that a <Tab> counts for while performing editing
 " operations, like inserting a <Tab> or using <BS>.
@@ -132,6 +153,9 @@ nnoremap <silent> <F3> :set invnumber<CR>
 
 " Open/close NERDTree panel
 nnoremap <silent> <F4> :NERDTreeToggle<CR>
+
+" Highlight word at cursor without changing position
+nnoremap <leader>h *<C-O>
 
 " Set NERDTree ignored file patterns
 let NERDTreeIgnore=['\.py[co]$', '\.svn$', '\.git$', '\~$']
