@@ -148,6 +148,9 @@ map <c-k> <c-w>k
 map <c-l> <c-w>l
 map <c-h> <c-w>h
 
+" Toggle paste mode with F2
+set pastetoggle=<F2>
+
 " Turn line-numbering on/off
 nnoremap <silent> <F3> :set invnumber<CR>
 
