@@ -1,1 +1,2 @@
-xmodmap ~/.xmodmap
+[[ -f ~/.Xmodmap ]] && xmodmap ~/.Xmodmap
+[[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
