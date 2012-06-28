@@ -73,11 +73,9 @@ set ignorecase
 
 " Number of spaces that a <Tab> in the file counts for.
 set tabstop=4
-autocmd FileType txt,plaintex set tabstop=3
 
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
-autocmd FileType txt,plaintex set shiftwidth=3
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
