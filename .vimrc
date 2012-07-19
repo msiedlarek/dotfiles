@@ -76,6 +76,7 @@ set tabstop=4
 
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
+autocmd FileType ada set shiftwidth=3
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -103,7 +104,7 @@ vnoremap > >gv
 " Number of spaces that a <Tab> counts for while performing editing
 " operations, like inserting a <Tab> or using <BS>.
 set softtabstop=4
-autocmd FileType txt,plaintex set softtabstop=3
+autocmd FileType ada set softtabstop=3
 
 " Enable filetype plugins
 filetype on
