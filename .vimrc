@@ -13,6 +13,9 @@ set textwidth=79
 autocmd FileType txt,plaintex set textwidth=72
 set formatoptions=tcqron
 
+" Add .jinja2 extension
+au BufNewFile,BufRead *.jinja2 set filetype=htmljinja
+
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
 set backspace=indent,eol,start
@@ -201,3 +204,6 @@ set guioptions-=T
 
 " Jump to the last position when opening a file
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+
+" Set GNAT as default Ada compiler for Ada mode
+let g:ada_default_compiler = "gnat"
