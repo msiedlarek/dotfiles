@@ -207,3 +207,6 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 
 " Set GNAT as default Ada compiler for Ada mode
 let g:ada_default_compiler = "gnat"
+
+" Autocomplete paths in ex-command mode.
+set wildmode=longest:full,list:full
