@@ -16,6 +16,9 @@ set formatoptions=tcqron
 " Add .jinja2 extension
 au BufNewFile,BufRead *.jinja2 set filetype=htmljinja
 
+" Add SConstruct files
+au BufNewFile,BufRead SConstruct set filetype=python
+
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
 set backspace=indent,eol,start
