@@ -13,8 +13,10 @@ set textwidth=79
 autocmd FileType txt,plaintex set textwidth=72
 set formatoptions=tcqron
 
-" Add .jinja2 extension
+" Add some extensions
 au BufNewFile,BufRead *.jinja2 set filetype=htmljinja
+au BufNewFile,BufRead *.j2 set filetype=htmljinja
+au BufNewFile,BufRead *.zcml set filetype=xml
 
 " Add SConstruct files
 au BufNewFile,BufRead SConstruct set filetype=python
@@ -83,6 +85,7 @@ set tabstop=4
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
 autocmd FileType ada set shiftwidth=3
+autocmd FileType rst set shiftwidth=3
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
