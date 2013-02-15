@@ -38,3 +38,7 @@
 	email = m.siedlarek@nctz.net
 [mergetool]
 	keepBackup = true
+[push]
+    default = simple
+[pull]
+    default = simple
