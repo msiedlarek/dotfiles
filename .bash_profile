@@ -49,3 +49,5 @@ if [ $? == 0 ]; then
         source "`brew --prefix`/etc/bash_completion"
     fi
 fi
+
+export PATH="/usr/local/context/bin:/usr/local/gnat/bin:$PATH"
