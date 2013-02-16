@@ -2,6 +2,13 @@
 " make Vim behave in a more useful way.
 set nocompatible
 
+" Activate pathogen.
+execute pathogen#infect()
+
+" Enable filetype plugins
+filetype on
+filetype plugin on
+
 " Show the filename in the window titlebar
 set title
 
@@ -10,8 +17,8 @@ set autoindent
 
 " Set formatting options for text blocks
 set textwidth=79
-autocmd FileType txt,plaintex set textwidth=72
-set formatoptions=tcqron
+autocmd FileType txt,tex,plaintex set textwidth=72
+set formatoptions=tcqronl1
 
 " Add some extensions
 au BufNewFile,BufRead *.jinja2 set filetype=htmljinja
@@ -72,7 +79,7 @@ set shortmess=atI
 " Remap leader to comma
 let mapleader = ","
 
-" Highlight searches (clear with \/)
+" Highlight searches (clear with ,/)
 set hlsearch
 nmap <silent> <leader>/ :nohlsearch<CR>
 
@@ -84,8 +91,18 @@ set tabstop=4
 
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
+
+" Number of spaces that a <Tab> counts for while performing editing
+" operations, like inserting a <Tab> or using <BS>.
+set softtabstop=4
+
+" Ada indentation
 autocmd FileType ada set shiftwidth=3
+autocmd FileType ada set softtabstop=3
+
+" RST indentation
 autocmd FileType rst set shiftwidth=3
+autocmd FileType rst set softtabstop=3
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -100,7 +117,7 @@ nnoremap <left> <nop>
 nnoremap <right> <nop>
 inoremap <up> <nop>
 
-" Navigate through splits with Ctrk+<direction>
+" Navigate through splits with Ctrl+<direction>
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -109,15 +126,6 @@ nnoremap <C-l> <C-w>l
 " Reselect visual after indent/outdent
 vnoremap < <gv
 vnoremap > >gv
-
-" Number of spaces that a <Tab> counts for while performing editing
-" operations, like inserting a <Tab> or using <BS>.
-set softtabstop=4
-autocmd FileType ada set softtabstop=3
-
-" Enable filetype plugins
-filetype on
-filetype plugin on
 
 " Set filetype to `txt` for default
 autocmd BufEnter * if &filetype == "" | setlocal ft=txt | endif
@@ -129,14 +137,11 @@ autocmd FileType make setlocal noexpandtab
 let b:comment_leader = '#'
 autocmd FileType c,cpp            let b:comment_leader = '\/\/'
 autocmd FileType haskell,vhdl,ada let b:comment_leader = '--'
-autocmd FileType plaintex         let b:comment_leader = '%'
+autocmd FileType tex,plaintex     let b:comment_leader = '%'
 autocmd FileType mail             let b:comment_leader = '>'
 autocmd FileType vim              let b:comment_leader = '"'
 noremap <silent> <leader>k :s/^/<C-R>=b:comment_leader<CR>/<CR>:nohl<CR>
 noremap <silent> <leader>j :s/^<C-R>=b:comment_leader<CR>//e<CR>:nohl<CR>
-
-" Enable mouse
-set mouse=a
 
 " Turn on syntax highlighting
 if has("syntax")
@@ -147,14 +152,12 @@ if $TERM != "screen"
     " Number of terminal colors
     set t_Co=256
     " Color scheme
-    colorscheme mustang
+    try
+        colorscheme mustang
+    catch
+        " Can happen when Vundle hasn't installed the scheme yet.
+    endtry
 endif
-
-" Move though windows using Ctrl+<movement key>
-map <c-j> <c-w>j
-map <c-k> <c-w>k
-map <c-l> <c-w>l
-map <c-h> <c-w>h
 
 " Toggle paste mode with F2
 set pastetoggle=<F2>
@@ -174,7 +177,7 @@ let NERDTreeIgnore=['\.py[co]$', '\.svn$', '\.git$', '\~$']
 " Columns soft-limit (highlighting)
 highlight ColorColumn ctermbg=235 guibg=#363636
 set colorcolumn=81
-autocmd FileType txt,plaintex set colorcolumn=73
+autocmd FileType txt,tex,plaintex set colorcolumn=73
 
 " Highlight trailing whitespaces
 match ErrorMsg /\s\+$/
@@ -202,17 +205,14 @@ function TrimTrailingEmptyLines()
 endfunction
 au BufWritePre * call TrimTrailingEmptyLines()
 
-" Set GUI font
-set guifont=Inconsolata:h16
-
-" Hide GUI toolbar
-set guioptions-=T
-
 " Jump to the last position when opening a file
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 
-" Set GNAT as default Ada compiler for Ada mode
-let g:ada_default_compiler = "gnat"
+" Setup Syntastic - use ,p to toggle automatic static checking.
+let g:syntastic_mode_map = { 'mode': 'passive',
+                           \ 'active_filetypes': [],
+                           \ 'passive_filetypes': [] }
+nnoremap <silent> <leader>p :SyntasticToggleMode<CR>
 
 " Autocomplete paths in ex-command mode.
 set wildmode=longest:full,list:full
