@@ -5,6 +5,8 @@
     st = status -s
     # Diff
     df = diff --patch-with-stat
+    # Diff HEAD
+    dfh = diff --patch-with-stat HEAD
     # Checkout
     co = checkout
     # Branch
