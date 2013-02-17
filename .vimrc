@@ -28,14 +28,14 @@ set title
 set autoindent
 
 " Set formatting options for text blocks
-set textwidth=79
-set formatoptions=tcqronl1
 highlight ColorColumn ctermbg=235 guibg=#363636
-set colorcolumn=81
+set textwidth=79
+set colorcolumn=80
+set formatoptions=tcqronl1
 
-" Text width for plaintext and TeX files
-autocmd FileType txt,tex,plaintex set textwidth=72
-autocmd FileType txt,tex,plaintex set colorcolumn=73
+" Text width for plaintext, TeX and CoNtExT files
+autocmd FileType txt,tex,plaintex,context set textwidth=72
+autocmd FileType txt,tex,plaintex,context set colorcolumn=73
 
 " Add some file extensions
 au BufNewFile,BufRead *.jinja2,*.j2 set filetype=htmljinja
