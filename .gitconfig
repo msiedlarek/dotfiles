@@ -5,6 +5,12 @@
     st = status -s
     # Diff
     df = diff --patch-with-stat
+    # Checkout
+    co = checkout
+    # Branch
+    br = branch
+    # Add all
+    aa = add --all
 [apply]
     # Detect whitespace errors when applying a patch
     whitespace = fix
@@ -29,16 +35,14 @@
     added = yellow
     changed = green
     untracked = cyan
-[branch "master"]
-    # Use `origin` as the default remote on the `master` branch in all cases
-    remote = origin
-    merge = refs/heads/master
-[user]
-	name = Mikołaj Siedlarek
-	email = m.siedlarek@nctz.net
+[merge]
+    tool = vimdiff
 [mergetool]
-	keepBackup = true
+    keepBackup = false
 [push]
     default = simple
 [pull]
     default = simple
+[user]
+	name = Mikołaj Siedlarek
+	email = m.siedlarek@nctz.net

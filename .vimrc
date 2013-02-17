@@ -123,6 +123,9 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
+" Close file with ,q
+nnoremap <leader>q :q<CR>
+
 " Reselect visual after indent/outdent
 vnoremap < <gv
 vnoremap > >gv
