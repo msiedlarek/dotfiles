@@ -9,6 +9,18 @@ execute pathogen#infect()
 filetype on
 filetype plugin on
 
+" Turn on syntax highlighting
+if has("syntax")
+    syntax on
+endif
+
+if $TERM != "screen"
+    " Number of terminal colors
+    set t_Co=256
+    " Color scheme
+    colorscheme mustang
+endif
+
 " Show the filename in the window titlebar
 set title
 
@@ -17,15 +29,17 @@ set autoindent
 
 " Set formatting options for text blocks
 set textwidth=79
-autocmd FileType txt,tex,plaintex set textwidth=72
 set formatoptions=tcqronl1
+highlight ColorColumn ctermbg=235 guibg=#363636
+set colorcolumn=81
 
-" Add some extensions
-au BufNewFile,BufRead *.jinja2 set filetype=htmljinja
-au BufNewFile,BufRead *.j2 set filetype=htmljinja
+" Text width for plaintext and TeX files
+autocmd FileType txt,tex,plaintex set textwidth=72
+autocmd FileType txt,tex,plaintex set colorcolumn=73
+
+" Add some file extensions
+au BufNewFile,BufRead *.jinja2,*.j2 set filetype=htmljinja
 au BufNewFile,BufRead *.zcml set filetype=xml
-
-" Add SConstruct files
 au BufNewFile,BufRead SConstruct set filetype=python
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
@@ -146,24 +160,8 @@ autocmd FileType vim              let b:comment_leader = '"'
 noremap <silent> <leader>k :s/^/<C-R>=b:comment_leader<CR>/<CR>:nohl<CR>
 noremap <silent> <leader>j :s/^<C-R>=b:comment_leader<CR>//e<CR>:nohl<CR>
 
-" Turn on syntax highlighting
-if has("syntax")
-    syntax on
-endif
-
-if $TERM != "screen"
-    " Number of terminal colors
-    set t_Co=256
-    " Color scheme
-    try
-        colorscheme mustang
-    catch
-        " Can happen when Vundle hasn't installed the scheme yet.
-    endtry
-endif
-
-" Toggle paste mode with F2
-set pastetoggle=<F2>
+" Toggle paste mode with ,p
+noremap <leader>p :set invpaste<CR>
 
 " Turn line-numbering on/off
 nnoremap <silent> <F3> :set invnumber<CR>
@@ -176,11 +174,6 @@ nnoremap <leader>h *<C-O>
 
 " Set NERDTree ignored file patterns
 let NERDTreeIgnore=['\.py[co]$', '\.svn$', '\.git$', '\~$']
-
-" Columns soft-limit (highlighting)
-highlight ColorColumn ctermbg=235 guibg=#363636
-set colorcolumn=81
-autocmd FileType txt,tex,plaintex set colorcolumn=73
 
 " Highlight trailing whitespaces
 match ErrorMsg /\s\+$/
@@ -215,7 +208,7 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 let g:syntastic_mode_map = { 'mode': 'passive',
                            \ 'active_filetypes': [],
                            \ 'passive_filetypes': [] }
-nnoremap <silent> <leader>p :SyntasticToggleMode<CR>
+nnoremap <silent> <leader>c :SyntasticToggleMode<CR>
 
 " a.vim mapping
 nnoremap <silent> <leader>a :AV<CR>
