@@ -50,4 +50,13 @@ if [ $? == 0 ]; then
     fi
 fi
 
+# Activate RVM
+RVM_HOME="$HOME/.rvm"
+if [ -e "$RVM_HOME/scripts/rvm" ]; then
+    source "$RVM_HOME/scripts/rvm"
+    if [ -e "$RVM_HOME/scripts/completion" ]; then
+        source "$RVM_HOME/scripts/completion"
+    fi
+fi
+
 export PATH="/usr/local/context/bin:/usr/local/gnat/bin:$PATH"
