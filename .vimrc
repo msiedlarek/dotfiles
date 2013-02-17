@@ -213,8 +213,5 @@ nnoremap <silent> <leader>c :SyntasticToggleMode<CR>
 " a.vim mapping
 nnoremap <silent> <leader>a :AV<CR>
 
-" Ada configuration for a.vim
-let g:alternateExtensions_adb = "ads"
-
 " Autocomplete paths in ex-command mode.
 set wildmode=longest:full,list:full
