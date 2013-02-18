@@ -59,4 +59,4 @@ if [ -e "$RVM_HOME/scripts/rvm" ]; then
     fi
 fi
 
-export PATH="/usr/local/context/bin:/usr/local/gnat/bin:$PATH"
+export PATH="/usr/local/context/tex/texmf-osx-64/bin:/usr/local/gnat/bin:$PATH"
