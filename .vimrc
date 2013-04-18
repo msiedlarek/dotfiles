@@ -41,6 +41,7 @@ autocmd FileType txt,tex,plaintex,context set colorcolumn=73
 au BufNewFile,BufRead *.jinja2,*.j2 set filetype=htmljinja
 au BufNewFile,BufRead *.zcml set filetype=xml
 au BufNewFile,BufRead SConstruct set filetype=python
+au BufNewFile,BufRead wscript set filetype=python
 au BufNewFile,BufRead Vagrantfile set filetype=ruby
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
@@ -153,7 +154,7 @@ autocmd FileType make setlocal noexpandtab
 
 " Commenting blocks of code
 let b:comment_leader = '#'
-autocmd FileType c,cpp            let b:comment_leader = '\/\/'
+autocmd FileType c,cpp,objcpp     let b:comment_leader = '\/\/'
 autocmd FileType haskell,vhdl,ada let b:comment_leader = '--'
 autocmd FileType tex,plaintex     let b:comment_leader = '%'
 autocmd FileType mail             let b:comment_leader = '>'
