@@ -25,7 +25,7 @@ shopt -s cdspell
 
 # Prompt
 function parse_git_dirty() {
-    [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
+    [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit, working directory clean" ]] && echo "*"
 }
 function parse_git_branch() {
     git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
@@ -59,4 +59,4 @@ if [ -e "$RVM_HOME/scripts/rvm" ]; then
     fi
 fi
 
-export PATH="$PATH:/usr/local/context/tex/texmf-osx-64/bin:/usr/local/gnat/bin"
+export PATH="/usr/local/bin:$PATH:/usr/local/context/tex/texmf-osx-64/bin:/usr/local/gnat/bin"
