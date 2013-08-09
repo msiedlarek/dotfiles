@@ -45,8 +45,8 @@ fi
 # Autocompletion for Homebrew packages
 brew --version >/dev/null 2>&1
 if [ $? == 0 ]; then
-    if [ -f "`brew --prefix`/etc/bash_completion" ]; then
-        source "`brew --prefix`/etc/bash_completion"
+    if [ -d "`brew --prefix`/etc/bash_completion.d" ]; then
+        source `brew --prefix`/etc/bash_completion.d/*
     fi
 fi
 
