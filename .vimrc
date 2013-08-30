@@ -217,3 +217,6 @@ nnoremap <silent> <leader>a :AV<CR>
 
 " Autocomplete paths in ex-command mode.
 set wildmode=longest:full,list:full
+
+" Ignore matching results when searching for files
+set wildignore=*.o,*.class,*.git,*.svn,*.pyc
