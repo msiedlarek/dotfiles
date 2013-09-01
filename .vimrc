@@ -171,6 +171,9 @@ if exists("&undodir")
     set undodir=~/.vim/undodir
 endif
 
+" Use persistend undo history.
+set undofile
+
 " Trim trailing whitespaces
 function TrimTrailingWhitespaces()
     let save_cursor = getpos(".")
