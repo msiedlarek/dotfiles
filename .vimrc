@@ -158,14 +158,8 @@ noremap <leader>p :set invpaste<CR>
 " Turn line-numbering on/off
 nnoremap <silent> <F3> :set invnumber<CR>
 
-" Open/close NERDTree panel
-nnoremap <silent> <F4> :NERDTreeToggle<CR>
-
 " Highlight word at cursor without changing position
 nnoremap <leader>h *<C-O>
-
-" Set NERDTree ignored file patterns
-let NERDTreeIgnore=['\.py[co]$', '\.svn$', '\.git$', '\~$']
 
 " Highlight trailing whitespaces
 match ErrorMsg /\s\+$/
