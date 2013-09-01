@@ -1,13 +1,10 @@
-" This option has the effect of making Vim either more Vi-compatible, or
-" make Vim behave in a more useful way.
-set nocompatible
-
 " Activate pathogen.
+filetype off
 execute pathogen#infect()
+filetype plugin indent on
 
-" Enable filetype plugins
-filetype on
-filetype plugin on
+" Don't bother with Vi compatibility.
+set nocompatible
 
 " Turn on syntax highlighting
 if has("syntax")
@@ -218,8 +215,20 @@ nnoremap <silent> <leader>a :AV<CR>
 " Autocomplete paths in ex-command mode.
 set wildmode=longest:full,list:full
 
-" Ignore matching results when searching for files
+" Ignore matching results when searching for files.
 set wildignore=.git,.svn,*.o,*.class,*.pyc
 
-" Sign column with same appearance as line number column
+" Sign column with same appearance as line number column.
 highlight clear SignColumn
+
+" Reload files when changed on disk.
+set autoread
+
+" Yank and paste with the system clipboard.
+set clipboard=unnamed
+
+" Enable basic mouse behavior such as resizing buffers.
+set mouse=a
+
+" Automatically rebalance windows on vim resize.
+autocmd VimResized * :wincmd =
