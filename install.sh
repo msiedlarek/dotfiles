@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -e
-set -o pipefail
-
 createSymbolicLink() {
     if [ -e $2 ] || [ -h $2 ]
     then
@@ -50,11 +47,6 @@ cd "`dirname "$0"`"
 path=`pwd`
 cd "$original_path"
 
-echo "Compiling Command-T Vim plugin..."
-cd "$path/.vim/bundle/command-t/ruby/command-t"
-ruby extconf.rb
-make
-cd "$original_path"
 echo "Creating symbolic links..."
 createSymbolicLink "$path/.bash_aliases" "$HOME/.bash_aliases"
 createSymbolicLink "$path/.bash_profile" "$HOME/.bash_profile"
