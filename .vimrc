@@ -219,4 +219,4 @@ nnoremap <silent> <leader>a :AV<CR>
 set wildmode=longest:full,list:full
 
 " Ignore matching results when searching for files
-set wildignore=*.o,*.class,*.git,*.svn,*.pyc
+set wildignore=.git,.svn,*.o,*.class,*.pyc
