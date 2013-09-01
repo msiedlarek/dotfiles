@@ -220,3 +220,6 @@ set wildmode=longest:full,list:full
 
 " Ignore matching results when searching for files
 set wildignore=.git,.svn,*.o,*.class,*.pyc
+
+" Sign column with same appearance as line number column
+highlight clear SignColumn
