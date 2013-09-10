@@ -14,6 +14,9 @@ export HISTSIZE=32768
 export HISTFILESIZE=$HISTSIZE
 export HISTCONTROL=ignoredups
 
+# Use Vi-like input mode.
+set -o vi
+
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob
 

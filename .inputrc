@@ -14,3 +14,7 @@ set show-all-if-ambiguous on
 set input-meta on
 set output-meta on
 set convert-meta off
+
+# Vi-like editing in readline.
+set editing-mode vi
+set keymap vi
