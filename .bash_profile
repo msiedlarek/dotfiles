@@ -14,9 +14,6 @@ export HISTSIZE=32768
 export HISTFILESIZE=$HISTSIZE
 export HISTCONTROL=ignoredups
 
-# Use Vi-like input mode.
-set -o vi
-
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob
 
@@ -62,4 +59,11 @@ if [ -e "$RVM_HOME/scripts/rvm" ]; then
     fi
 fi
 
-export PATH="/usr/local/bin:$PATH:/usr/local/play:/usr/local/share/npm/bin:/usr/local/context/tex/texmf-osx-64/bin:/usr/local/gnat/bin"
+PATH="/usr/local/bin:$PATH"
+PATH="$PATH:/usr/local/gradle/bin"
+PATH="$PATH:/usr/local/play"
+PATH="$PATH:/usr/local/share/npm/bin"
+PATH="$PATH:/usr/local/context/tex/texmf-osx-64/bin"
+PATH="$PATH:/usr/local/gnat/bin"
+PATH="$PATH:$HOME/.rvm/bin"
+export PATH

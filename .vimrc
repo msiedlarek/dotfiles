@@ -40,6 +40,7 @@ au BufNewFile,BufRead *.zcml set filetype=xml
 au BufNewFile,BufRead SConstruct set filetype=python
 au BufNewFile,BufRead wscript set filetype=python
 au BufNewFile,BufRead Vagrantfile set filetype=ruby
+au BufNewFile,BufRead *.gradle set filetype=groovy
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
