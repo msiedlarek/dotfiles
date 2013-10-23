@@ -149,6 +149,7 @@ autocmd BufEnter * if &filetype == "" | setlocal ft=txt | endif
 
 " Use normal \t tabs for Makefiles
 autocmd FileType make setlocal noexpandtab
+autocmd FileType sql setlocal noexpandtab
 
 " Toggle comment with leader-k.
 noremap <silent> <leader>k :TComment<CR>
