@@ -32,16 +32,6 @@ function parse_git_branch() {
 }
 PS1="\u@\h:\w\$([[ -n \$(git branch 2> /dev/null) ]] && echo \"(\")\$(parse_git_branch)\$([[ -n \$(git branch 2> /dev/null) ]] && echo \")\")\$ "
 
-# Load .bash_aliases
-if [ -f "$HOME/.bash_aliases" ]; then
-    source "$HOME/.bash_aliases"
-fi
-
-# Autocompletion of SSH hosts for `mosh`
-if [ -e "$HOME/.ssh/known_hosts" ]; then
-    complete -W "$(echo `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)" mosh
-fi
-
 # Autocompletion for Homebrew packages
 brew --version >/dev/null 2>&1
 if [ $? == 0 ]; then

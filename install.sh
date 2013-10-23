@@ -1,64 +1,31 @@
 #!/bin/bash
 
-createSymbolicLink() {
-    if [ -e $2 ] || [ -h $2 ]
-    then
-        fileType=`file -b $2 | cut -d' ' -f1,2`
-        link=`file -b $2 | cut -d'\`' -f2`
-        option=""
-        if [ "$fileType" = "symbolic link" ]
-        then
-            if [ "$link" = "$1'" ]
-            then
-                echo "    ✓ $2 → $1"
-                return
-            fi
-        fi
-        if [ "$fileType" = "broken symbolic" ]
-        then
-            msg="  \"$2\" is a broken symbolic link! Replace it? [y/n]: "
-        else
-            msg="  \"$2\" already exists! Replace it with a symbolic link? [y/n]: "
-        fi
-        while [ "$option" != "y" ] && [ "$option" != "n" ]
-        do
-            echo "$msg"
-            read option
-            if [ "$option" = "y" ] || [ "$option" = "n" ]
-            then
-                if [ "$option" = "y" ]
-                then
-                    rm -rf $2
-                    ln -fs $1 $2
-                    echo "    ✓ $2 → $1"
-                else
-                    echo "    ✗ $2 → $1"
-                fi
-            fi
-        done
-    else
-        ln -s $1 $2
-        echo "    ✓ $2 → $1"
-    fi
+set -e
+
+cd "$(dirname $0)"
+
+function symlink() {
+    echo "    $2 -> $(pwd)/$1"
+    ln -sFi "$(pwd)/$1" "$2"
 }
 
-original_path="`pwd`"
-cd "`dirname "$0"`"
-path=`pwd`
-cd "$original_path"
+function install_module() {
+    echo "Installing module: $1"
+    cd "$1"
+    source "install.sh"
+    cd ..
+}
 
-echo "Creating symbolic links..."
-createSymbolicLink "$path/.bash_aliases" "$HOME/.bash_aliases"
-createSymbolicLink "$path/.bash_profile" "$HOME/.bash_profile"
-createSymbolicLink "$path/.bashrc" "$HOME/.bashrc"
-createSymbolicLink "$path/.gitconfig" "$HOME/.gitconfig"
-createSymbolicLink "$path/.inputrc" "$HOME/.inputrc"
-createSymbolicLink "$path/.screenrc" "$HOME/.screenrc"
-createSymbolicLink "$path/.ackrc" "$HOME/.ackrc"
-createSymbolicLink "$path/.tmux.conf" "$HOME/.tmux.conf"
-createSymbolicLink "$path/.vim" "$HOME/.vim"
-createSymbolicLink "$path/.vimrc" "$HOME/.vimrc"
-createSymbolicLink "$path/.Xmodmap" "$HOME/.Xmodmap"
-createSymbolicLink "$path/.xsessionrc" "$HOME/.xsessionrc"
-createSymbolicLink "$path/.Xresources" "$HOME/.Xresources"
-createSymbolicLink "$path/.i3" "$HOME/.i3"
+install_module ack
+install_module bash
+install_module git
+install_module prezto
+install_module readline
+install_module screen
+install_module tmux
+install_module vim
+
+if [[ "$(uname)" == "Linux" ]]; then
+    install_module i3
+    install_module x
+fi
