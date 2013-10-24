@@ -1,13 +1,6 @@
-# Prefer US English and use UTF-8
-export LC_ALL="en_US.UTF-8"
-export LANG="en_US.UTF-8"
-
-# Use Vim as default editor
-export EDITOR="vim"
-export VISUAL="$EDITOR"
-
-# Don’t clear the screen after quitting a manual page
-export MANPAGER="less -X"
+if [ -e "$HOME/.profile ]; then
+    source "$HOME/.profile"
+fi
 
 # Larger bash history (allow 32³ entries; default is 500)
 export HISTSIZE=32768
@@ -48,12 +41,3 @@ if [ -e "$RVM_HOME/scripts/rvm" ]; then
         source "$RVM_HOME/scripts/completion"
     fi
 fi
-
-PATH="/usr/local/bin:$PATH"
-PATH="$PATH:/usr/local/gradle/bin"
-PATH="$PATH:/usr/local/play"
-PATH="$PATH:/usr/local/share/npm/bin"
-PATH="$PATH:/usr/local/context/tex/texmf-osx-64/bin"
-PATH="$PATH:/usr/local/gnat/bin"
-PATH="$PATH:$HOME/.rvm/bin"
-export PATH

@@ -16,6 +16,7 @@ function install_module() {
     cd ..
 }
 
+install_module shell
 install_module ack
 install_module bash
 install_module git
