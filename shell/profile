@@ -9,6 +9,10 @@ export VISUAL="$EDITOR"
 export PAGER="less -X"
 export MANPAGER="less -X"
 
+if [[ -x "/usr/libexec/java_home" ]]; then
+    JAVA_HOME="`/usr/libexec/java_home -v 1.7`" && export JAVA_HOME
+fi
+
 PATH="/usr/local/bin:$PATH"
 PATH="$PATH:/usr/local/opt/context/tex/texmf-osx-64/bin"
 export PATH
