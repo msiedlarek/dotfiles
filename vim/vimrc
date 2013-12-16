@@ -24,23 +24,26 @@ set title
 " Turn on automatic indentation
 set autoindent
 
-" Set formatting options for text blocks
-highlight ColorColumn ctermbg=235 guibg=#363636
-set textwidth=79
-set colorcolumn=80
-set formatoptions=tcqronl1
-
-" Text width for plaintext, TeX and CoNtExT files
-autocmd FileType txt,tex,plaintex,context set textwidth=72
-autocmd FileType txt,tex,plaintex,context set colorcolumn=73
-
 " Add some file extensions
 au BufNewFile,BufRead *.jinja2,*.j2 set filetype=htmljinja
+au BufNewFile,BufRead *.md set filetype=markdown
 au BufNewFile,BufRead *.zcml set filetype=xml
 au BufNewFile,BufRead SConstruct set filetype=python
 au BufNewFile,BufRead wscript set filetype=python
 au BufNewFile,BufRead Vagrantfile set filetype=ruby
 au BufNewFile,BufRead *.gradle set filetype=groovy
+
+" Set formatting options for text blocks
+highlight ColorColumn ctermbg=235 guibg=#363636
+set textwidth=79
+set colorcolumn=80
+set formatoptions=tcqronl1
+let g:vimroom_width = 79
+
+" Text width for plaintext, TeX and CoNtExT files
+autocmd FileType txt,tex,markdown,plaintex,context set textwidth=72
+autocmd FileType txt,tex,markdown,plaintex,context set colorcolumn=73
+autocmd FileType txt,tex,markdown,plaintex,context let g:vimroom_width = 72
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
@@ -109,6 +112,10 @@ set shiftwidth=4
 " Number of spaces that a <Tab> counts for while performing editing
 " operations, like inserting a <Tab> or using <BS>.
 set softtabstop=4
+
+" YAML indentation
+autocmd FileType yaml set shiftwidth=2
+autocmd FileType yaml set softtabstop=2
 
 " Ada indentation
 autocmd FileType ada set shiftwidth=3
@@ -224,3 +231,20 @@ set mouse=a
 
 " Automatically rebalance windows on vim resize.
 autocmd VimResized * :wincmd =
+
+" Setup the distraction free mode.
+let g:vimroom_sidebar_height = 2
+function ToggleDistractionFreeMode()
+    if &colorcolumn != ''
+        set colorcolumn&
+    else
+        set colorcolumn=+1
+    endif
+    :set invruler
+    :GitGutterToggle
+    :VimroomToggle
+endfunction
+nnoremap <silent> <leader>v :call ToggleDistractionFreeMode()<CR>
+
+" Disable markdown folding
+let g:vim_markdown_folding_disabled = 1
