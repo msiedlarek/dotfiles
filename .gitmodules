@@ -37,3 +37,6 @@
 [submodule "vim/vim/bundle/vimroom"]
     path = vim/vim/bundle/vimroom
     url = https://github.com/mikewest/vimroom.git
+[submodule "vim/vim/bundle/vim-qml"]
+    path = vim/vim/bundle/vim-qml
+    url = https://github.com/peterhoeg/vim-qml.git
