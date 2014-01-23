@@ -15,7 +15,12 @@ if $TERM != "screen"
     " Number of terminal colors
     set t_Co=256
     " Color scheme
-    colorscheme mustang
+    "colorscheme mustang
+    colorscheme lucius
+    hi GitGutterAdd ctermfg=28 ctermbg=253 guifg=#008700 guibg=#dadada
+    hi GitGutterChange ctermfg=172 ctermbg=253 guifg=#d78700 guibg=#dadada
+    hi GitGutterChangeDelete ctermfg=124 ctermbg=253 guifg=#af0000 guibg=#dadada
+    hi GitGutterDelete ctermfg=124 ctermbg=253 guifg=#af0000 guibg=#dadada
 endif
 
 " Show the filename in the window titlebar
@@ -35,7 +40,7 @@ au BufNewFile,BufRead *.gradle set filetype=groovy
 au BufNewFile,BufRead ejabberd.cfg set filetype=erlang
 
 " Set formatting options for text blocks
-highlight ColorColumn ctermbg=235 guibg=#363636
+highlight ColorColumn ctermbg=253 guibg=#dadada
 set textwidth=79
 set colorcolumn=80
 set formatoptions=tcqronl1

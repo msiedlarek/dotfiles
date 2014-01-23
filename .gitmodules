@@ -40,3 +40,6 @@
 [submodule "vim/vim/bundle/vim-qml"]
     path = vim/vim/bundle/vim-qml
     url = https://github.com/peterhoeg/vim-qml.git
+[submodule "vim/vim/bundle/vim-lucius"]
+    path = vim/vim/bundle/vim-lucius
+    url = https://github.com/jonathanfilip/vim-lucius.git
