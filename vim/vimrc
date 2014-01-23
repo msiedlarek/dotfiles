@@ -32,6 +32,7 @@ au BufNewFile,BufRead SConstruct set filetype=python
 au BufNewFile,BufRead wscript set filetype=python
 au BufNewFile,BufRead Vagrantfile set filetype=ruby
 au BufNewFile,BufRead *.gradle set filetype=groovy
+au BufNewFile,BufRead ejabberd.cfg set filetype=erlang
 
 " Set formatting options for text blocks
 highlight ColorColumn ctermbg=235 guibg=#363636
