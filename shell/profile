@@ -15,4 +15,5 @@ fi
 
 PATH="/usr/local/bin:$PATH"
 PATH="$PATH:/usr/local/opt/context/tex/texmf-osx-64/bin"
+PATH="$PATH:/usr/local/opt/gnat/bin"
 export PATH
