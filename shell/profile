@@ -10,8 +10,10 @@ export PAGER="less -X"
 export MANPAGER="less -X"
 
 if [[ -x "/usr/libexec/java_home" ]]; then
-    JAVA_HOME="`/usr/libexec/java_home -v 1.7`" && export JAVA_HOME
+    JAVA_HOME="`/usr/libexec/java_home -v 1.8`" && export JAVA_HOME
 fi
+
+alias hr='printf "=%.0s" {1..$(tput cols)} && printf "\n"'
 
 PATH="/usr/local/bin:$PATH"
 PATH="$PATH:/usr/local/opt/context/tex/texmf-osx-64/bin"
