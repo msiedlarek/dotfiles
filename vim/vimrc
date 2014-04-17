@@ -254,3 +254,11 @@ nnoremap <silent> <leader>v :call ToggleDistractionFreeMode()<CR>
 
 " Disable markdown folding
 let g:vim_markdown_folding_disabled = 1
+
+" Enable project-specific settings.
+set exrc
+set secure
+
+" a.vim GLSL shaders alternation
+let g:alternateExtensions_vert = "frag"
+let g:alternateExtensions_frag = "vert"

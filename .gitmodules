@@ -43,3 +43,9 @@
 [submodule "vim/vim/bundle/vim-lucius"]
     path = vim/vim/bundle/vim-lucius
     url = https://github.com/jonathanfilip/vim-lucius.git
+[submodule "vim/vim/bundle/cpp-vim"]
+    path = vim/vim/bundle/cpp-vim
+    url = https://github.com/vim-jp/cpp-vim.git
+[submodule "vim/vim/bundle/vim-glsl"]
+    path = vim/vim/bundle/vim-glsl
+    url = https://github.com/tikhomirov/vim-glsl.git
