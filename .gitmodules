@@ -1,9 +1,6 @@
 [submodule "prezto/zprezto"]
 	path = prezto/zprezto
 	url = https://github.com/sorin-ionescu/prezto.git
-[submodule "vim/vim/bundle/Mustang2"]
-	path = vim/vim/bundle/Mustang2
-	url = https://github.com/vim-scripts/Mustang2.git
 [submodule "vim/vim/bundle/a.vim"]
 	path = vim/vim/bundle/a.vim
 	url = https://github.com/vim-scripts/a.vim.git
@@ -13,9 +10,6 @@
 [submodule "vim/vim/bundle/pyflakes-vim"]
 	path = vim/vim/bundle/pyflakes-vim
 	url = https://github.com/kevinw/pyflakes-vim.git
-[submodule "vim/vim/bundle/syntastic"]
-	path = vim/vim/bundle/syntastic
-	url = https://github.com/scrooloose/syntastic.git
 [submodule "vim/vim/bundle/tcomment_vim"]
 	path = vim/vim/bundle/tcomment_vim
 	url = https://github.com/tomtom/tcomment_vim.git
@@ -28,9 +22,6 @@
 [submodule "vim/vim/bundle/vim-puppet"]
 	path = vim/vim/bundle/vim-puppet
 	url = https://github.com/rodjek/vim-puppet.git
-[submodule "vim/vim/bundle/vim-surround"]
-	path = vim/vim/bundle/vim-surround
-	url = https://github.com/tpope/vim-surround.git
 [submodule "vim/vim/bundle/vim-markdown"]
     path = vim/vim/bundle/vim-markdown
     url = https://github.com/plasticboy/vim-markdown.git
@@ -49,3 +40,6 @@
 [submodule "vim/vim/bundle/vim-glsl"]
     path = vim/vim/bundle/vim-glsl
     url = https://github.com/tikhomirov/vim-glsl.git
+[submodule "vim/vim/bundle/YouCompleteMe"]
+    path = vim/vim/bundle/YouCompleteMe
+    url = https://github.com/Valloric/YouCompleteMe.git

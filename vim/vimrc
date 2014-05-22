@@ -15,7 +15,6 @@ if $TERM != "screen"
     " Number of terminal colors
     set t_Co=256
     " Color scheme
-    "colorscheme mustang
     colorscheme lucius
     hi GitGutterAdd ctermfg=28 ctermbg=253 guifg=#008700 guibg=#dadada
     hi GitGutterChange ctermfg=172 ctermbg=253 guifg=#d78700 guibg=#dadada
@@ -131,6 +130,12 @@ autocmd FileType ada set softtabstop=3
 autocmd FileType rst set shiftwidth=3
 autocmd FileType rst set softtabstop=3
 
+" package.json and bower.json indentation
+autocmd BufRead,BufNewFile package.json set shiftwidth=2
+autocmd BufRead,BufNewFile package.json set softtabstop=2
+autocmd BufRead,BufNewFile bower.json set shiftwidth=2
+autocmd BufRead,BufNewFile bower.json set softtabstop=2
+
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
 
@@ -208,12 +213,6 @@ au BufWritePre * call TrimTrailingEmptyLines()
 " Jump to the last position when opening a file
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 
-" Setup Syntastic - use ,p to toggle automatic static checking.
-let g:syntastic_mode_map = { 'mode': 'passive',
-                           \ 'active_filetypes': [],
-                           \ 'passive_filetypes': [] }
-nnoremap <silent> <leader>c :SyntasticToggleMode<CR>
-
 " a.vim mapping
 nnoremap <silent> <leader>a :AV<CR>
 
@@ -228,12 +227,6 @@ highlight clear SignColumn
 
 " Reload files when changed on disk.
 set autoread
-
-" Yank and paste with the system clipboard.
-set clipboard=unnamed
-
-" Enable basic mouse behavior such as resizing buffers.
-set mouse=a
 
 " Automatically rebalance windows on vim resize.
 autocmd VimResized * :wincmd =
@@ -262,3 +255,6 @@ set secure
 " a.vim GLSL shaders alternation
 let g:alternateExtensions_vert = "frag"
 let g:alternateExtensions_frag = "vert"
+
+" Disable completion Scratch window
+set completeopt=menu,menuone
