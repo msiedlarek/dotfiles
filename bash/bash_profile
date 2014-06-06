@@ -16,28 +16,27 @@ shopt -s histappend
 # Autocorrect typos in path names when using `cd`
 shopt -s cdspell
 
+# Enable some Bash 4 features when possible:
+# * `autocd`, e.g. `**/qux` will enter `./foo/bar/baz/qux`
+# * Recursive globbing, e.g. `echo **/*.txt`
+for option in autocd globstar; do
+    shopt -s "$option" 2> /dev/null
+done
+
 # Prompt
-function parse_git_dirty() {
-    [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit, working directory clean" ]] && echo "*"
-}
 function parse_git_branch() {
-    git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
+    local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    if [ -n "${branch}" ]; then
+        [ "${branch}" == "HEAD" ] && local branch=$(git rev-parse --short HEAD 2>/dev/null)
+        local status=$(git status --porcelain 2>/dev/null)
+        echo -n "[${branch}"
+        [ -n "${status}" ] && echo -n "*"
+        echo -n "]"
+    fi
 }
-PS1="\u@\h:\w\$([[ -n \$(git branch 2> /dev/null) ]] && echo \"(\")\$(parse_git_branch)\$([[ -n \$(git branch 2> /dev/null) ]] && echo \")\")\$ "
+PS1="\u@\h:\w\$(parse_git_branch)\$ "
 
 # Autocompletion for Homebrew packages
-brew --version >/dev/null 2>&1
-if [ $? == 0 ]; then
-    if [ -d "`brew --prefix`/etc/bash_completion.d" ]; then
-        source `brew --prefix`/etc/bash_completion.d/*
-    fi
-fi
-
-# Activate RVM
-RVM_HOME="$HOME/.rvm"
-if [ -e "$RVM_HOME/scripts/rvm" ]; then
-    source "$RVM_HOME/scripts/rvm"
-    if [ -e "$RVM_HOME/scripts/completion" ]; then
-        source "$RVM_HOME/scripts/completion"
-    fi
+if which brew > /dev/null && [ -d "$(brew --prefix)/etc/bash_completion.d" ]; then
+    source "$(brew --prefix)/etc/bash_completion.d/"*
 fi
