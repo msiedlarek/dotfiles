@@ -43,6 +43,7 @@ fi
 alias ..='cd ..'
 alias hr='printf "=%.0s" {1..'`tput cols`'} && printf "\n"'
 alias alert='tput bel'
+alias mypublicip='dig +short myip.opendns.com @resolver1.opendns.com'
 
 dump4chan() {
     wget -O - $1 | grep -Eo 'i.4cdn.org/[^"]+' | uniq | xargs wget
