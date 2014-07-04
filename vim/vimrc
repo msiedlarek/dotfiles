@@ -12,14 +12,17 @@ if has("syntax")
 endif
 
 if $TERM != "screen"
-    " Number of terminal colors
-    set t_Co=256
     " Color scheme
-    colorscheme lucius
-    hi GitGutterAdd ctermfg=28 ctermbg=253 guifg=#008700 guibg=#dadada
-    hi GitGutterChange ctermfg=172 ctermbg=253 guifg=#d78700 guibg=#dadada
-    hi GitGutterChangeDelete ctermfg=124 ctermbg=253 guifg=#af0000 guibg=#dadada
-    hi GitGutterDelete ctermfg=124 ctermbg=253 guifg=#af0000 guibg=#dadada
+    colorscheme smyck
+    hi Search cterm=none ctermbg=3 ctermfg=8 gui=none guibg=#F6DC69 guifg=#8F8F8F
+
+    " Vertical split line formatting
+    " The comma preserves the whitespace at the end of the line.
+    set fillchars+=vert:\ ,
+    hi VertSplit ctermfg=240 ctermbg=240 guibg=#666666 guifg=#666666
+
+    " 80th column color
+    hi ColorColumn ctermbg=236 guibg=#666666
 endif
 
 " Show the filename in the window titlebar
@@ -39,16 +42,13 @@ au BufNewFile,BufRead *.gradle set filetype=groovy
 au BufNewFile,BufRead ejabberd.cfg set filetype=erlang
 
 " Set formatting options for text blocks
-highlight ColorColumn ctermbg=253 guibg=#dadada
 set textwidth=79
 set colorcolumn=80
 set formatoptions=tcqronl1
-let g:vimroom_width = 79
 
 " Text width for plaintext, TeX and CoNtExT files
 autocmd FileType txt,tex,markdown,plaintex,context set textwidth=72
 autocmd FileType txt,tex,markdown,plaintex,context set colorcolumn=73
-autocmd FileType txt,tex,markdown,plaintex,context let g:vimroom_width = 72
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
@@ -109,7 +109,7 @@ nmap <silent> <leader>/ :nohlsearch<CR>
 set ignorecase
 
 " Number of spaces that a <Tab> in the file counts for.
-set tabstop=4
+set tabstop=8
 
 " Number of spaces to use for each step of (auto)indent.
 set shiftwidth=4
@@ -130,11 +130,9 @@ autocmd FileType ada set softtabstop=3
 autocmd FileType rst set shiftwidth=3
 autocmd FileType rst set softtabstop=3
 
-" package.json and bower.json indentation
-autocmd BufRead,BufNewFile package.json set shiftwidth=2
-autocmd BufRead,BufNewFile package.json set softtabstop=2
-autocmd BufRead,BufNewFile bower.json set shiftwidth=2
-autocmd BufRead,BufNewFile bower.json set softtabstop=2
+" JSON indentation
+autocmd FileType json set shiftwidth=2
+autocmd FileType json set softtabstop=2
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -175,11 +173,8 @@ noremap <silent> <leader>k :TComment<CR>
 " Toggle paste mode with ,p
 noremap <leader>p :set invpaste<CR>
 
-" Turn line-numbering on/off
-nnoremap <silent> <F3> :set invnumber<CR>
-
-" Highlight word at cursor without changing position
-nnoremap <leader>h *<C-O>
+" Turn line-numbering and GitGutter on/off
+nnoremap <silent> <F1> :set invnumber<CR>:GitGutterToggle<CR>
 
 " Highlight trailing whitespaces
 match ErrorMsg /\s\+$/
@@ -230,20 +225,6 @@ set autoread
 
 " Automatically rebalance windows on vim resize.
 autocmd VimResized * :wincmd =
-
-" Setup the distraction free mode.
-let g:vimroom_sidebar_height = 2
-function ToggleDistractionFreeMode()
-    if &colorcolumn != ''
-        set colorcolumn&
-    else
-        set colorcolumn=+1
-    endif
-    :set invruler
-    :GitGutterToggle
-    :VimroomToggle
-endfunction
-nnoremap <silent> <leader>v :call ToggleDistractionFreeMode()<CR>
 
 " Disable markdown folding
 let g:vim_markdown_folding_disabled = 1

@@ -46,7 +46,7 @@ alias alert='tput bel'
 alias mypublicip='dig +short myip.opendns.com @resolver1.opendns.com'
 
 dump4chan() {
-    wget -O - $1 | grep -Eo 'i.4cdn.org/[^"]+' | uniq | xargs wget
+    wget -O - $1 | grep -Eo 'i.4cdn.org/[^"]+' | uniq | xargs wget --no-clobber
 }
 
 clean_ds_store() {

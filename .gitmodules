@@ -25,15 +25,9 @@
 [submodule "vim/vim/bundle/vim-markdown"]
     path = vim/vim/bundle/vim-markdown
     url = https://github.com/plasticboy/vim-markdown.git
-[submodule "vim/vim/bundle/vimroom"]
-    path = vim/vim/bundle/vimroom
-    url = https://github.com/mikewest/vimroom.git
 [submodule "vim/vim/bundle/vim-qml"]
     path = vim/vim/bundle/vim-qml
     url = https://github.com/peterhoeg/vim-qml.git
-[submodule "vim/vim/bundle/vim-lucius"]
-    path = vim/vim/bundle/vim-lucius
-    url = https://github.com/jonathanfilip/vim-lucius.git
 [submodule "vim/vim/bundle/cpp-vim"]
     path = vim/vim/bundle/cpp-vim
     url = https://github.com/vim-jp/cpp-vim.git
@@ -43,3 +37,6 @@
 [submodule "vim/vim/bundle/YouCompleteMe"]
     path = vim/vim/bundle/YouCompleteMe
     url = https://github.com/Valloric/YouCompleteMe.git
+[submodule "vim/vim/bundle/smyck-vim"]
+    path = vim/vim/bundle/smyck-vim
+    url = https://github.com/brendonrapp/smyck-vim.git

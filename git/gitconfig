@@ -5,14 +5,17 @@
     st = status -s
     # Diff
     df = diff --patch-with-stat
+    dfs = diff --stat
     # Diff HEAD
     dfh = diff --patch-with-stat HEAD
+    dfhs = diff --stat HEAD
     # Checkout
     co = checkout
     # Branch
     br = branch
     # Add all
     aa = add --all
+    cp = cherry-pick
 [apply]
     # Detect whitespace errors when applying a patch
     whitespace = fix
