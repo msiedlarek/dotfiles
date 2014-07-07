@@ -40,3 +40,6 @@
 [submodule "vim/vim/bundle/smyck-vim"]
     path = vim/vim/bundle/smyck-vim
     url = https://github.com/brendonrapp/smyck-vim.git
+[submodule "vim/vim/bundle/vim-fish"]
+    path = vim/vim/bundle/vim-fish
+    url = https://github.com/dag/vim-fish.git

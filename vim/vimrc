@@ -1,3 +1,6 @@
+" Use bash as vim shell
+set shell=/bin/bash
+
 " Activate pathogen.
 filetype off
 execute pathogen#infect()

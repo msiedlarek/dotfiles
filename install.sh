@@ -26,6 +26,7 @@ install_module screen
 install_module tmux
 install_module vim
 install_module sublime3
+install_module fish
 
 if [[ "$(uname)" == "Linux" ]]; then
     install_module i3
