@@ -10,12 +10,11 @@ if status --is-login
     # Enable colored grep output
     set -x GREP_OPTIONS '--color=auto'
 
+    # Set PATH
     set -x PATH '/usr/local/bin' $PATH
 
     # Prefer Java 8
     if [ -x '/usr/libexec/java_home' ]
-        set JAVA_HOME (/usr/libexec/java_home -v 1.8)
+        set -x JAVA_HOME (/usr/libexec/java_home -v 1.8)
     end
 end
-
-set fish_greeting ""

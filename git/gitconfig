@@ -49,5 +49,5 @@
 [pull]
     default = simple
 [user]
-	name = Mikołaj Siedlarek
-	email = mikolaj@siedlarek.pl
+    name = Mikołaj Siedlarek
+    email = mikolaj@siedlarek.pl

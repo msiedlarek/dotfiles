@@ -17,10 +17,8 @@ function install_module() {
 }
 
 install_module shell
-#install_module ack
 install_module bash
 install_module git
-#install_module prezto
 install_module readline
 install_module screen
 install_module tmux
