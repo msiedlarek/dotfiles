@@ -1,4 +1,8 @@
 if status --is-login
+    # Set locale.
+    set -x LC_ALL en_US.UTF-8
+    set -x LANG en_US.UTF-8
+
     # Use Vim as default editor
     set -x EDITOR vim
     set -x VISUAL $EDITOR
