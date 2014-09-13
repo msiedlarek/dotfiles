@@ -192,21 +192,16 @@ endif
 " Use persistend undo history.
 set undofile
 
-" Trim trailing whitespaces
-function TrimTrailingWhitespaces()
+function CleanWhiteSpace()
     let save_cursor = getpos(".")
+    " Remove white spaces from ends of lines.
     :silent! %s#\s\+$##
+    " Make sure that there is exactly one newline at the end of the file.
+    :silent! %s#\($\n\s*\)*\%$#\r#
     call setpos('.', save_cursor)
 endfunction
-au BufWritePre * call TrimTrailingWhitespaces()
-
-" Trim blank lines at end of file
-function TrimTrailingEmptyLines()
-    let save_cursor = getpos(".")
-    :silent! %s#\($\n\s*\)\+\%$##
-    call setpos('.', save_cursor)
-endfunction
-au BufWritePre * call TrimTrailingEmptyLines()
+command! CWS call CleanWhiteSpace()
+nnoremap <silent> <F2> :CWS<CR>
 
 " Jump to the last position when opening a file
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
