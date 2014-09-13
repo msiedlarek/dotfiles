@@ -34,12 +34,15 @@
 [submodule "vim/vim/bundle/vim-glsl"]
     path = vim/vim/bundle/vim-glsl
     url = https://github.com/tikhomirov/vim-glsl.git
-[submodule "vim/vim/bundle/YouCompleteMe"]
-    path = vim/vim/bundle/YouCompleteMe
-    url = https://github.com/Valloric/YouCompleteMe.git
 [submodule "vim/vim/bundle/smyck-vim"]
     path = vim/vim/bundle/smyck-vim
     url = https://github.com/brendonrapp/smyck-vim.git
 [submodule "vim/vim/bundle/vim-fish"]
     path = vim/vim/bundle/vim-fish
     url = https://github.com/dag/vim-fish.git
+[submodule "vim/vim/bundle/rust.vim"]
+    path = vim/vim/bundle/rust.vim
+    url = https://github.com/wting/rust.vim.git
+[submodule "vim/vim/bundle/vim-toml"]
+    path = vim/vim/bundle/vim-toml
+    url = https://github.com/cespare/vim-toml.git
