@@ -197,7 +197,7 @@ function CleanWhiteSpace()
     " Remove white spaces from ends of lines.
     :silent! %s#\s\+$##
     " Make sure that there is exactly one newline at the end of the file.
-    :silent! %s#\($\n\s*\)*\%$##
+    :silent! %s#\($\n\s*\)\+\%$##
     call setpos('.', save_cursor)
 endfunction
 command! CWS call CleanWhiteSpace()
