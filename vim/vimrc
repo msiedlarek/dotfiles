@@ -50,8 +50,8 @@ set colorcolumn=80
 set formatoptions=tcqronl1
 
 " Text width for plaintext, TeX and CoNtExT files
-autocmd FileType txt,tex,markdown,plaintex,context set textwidth=72
-autocmd FileType txt,tex,markdown,plaintex,context set colorcolumn=73
+autocmd FileType txt,tex,markdown,plaintex,context,gitcommit set textwidth=72
+autocmd FileType txt,tex,markdown,plaintex,context,gitcommit set colorcolumn=73
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
@@ -234,6 +234,3 @@ set secure
 " a.vim GLSL shaders alternation
 let g:alternateExtensions_vert = "frag"
 let g:alternateExtensions_frag = "vert"
-
-" Disable completion Scratch window
-set completeopt=menu,menuone
