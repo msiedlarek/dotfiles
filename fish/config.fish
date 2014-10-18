@@ -17,6 +17,12 @@ if status --is-login
     # Set PATH
     set -x PATH '/usr/local/bin' $PATH
 
+    # Run private scripts that cannot be released in public dotfiles
+    # repository.
+    for script in (dirname (status -f))/private/*.fish
+        source $script
+    end
+
     # Prefer Java 8
     if [ -x '/usr/libexec/java_home' ]
         set -x JAVA_HOME (/usr/libexec/java_home -v 1.8)
