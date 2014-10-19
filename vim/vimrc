@@ -234,3 +234,8 @@ set secure
 " a.vim GLSL shaders alternation
 let g:alternateExtensions_vert = "frag"
 let g:alternateExtensions_frag = "vert"
+
+" Save as root using :W
+command W :execute ':silent w !sudo tee % > /dev/null' | :edit!
+command Wq :execute ':W' | :q
+command WQ :Wq
