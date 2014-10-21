@@ -2,10 +2,7 @@
 
 set -e
 
-DOTFILES=$(dirname $0)
-STOW="stow --verbose=2 --dir=${DOTFILES} --target=${HOME} $@"
-
-PACKAGES=(
+readonly COMMON_PACKAGES=(
     bash
     fish
     git
@@ -17,14 +14,27 @@ PACKAGES=(
     vim
 )
 
-if [[ "$(uname)" == "Linux" ]]; then
-    PACKAGES+=(
-        i3
-        x
-    )
-fi
+readonly LINUX_PACKAGES=(
+    i3
+    x
+)
 
-# We don't want Stow's tree folding here - we prefer it to be a real directory.
-mkdir -p "${HOME}/.config/fish"
+readonly DOTFILES=$(dirname $0)
+readonly STOW="stow --verbose=2 --dir=${DOTFILES} --target=${HOME}"
 
-$STOW ${PACKAGES[*]}
+main() {
+    local additional_stow_args="$@"
+
+    local packages=(${COMMON_PACKAGES[*]})
+    if [[ "$(uname)" == "Linux" ]]; then
+        packages+=(${LINUX_PACKAGES[*]})
+    fi
+
+    # We don't want Stow's tree folding here - we prefer it to be a real
+    # directory.
+    mkdir -p "${HOME}/.config/fish"
+
+    $STOW $additional_stow_args ${packages[*]}
+}
+
+main $@
