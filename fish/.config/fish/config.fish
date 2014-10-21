@@ -8,7 +8,7 @@ if status --is-login
     set -x VISUAL $EDITOR
 
     # Use less without clearing the screen.
-    set -x PAGER= 'less -X'
+    set -x PAGER 'less -X'
     set -x MANPAGER 'less -X'
 
     # Enable colored grep output
