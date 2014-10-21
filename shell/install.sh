@@ -1,1 +1,0 @@
-symlink "profile" "$HOME/.profile"
