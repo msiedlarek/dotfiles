@@ -121,21 +121,17 @@ set shiftwidth=4
 " operations, like inserting a <Tab> or using <BS>.
 set softtabstop=4
 
-" YAML indentation
-autocmd FileType yaml set shiftwidth=2
-autocmd FileType yaml set softtabstop=2
+function SetIndentation(size)
+    execute "set shiftwidth=".a:size
+    execute "set softtabstop=".a:size
+endfunction
 
-" Ada indentation
-autocmd FileType ada set shiftwidth=3
-autocmd FileType ada set softtabstop=3
-
-" RST indentation
-autocmd FileType rst set shiftwidth=3
-autocmd FileType rst set softtabstop=3
-
-" JSON indentation
-autocmd FileType json set shiftwidth=2
-autocmd FileType json set softtabstop=2
+" Indentation for specific file formats.
+autocmd FileType yaml call SetIndentation(2)
+autocmd FileType ada call SetIndentation(3)
+autocmd FileType rst call SetIndentation(3)
+autocmd FileType json call SetIndentation(2)
+autocmd FileType ruby call SetIndentation(2)
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -166,9 +162,10 @@ vnoremap > >gv
 " Set filetype to `txt` for default
 autocmd BufEnter * if &filetype == "" | setlocal ft=txt | endif
 
-" Use normal \t tabs for Makefiles
+" Use normal \t tabs for some file types.
 autocmd FileType make setlocal noexpandtab
 autocmd FileType sql setlocal noexpandtab
+autocmd FileType go setlocal noexpandtab
 
 " Toggle comment with leader-k.
 noremap <silent> <leader>k :TComment<CR>
@@ -239,3 +236,7 @@ let g:alternateExtensions_frag = "vert"
 command W :execute ':silent w !sudo tee % > /dev/null' | :edit!
 command Wq :execute ':W' | :q
 command WQ :Wq
+
+" Set Command-T shortcuts
+nnoremap <C-p> :CommandT<CR>
+let g:CommandTCancelMap=['<Esc>', '<C-c>']

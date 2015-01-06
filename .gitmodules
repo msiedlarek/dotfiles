@@ -1,9 +1,6 @@
 [submodule "a.vim"]
     path = vim/.vim/bundle/a.vim
     url = https://github.com/vim-scripts/a.vim.git
-[submodule "ctrlp.vim"]
-    path = vim/.vim/bundle/ctrlp.vim
-    url = https://github.com/kien/ctrlp.vim.git
 [submodule "pyflakes-vim"]
     path = vim/.vim/bundle/pyflakes-vim
     url = https://github.com/kevinw/pyflakes-vim.git
@@ -46,3 +43,6 @@
 [submodule "thrift.vim"]
     path = vim/.vim/bundle/thrift.vim
     url = https://github.com/solarnz/thrift.vim.git
+[submodule "command-t"]
+    path = vim/.vim/bundle/command-t
+    url = https://github.com/wincent/command-t.git
