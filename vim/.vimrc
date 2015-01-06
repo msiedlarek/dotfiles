@@ -238,5 +238,10 @@ command Wq :execute ':W' | :q
 command WQ :Wq
 
 " Set Command-T shortcuts
-nnoremap <C-p> :CommandT<CR>
+nnoremap <silent> <C-p> :CommandT<CR>
 let g:CommandTCancelMap=['<Esc>', '<C-c>']
+
+" System clipboard shortcuts
+nnoremap Y "*y
+nnoremap P "*p
+nnoremap X "*x
