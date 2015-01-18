@@ -38,8 +38,9 @@ if has('gui_running')
     set guifont=Source\ Code\ Pro\ Light:h12
     set linespace=2
 
-    set columns=180
-    set lines=45
+    " Use maximum window size possible
+    set columns=9999 lines=9999
+    " set columns=180 lines=45
 
     " Disable all scrollbars
     set guioptions-=r
