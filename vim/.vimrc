@@ -17,15 +17,35 @@ endif
 if $TERM != "screen"
     " Color scheme
     colorscheme smyck
-    hi Search cterm=none ctermbg=3 ctermfg=8 gui=none guibg=#F6DC69 guifg=#8F8F8F
 
     " Vertical split line formatting
     " The comma preserves the whitespace at the end of the line.
     set fillchars+=vert:\ ,
-    hi VertSplit ctermfg=240 ctermbg=240 guibg=#666666 guifg=#666666
+    hi VertSplit ctermfg=240 ctermbg=240 guibg=#555555 guifg=#555555
 
-    " 80th column color
-    hi ColorColumn ctermbg=236 guibg=#666666
+    hi Search ctermbg=11 ctermfg=0 guibg=#FFE377 guifg=#000000
+    hi ColorColumn ctermbg=236 guibg=#333333
+    hi Error guifg=#C75646
+    hi ErrorMsg guibg=#C75646
+
+    hi GitGutterAdd guifg=#8EB33B
+    hi GitGutterChange guifg=#D0B03C
+    hi GitGutterDelete guifg=#C75646
+    hi GitGutterChangeDelete guifg=#D0B03C
+endif
+
+if has('gui_running')
+    set guifont=Source\ Code\ Pro\ Light:h12
+    set linespace=2
+
+    set columns=180
+    set lines=45
+
+    " Disable all scrollbars
+    set guioptions-=r
+    set guioptions-=R
+    set guioptions-=l
+    set guioptions-=L
 endif
 
 " Show the filename in the window titlebar
@@ -44,14 +64,15 @@ au BufNewFile,BufRead Vagrantfile set filetype=ruby
 au BufNewFile,BufRead *.gradle set filetype=groovy
 au BufNewFile,BufRead ejabberd.cfg set filetype=erlang
 
-" Set formatting options for text blocks
-set textwidth=79
-set colorcolumn=80
-set formatoptions=tcqronl1
+function! SetTextWidth(width)
+    execute "set textwidth=".a:width
+    execute "set colorcolumn=".a:width + 1
+endfunction
+call SetTextWidth(79)
+autocmd FileType txt,tex,markdown,plaintex,context,gitcommit call SetTextWidth(72)
 
-" Text width for plaintext, TeX and CoNtExT files
-autocmd FileType txt,tex,markdown,plaintex,context,gitcommit set textwidth=72
-autocmd FileType txt,tex,markdown,plaintex,context,gitcommit set colorcolumn=73
+" Set formatting options for text blocks
+set formatoptions=tcqronl1
 
 " Allow backspacing over autoindent, line breaks (join lines) and over
 " the start of insert
@@ -114,17 +135,14 @@ set ignorecase
 " Number of spaces that a <Tab> in the file counts for.
 set tabstop=8
 
-" Number of spaces to use for each step of (auto)indent.
-set shiftwidth=4
-
-" Number of spaces that a <Tab> counts for while performing editing
-" operations, like inserting a <Tab> or using <BS>.
-set softtabstop=4
-
-function SetIndentation(size)
+function! SetIndentation(size)
+    " Number of spaces to use for each step of (auto)indent.
     execute "set shiftwidth=".a:size
+    " Number of spaces that a <Tab> counts for while performing editing
+    " operations, like inserting a <Tab> or using <BS>.
     execute "set softtabstop=".a:size
 endfunction
+call SetIndentation(4)
 
 " Indentation for specific file formats.
 autocmd FileType yaml call SetIndentation(2)
@@ -189,7 +207,7 @@ endif
 " Use persistend undo history.
 set undofile
 
-function CleanWhiteSpace()
+function! CleanWhiteSpace()
     let save_cursor = getpos(".")
     " Remove white spaces from ends of lines.
     :silent! %s#\s\+$##
@@ -197,8 +215,7 @@ function CleanWhiteSpace()
     :silent! %s#\($\n\s*\)\+\%$##
     call setpos('.', save_cursor)
 endfunction
-command! CWS call CleanWhiteSpace()
-nnoremap <silent> <F2> :CWS<CR>
+noremap <leader>c :call CleanWhiteSpace()<CR>
 
 " Jump to the last position when opening a file
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
@@ -233,14 +250,12 @@ let g:alternateExtensions_vert = "frag"
 let g:alternateExtensions_frag = "vert"
 
 " Save as root using :W
-command W :execute ':silent w !sudo tee % > /dev/null' | :edit!
-command Wq :execute ':W' | :q
-command WQ :Wq
+command! W :execute ':silent w !sudo tee % > /dev/null' | :edit!
+command! Wq :execute ':W' | :q
+command! WQ :Wq
 
 " Set Command-T shortcuts
 nnoremap <silent> <C-p> :CommandT<CR>
 
-" System clipboard shortcuts
-nnoremap Y "*y
-nnoremap P "*p
-nnoremap X "*x
+" Set NERDTree toggle shortcut
+map <C-n> :NERDTreeToggle<CR>
