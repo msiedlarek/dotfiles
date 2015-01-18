@@ -67,7 +67,7 @@ au BufNewFile,BufRead ejabberd.cfg set filetype=erlang
 
 function! SetTextWidth(width)
     execute "set textwidth=".a:width
-    execute "set colorcolumn=".a:width + 1
+    execute "set colorcolumn=".(a:width + 1)
 endfunction
 call SetTextWidth(79)
 autocmd FileType txt,tex,markdown,plaintex,context,gitcommit call SetTextWidth(72)
