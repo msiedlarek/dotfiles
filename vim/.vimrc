@@ -70,7 +70,7 @@ function! SetTextWidth(width)
     execute "set colorcolumn=".(a:width + 1)
 endfunction
 call SetTextWidth(79)
-autocmd FileType txt,tex,markdown,plaintex,context,gitcommit call SetTextWidth(72)
+autocmd FileType txt,tex,markdown,plaintex,context,gitcommit :call SetTextWidth(72)
 
 " Set formatting options for text blocks
 set formatoptions=tcqronl1
@@ -146,11 +146,8 @@ endfunction
 call SetIndentation(4)
 
 " Indentation for specific file formats.
-autocmd FileType yaml call SetIndentation(2)
-autocmd FileType ada call SetIndentation(3)
-autocmd FileType rst call SetIndentation(3)
-autocmd FileType json call SetIndentation(2)
-autocmd FileType ruby call SetIndentation(2)
+autocmd FileType yaml,json,ruby :call SetIndentation(2)
+autocmd FileType ada,rst :call SetIndentation(3)
 
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
@@ -182,9 +179,7 @@ vnoremap > >gv
 autocmd BufEnter * if &filetype == "" | setlocal ft=txt | endif
 
 " Use normal \t tabs for some file types.
-autocmd FileType make setlocal noexpandtab
-autocmd FileType sql setlocal noexpandtab
-autocmd FileType go setlocal noexpandtab
+autocmd FileType make,sql,go setlocal noexpandtab
 
 " Toggle comment with leader-k.
 noremap <silent> <leader>k :TComment<CR>
