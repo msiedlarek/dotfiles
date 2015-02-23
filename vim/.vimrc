@@ -56,7 +56,7 @@ set title
 set autoindent
 
 " Add some file extensions
-au BufNewFile,BufRead *.jinja2,*.j2 set filetype=htmljinja
+au BufNewFile,BufRead *.jinja,*.jinja2,*.j2 set filetype=htmljinja
 au BufNewFile,BufRead *.md set filetype=markdown
 au BufNewFile,BufRead *.zcml set filetype=xml
 au BufNewFile,BufRead SConstruct set filetype=python
@@ -70,7 +70,8 @@ function! SetTextWidth(width)
     execute "set colorcolumn=".(a:width + 1)
 endfunction
 call SetTextWidth(79)
-autocmd FileType txt,tex,markdown,plaintex,context,gitcommit :call SetTextWidth(72)
+autocmd FileType text,tex,markdown,plaintex,context,gitcommit :call SetTextWidth(72)
+autocmd FileType rust :call SetTextWidth(99)
 
 " Set formatting options for text blocks
 set formatoptions=tcqronl1
@@ -175,9 +176,6 @@ nnoremap <leader>q :q<CR>
 vnoremap < <gv
 vnoremap > >gv
 
-" Set filetype to `txt` for default
-autocmd BufEnter * if &filetype == "" | setlocal ft=txt | endif
-
 " Use normal \t tabs for some file types.
 autocmd FileType make,sql,go setlocal noexpandtab
 
@@ -245,13 +243,18 @@ set secure
 let g:alternateExtensions_vert = "frag"
 let g:alternateExtensions_frag = "vert"
 
-" Save as root using :W
-command! W :execute ':silent w !sudo tee % > /dev/null' | :edit!
-command! Wq :execute ':W' | :q
-command! WQ :Wq
-
-" Set Command-T shortcuts
-nnoremap <silent> <C-p> :CommandT<CR>
+" Save as root using :Sudow
+command! Sudow :execute ':silent w !sudo tee % > /dev/null' | :edit!
+command! Sudowq :execute ':Sudow' | :q
 
 " Set NERDTree toggle shortcut
 map <C-n> :NERDTreeToggle<CR>
+
+" Disable folding
+set nofoldenable
+
+" Syntastic settings
+let g:syntastic_check_on_open = 1
+let g:syntastic_error_symbol = "X"
+let g:syntastic_warning_symbol = "!"
+let g:syntastic_auto_loc_list = 2

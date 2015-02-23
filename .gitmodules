@@ -1,12 +1,6 @@
 [submodule "a.vim"]
     path = vim/.vim/bundle/a.vim
     url = https://github.com/vim-scripts/a.vim.git
-[submodule "pyflakes-vim"]
-    path = vim/.vim/bundle/pyflakes-vim
-    url = https://github.com/kevinw/pyflakes-vim.git
-[submodule "tcomment_vim"]
-    path = vim/.vim/bundle/tcomment_vim
-    url = https://github.com/tomtom/tcomment_vim.git
 [submodule "vim-fugitive"]
     path = vim/.vim/bundle/vim-fugitive
     url = https://github.com/tpope/vim-fugitive.git
@@ -43,12 +37,15 @@
 [submodule "thrift.vim"]
     path = vim/.vim/bundle/thrift.vim
     url = https://github.com/solarnz/thrift.vim.git
-[submodule "command-t"]
-    path = vim/.vim/bundle/command-t
-    url = https://github.com/wincent/command-t.git
 [submodule "nerdtree"]
     path = vim/.vim/bundle/nerdtree
     url = https://github.com/scrooloose/nerdtree.git
 [submodule "vim-yaml"]
     path = vim/.vim/bundle/vim-yaml
     url = https://github.com/stephpy/vim-yaml.git
+[submodule "syntastic"]
+    path = vim/.vim/bundle/syntastic
+    url = https://github.com/scrooloose/syntastic.git
+[submodule "ctrlp.vim"]
+    path = vim/.vim/bundle/ctrlp.vim
+    url = https://github.com/kien/ctrlp.vim.git
