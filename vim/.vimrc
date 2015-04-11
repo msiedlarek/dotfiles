@@ -258,3 +258,6 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_error_symbol = "X"
 let g:syntastic_warning_symbol = "!"
 let g:syntastic_auto_loc_list = 2
+let g:syntastic_cpp_checkers = []
+
+nmap <silent> <leader>d <Plug>DashSearch
