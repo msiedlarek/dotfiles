@@ -26,6 +26,7 @@
 
 'body':
   'ctrl-n': 'unset!'
+  'cmd-w': 'pane:close'
 
 'atom-workspace':
   'cmd-t': 'application:new-file'
@@ -46,6 +47,8 @@
   ', k': 'editor:toggle-line-comments'
   ', d': 'dash:shortcut'
   ', t': 'tree-view:toggle-focus'
+  ', v': 'pane:split-left'
+  ', h': 'pane:split-down'
 
 '.tree-view':
   ', t': 'tree-view:toggle'
@@ -65,7 +68,8 @@
   'ctrl-k': 'core:move-up'
 
 '.select-list':
+  'ctrl-v': 'pane:split-left'
   'ctrl-h': 'pane:split-left'
-  'ctrl-v': 'pane:split-right'
+  'ctrl-l': 'pane:split-right'
   'ctrl-j': 'core:move-down'
   'ctrl-k': 'core:move-up'

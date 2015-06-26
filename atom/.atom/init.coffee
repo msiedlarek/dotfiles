@@ -27,3 +27,14 @@ atom.commands.add 'atom-text-editor', 'msiedlarek:autocomplete', ->
       atom.commands.dispatch target, "core:move-down"
     else
       atom.commands.dispatch target, "autocomplete-plus:confirm"
+
+atom.packages.onDidActivatePackage (pack) ->
+  ExInternal = require(atom.packages.resolvePackagePath('ex-mode') + '/lib/Ex').singleton()
+  if pack.name == 'ex-mode'
+    Ex = pack.mainModule.provideEx()
+    quit = ->
+      atom.workspace.getActivePane().destroy()
+    Ex.registerCommand 'quit', quit
+    Ex.registerCommand 'q', quit
+    Ex.registerCommand 'wq', (args...) ->
+      ExInternal.write(args...).then => quit()
