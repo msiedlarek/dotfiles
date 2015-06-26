@@ -25,6 +25,7 @@
   ', d': 'dash:shortcut'
   ', v': 'pane:split-left'
   ', h': 'pane:split-down'
+  'g q': 'autoflow:reflow-selection'
 
 '.tree-view':
   'ctrl-t': 'tree-view:toggle'
