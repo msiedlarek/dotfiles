@@ -6,11 +6,10 @@
       "exception-reporting"
       "metrics"
       "autocomplete-python"
-      "tabs"
     ]
   editor:
     invisibles: {}
-    fontSize: 10
+    fontSize: 11
     fontFamily: "SourceCodePro-Light"
     showIndentGuide: true
     scrollPastEnd: true
@@ -130,3 +129,6 @@
   "autocomplete-plus":
     backspaceTriggersAutocomplete: true
     minimumWordLength: 1
+  "tree-view":
+    hideVcsIgnoredFiles: true
+    hideIgnoredNames: true

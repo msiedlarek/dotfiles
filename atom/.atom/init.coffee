@@ -1,21 +1,12 @@
-# Your init script
-#
-# Atom will evaluate this file each time a new window is opened. It is run
-# after packages are loaded/activated and after the previous editor state
-# has been restored.
-#
-# An example hack to log to the console when each text editor is saved.
-#
-# atom.workspace.observeTextEditors (editor) ->
-#   editor.onDidSave ->
-#     console.log "Saved! #{editor.getPath()}"
-
+# Fix PATH with common locations.
 process.env.PATH = [
   "/usr/local/bin",
   "/usr/bin",
   process.env.PATH
 ].join(":")
 
+# Confirm autocompletion automatically if there is only one suggestion. If not,
+# iterate through them.
 atom.commands.add 'atom-text-editor', 'msiedlarek:autocomplete', ->
   autocomplete = atom.packages.getActivePackage('autocomplete-plus').mainModule
   suggestions = autocomplete.getAutocompleteManager().suggestionList.items
@@ -28,13 +19,28 @@ atom.commands.add 'atom-text-editor', 'msiedlarek:autocomplete', ->
     else
       atom.commands.dispatch target, "autocomplete-plus:confirm"
 
+# Open tree-view when trying to go left from a leftmost pane.
+atom.commands.add 'atom-text-editor', 'msiedlarek:focus-pane-on-left', ->
+  treeViewActive = atom.packages.isPackageActive('tree-view')
+  workspaceView = atom.views.getView(atom.workspace)
+  paneContainerView = atom.views.getView(workspaceView.paneContainer)
+  if treeViewActive and !paneContainerView.nearestPaneInDirection('left')
+    atom.commands.dispatch workspaceView, "tree-view:toggle-focus"
+  else
+    atom.commands.dispatch workspaceView, "window:focus-pane-on-left"
+
 atom.packages.onDidActivatePackage (pack) ->
-  ExInternal = require(atom.packages.resolvePackagePath('ex-mode') + '/lib/Ex').singleton()
-  if pack.name == 'ex-mode'
-    Ex = pack.mainModule.provideEx()
-    quit = ->
-      atom.workspace.getActivePane().destroy()
-    Ex.registerCommand 'quit', quit
-    Ex.registerCommand 'q', quit
-    Ex.registerCommand 'wq', (args...) ->
-      ExInternal.write(args...).then => quit()
+  switch pack.name
+    when 'ex-mode'
+      # Add ex-mode commands.
+      Ex = pack.mainModule.provideEx()
+      Ex.registerCommand 'qa', ->
+        atom.close()
+    when 'tree-view'
+      # Hide tree-view by default.
+      hideTreeView = ->
+        treeView = atom.packages.getActivePackage('tree-view').mainModule.treeView
+        if treeView?.isVisible()
+          treeView.detach()
+      atom.project.onDidChangePaths hideTreeView
+      atom.workspace.onDidOpen hideTreeView

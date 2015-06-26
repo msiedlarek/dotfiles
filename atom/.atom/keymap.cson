@@ -1,65 +1,43 @@
-# Your keymap
-#
-# Atom keymaps work similarly to style sheets. Just as style sheets use
-# selectors to apply styles to elements, Atom keymaps use selectors to associate
-# keystrokes with events in specific contexts.
-#
-# You can create a new keybinding in this file by typing "key" and then hitting
-# tab.
-#
-# Here's an example taken from Atom's built-in keymap:
-#
-# 'atom-text-editor':
-#   'enter': 'editor:newline'
-#
-# 'atom-workspace':
-#   'ctrl-shift-p': 'core:move-up'
-#   'ctrl-p': 'core:move-down'
-#
-# You can find more information about keymaps in these guides:
-# * https://atom.io/docs/latest/using-atom-basic-customization#customizing-key-bindings
-# * https://atom.io/docs/latest/behind-atom-keymaps-in-depth
-#
-# This file uses CoffeeScript Object Notation (CSON).
-# If you are unfamiliar with CSON, you can read more about it here:
-# https://github.com/bevry/cson#what-is-cson
-
 'body':
+  # Disabled for atom-text-editor binding.
   'ctrl-n': 'unset!'
-  'cmd-w': 'pane:close'
 
 'atom-workspace':
   'cmd-t': 'application:new-file'
 
   'ctrl-p': 'fuzzy-finder:toggle-file-finder'
   'ctrl-c': 'command-palette:toggle',
+  'ctrl-t': 'tree-view:toggle-focus'
 
   'ctrl-l': 'window:focus-pane-on-right'
-  'ctrl-h': 'window:focus-pane-on-left'
+  'ctrl-h': 'msiedlarek:focus-pane-on-left'
   'ctrl-j': 'window:focus-pane-below'
   'ctrl-k': 'window:focus-pane-above'
 
 'atom-text-editor':
-  # Disabled for .select-list ctrl-k binding.
+  # Disabled for .select-list binding.
   'ctrl-k': 'unset!'
+  # Disabled for atom-workspace binding.
+  'ctrl-t': 'unset!'
 
 'atom-text-editor.vim-mode:not(.insert-mode)':
   ', k': 'editor:toggle-line-comments'
   ', d': 'dash:shortcut'
-  ', t': 'tree-view:toggle-focus'
   ', v': 'pane:split-left'
   ', h': 'pane:split-down'
 
 '.tree-view':
-  ', t': 'tree-view:toggle'
+  'ctrl-t': 'tree-view:toggle'
+  'ctrl-l': 'tree-view:toggle'
+  'ctrl-v': 'tree-view:open-selected-entry-right'
 
 'atom-text-editor.vim-mode':
-  # Disabled for atom-workspace ctrl-c binding.
+  # Disabled for atom-workspace binding.
   'ctrl-c': 'unset!'
   'ctrl-n': 'autocomplete-plus:activate'
 
 '.platform-darwin atom-text-editor.vim-mode:not(.command-mode)':
-  # Disabled for atom-workspace ctrl-c binding.
+  # Disabled for atom-workspace binding.
   'ctrl-c': 'unset!'
 
 'atom-text-editor:not(mini).autocomplete-active':
