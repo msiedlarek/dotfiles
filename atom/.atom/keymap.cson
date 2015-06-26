@@ -41,8 +41,11 @@
   # Disabled for atom-workspace ctrl-c binding.
   'ctrl-c': 'unset!'
 
+'atom-text-editor.vim-mode:not(.insert-mode)':
+  ', k': 'editor:toggle-line-comments'
+  ', d': 'dash:shortcut'
+
 '.select-list':
-  'ctrl-l': 'pane:split-right'
   'ctrl-h': 'pane:split-left'
   'ctrl-v': 'pane:split-right'
   'ctrl-j': 'core:move-down'
