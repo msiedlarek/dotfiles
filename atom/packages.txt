@@ -9,4 +9,5 @@ linter@1.0.6
 python-isort@0.0.7
 term2@0.9.9
 the-closer@0.5.0
+vim-mode-visual-block@0.2.4
 vim-mode@0.54.0
