@@ -5,12 +5,15 @@
     disabledPackages: [
       "exception-reporting"
       "metrics"
+      "autocomplete-python"
     ]
   editor:
     invisibles: {}
     fontSize: 11
     fontFamily: "SourceCodePro-Light"
     showIndentGuide: true
+    scrollPastEnd: true
+    softWrap: true
   linter: {}
   term2:
     colors:
@@ -110,6 +113,7 @@
     ]
     communityPackages: [
       "term2"
+      "dash"
     ]
   "autocomplete-python": {}
   "file-icons":
@@ -122,3 +126,6 @@
   "python-isort": {}
   "vim-mode":
     useClipboardAsDefaultRegister: true
+  "autocomplete-plus":
+    backspaceTriggersAutocomplete: true
+    minimumWordLength: 1

@@ -15,3 +15,15 @@ process.env.PATH = [
   "/usr/bin",
   process.env.PATH
 ].join(":")
+
+atom.commands.add 'atom-text-editor', 'msiedlarek:autocomplete', ->
+  autocomplete = atom.packages.getActivePackage('autocomplete-plus').mainModule
+  suggestions = autocomplete.getAutocompleteManager().suggestionList.items
+  target = atom.views.getView(atom.workspace).querySelector(
+    '.autocomplete-plus'
+  )
+  if target
+    if suggestions and suggestions.length > 1
+      atom.commands.dispatch target, "core:move-down"
+    else
+      atom.commands.dispatch target, "autocomplete-plus:confirm"

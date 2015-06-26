@@ -24,7 +24,12 @@
 # If you are unfamiliar with CSON, you can read more about it here:
 # https://github.com/bevry/cson#what-is-cson
 
+'body':
+  'ctrl-n': 'unset!'
+
 'atom-workspace':
+  'cmd-t': 'application:new-file'
+
   'ctrl-p': 'fuzzy-finder:toggle-file-finder'
   'ctrl-c': 'command-palette:toggle',
 
@@ -37,13 +42,27 @@
   # Disabled for .select-list ctrl-k binding.
   'ctrl-k': 'unset!'
 
-'atom-text-editor.vim-mode':
-  # Disabled for atom-workspace ctrl-c binding.
-  'ctrl-c': 'unset!'
-
 'atom-text-editor.vim-mode:not(.insert-mode)':
   ', k': 'editor:toggle-line-comments'
   ', d': 'dash:shortcut'
+  ', t': 'tree-view:toggle-focus'
+
+'.tree-view':
+  ', t': 'tree-view:toggle'
+
+'atom-text-editor.vim-mode':
+  # Disabled for atom-workspace ctrl-c binding.
+  'ctrl-c': 'unset!'
+  'ctrl-n': 'autocomplete-plus:activate'
+
+'.platform-darwin atom-text-editor.vim-mode:not(.command-mode)':
+  # Disabled for atom-workspace ctrl-c binding.
+  'ctrl-c': 'unset!'
+
+'atom-text-editor:not(mini).autocomplete-active':
+  'ctrl-n': 'msiedlarek:autocomplete'
+  'ctrl-j': 'core:move-down'
+  'ctrl-k': 'core:move-up'
 
 '.select-list':
   'ctrl-h': 'pane:split-left'
