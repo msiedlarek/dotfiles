@@ -12,6 +12,7 @@ readonly COMMON_PACKAGES=(
     shell
     tmux
     vim
+    atom
 )
 
 readonly LINUX_PACKAGES=(
@@ -21,6 +22,7 @@ readonly LINUX_PACKAGES=(
 
 readonly DOTFILES=$(dirname $0)
 readonly STOW="stow --verbose=2 --dir=${DOTFILES} --target=${HOME}"
+readonly APM=$(which apm)
 
 main() {
     local additional_stow_args="$@"
@@ -35,6 +37,10 @@ main() {
     mkdir -p "${HOME}/.config/fish"
 
     $STOW $additional_stow_args ${packages[*]}
+
+    if [[ -x $APM ]]; then
+        $APM install -c -q --packages-file ${DOTFILES}/atom/packages.txt
+    fi
 }
 
 main $@

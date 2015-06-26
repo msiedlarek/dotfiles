@@ -35,7 +35,7 @@ if $TERM != "screen"
 endif
 
 if has('gui_running')
-    set guifont=Source\ Code\ Pro\ Light:h12
+    set guifont=Sauce\ Code\ Powerline\ Light:h10
     set linespace=2
 
     " Use maximum window size possible
@@ -260,4 +260,12 @@ let g:syntastic_warning_symbol = "!"
 let g:syntastic_auto_loc_list = 2
 let g:syntastic_cpp_checkers = []
 
+" Use <leader>d to search for a symbol in Dash app.
 nmap <silent> <leader>d <Plug>DashSearch
+
+" Set Airline looks.
+let g:airline_powerline_fonts = 1
+let g:airline_theme="powerlineish"
+
+" Use relative line numbering
+set relativenumber
