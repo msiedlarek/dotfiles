@@ -34,7 +34,11 @@ atom.packages.onDidActivatePackage (pack) ->
     when 'ex-mode'
       # Add ex-mode commands.
       Ex = pack.mainModule.provideEx()
+      Ex.registerCommand 'qt', ->
+        # Close active pane.
+        atom.workspace.getActivePane().destroy()
       Ex.registerCommand 'qa', ->
+        # Close active window.
         atom.close()
     when 'tree-view'
       # Hide tree-view by default.

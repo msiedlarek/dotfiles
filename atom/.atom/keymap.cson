@@ -1,5 +1,4 @@
 'body':
-  # Disabled for atom-text-editor binding.
   'ctrl-n': 'unset!'
 
 'atom-workspace':
@@ -14,10 +13,11 @@
   'ctrl-j': 'window:focus-pane-below'
   'ctrl-k': 'window:focus-pane-above'
 
+  'ctrl-[': 'pane:show-previous-item'
+  'ctrl-]': 'pane:show-next-item'
+
 'atom-text-editor':
-  # Disabled for .select-list binding.
   'ctrl-k': 'unset!'
-  # Disabled for atom-workspace binding.
   'ctrl-t': 'unset!'
 
 'atom-text-editor.vim-mode:not(.insert-mode)':
@@ -33,12 +33,14 @@
   'ctrl-v': 'tree-view:open-selected-entry-right'
 
 'atom-text-editor.vim-mode':
-  # Disabled for atom-workspace binding.
   'ctrl-c': 'unset!'
   'ctrl-n': 'autocomplete-plus:activate'
+  'ctrl-[': 'unset!'
+
+'atom-text-editor.vim-mode.command-mode':
+  'ctrl-]': 'unset!'
 
 '.platform-darwin atom-text-editor.vim-mode:not(.command-mode)':
-  # Disabled for atom-workspace binding.
   'ctrl-c': 'unset!'
 
 'atom-text-editor:not(mini).autocomplete-active':
