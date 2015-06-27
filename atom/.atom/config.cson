@@ -14,7 +14,6 @@
     showIndentGuide: true
     scrollPastEnd: true
     softWrap: true
-  linter: {}
   term2:
     colors:
       normalBlack:
@@ -111,19 +110,16 @@
     prefixKeys: [
       "ctrl-k"
     ]
-    communityPackages: [
-      "term2"
-      "dash"
+    allCommunityPackages: true
+    exceptCommunityPackages: [
+      "vim-mode"
+      "ex-mode"
     ]
-  "autocomplete-python": {}
-  "file-icons":
-    coloured: false
   "linter-flake8":
     ignoreErrorCodes: [
       "E127"
       "E128"
     ]
-  "python-isort": {}
   "vim-mode":
     useClipboardAsDefaultRegister: true
   "autocomplete-plus":
@@ -132,4 +128,15 @@
   "tree-view":
     hideVcsIgnoredFiles: true
     hideIgnoredNames: true
-  "fuzzy-finder": {}
+  "one-dark-ui":
+    fontSize: 11
+    layoutMode: "Compact"
+  "one-light-ui":
+    fontSize: 11
+    layoutMode: "Compact"
+  zentabs:
+    neverCloseDirty: true
+    neverCloseUnsaved: true
+    neverCloseNew: true
+  linter: {}
+  "spell-check": {}

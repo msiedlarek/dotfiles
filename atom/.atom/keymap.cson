@@ -16,6 +16,12 @@
   'ctrl-[': 'pane:show-previous-item'
   'ctrl-]': 'pane:show-next-item'
 
+  'ctrl-s': 'run-command:run'
+  'ctrl-s enter': 'run-command:run-command:re-run-last-command'
+  'ctrl-s ctrl-c': 'run-command:kill-last-command'
+  'ctrl-s escape': 'run-command:toggle-panel'
+  'ctrl-s ctrl-s': 'run-command:toggle-panel'
+
 'atom-text-editor':
   'ctrl-k': 'unset!'
   'ctrl-t': 'unset!'
@@ -25,6 +31,7 @@
   ', d': 'dash:shortcut'
   ', v': 'pane:split-left'
   ', h': 'pane:split-down'
+  ', z': 'zen:toggle'
   'g q': 'autoflow:reflow-selection'
   'ctrl-e': 'unset!'
 
@@ -39,6 +46,7 @@
 
 'atom-text-editor.vim-mode.command-mode':
   'ctrl-]': 'unset!'
+  'ctrl-v': 'vim-mode:activate-blockwise-visual-mode'
 
 'atom-text-editor.vim-mode.visual-mode':
   'j': 'vim-mode-visual-block:j'
@@ -52,7 +60,6 @@
   'o': 'vim-mode-visual-block:o'
   'escape': 'vim-mode-visual-block:escape'
   'ctrl-c': 'vim-mode-visual-block:escape'
-  'ctrl-v': 'vim-mode:activate-blockwise-visual-mode'
 
 'atom-text-editor:not(mini).autocomplete-active':
   'ctrl-n': 'msiedlarek:autocomplete'
