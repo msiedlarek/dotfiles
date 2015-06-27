@@ -43,7 +43,7 @@ atom.packages.onDidActivatePackage (pack) ->
     when 'tree-view'
       # Hide tree-view by default.
       hideTreeView = ->
-        treeView = atom.packages.getActivePackage('tree-view').mainModule.treeView
+        treeView = pack.mainModule.treeView
         if treeView?.isVisible()
           treeView.detach()
       atom.project.onDidChangePaths hideTreeView
