@@ -6,6 +6,10 @@
       "exception-reporting"
       "metrics"
       "autocomplete-python"
+      "background-tips"
+      "welcome"
+      "bookmarks"
+      "open-on-github"
     ]
   editor:
     invisibles: {}
@@ -115,6 +119,7 @@
       "vim-mode"
       "ex-mode"
       "jumpy"
+      "vim-mode-visual-block"
     ]
   "linter-flake8":
     ignoreErrorCodes: [
