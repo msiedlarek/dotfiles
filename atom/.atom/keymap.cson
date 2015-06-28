@@ -35,6 +35,9 @@
   'g q': 'autoflow:reflow-selection'
   'ctrl-e': 'unset!'
 
+'atom-text-editor:not(.mini).vim-mode:not(.insert-mode):not(.jumpy-jump-mode)':
+  'f': 'jumpy:toggle'
+
 '.tree-view':
   'ctrl-t': 'tree-view:toggle'
   'ctrl-l': 'tree-view:toggle'
