@@ -5,11 +5,13 @@
     disabledPackages: [
       "exception-reporting"
       "metrics"
-      "autocomplete-python"
       "background-tips"
       "welcome"
       "bookmarks"
       "open-on-github"
+      "autocomplete-python"
+      "package-generator"
+      "autosave"
     ]
   editor:
     invisibles: {}
@@ -18,6 +20,7 @@
     showIndentGuide: true
     scrollPastEnd: true
     softWrap: true
+    nonWordCharacters: "/\\() \"':,.;<>~!@#$%^&*|+=[]{}`?-"
   term2:
     colors:
       normalBlack:
@@ -144,7 +147,8 @@
     neverCloseDirty: true
     neverCloseUnsaved: true
     neverCloseNew: true
-  linter: {}
+  linter:
+    showErrorPanel: false
   "spell-check": {}
   "linter-eslint": {}
   "language-babel":
@@ -154,3 +158,11 @@
   "linter-htmlhint": {}
   jumpy:
     fontSize: 0.9
+  "project-manager":
+    closeCurrent: true
+  "bracket-matcher":
+    autocompleteBrackets: false
+    autocompleteSmartQuotes: false
+".protobuf.source":
+  editor:
+    tabLength: 4

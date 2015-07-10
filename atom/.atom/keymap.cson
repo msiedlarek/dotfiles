@@ -7,6 +7,7 @@
   'ctrl-p': 'fuzzy-finder:toggle-file-finder'
   'ctrl-e': 'command-palette:toggle',
   'ctrl-t': 'tree-view:toggle-focus'
+  'ctrl-o': 'project-manager:toggle'
 
   'ctrl-l': 'window:focus-pane-on-right'
   'ctrl-h': 'msiedlarek:focus-pane-on-left'
@@ -61,3 +62,7 @@
   'ctrl-l': 'pane:split-right'
   'ctrl-j': 'core:move-down'
   'ctrl-k': 'core:move-up'
+
+'.list-tree':
+  'j': 'core:move-down'
+  'k': 'core:move-up'
