@@ -10,9 +10,9 @@ main() {
     if [[ -x $DEFAULTS ]]; then
         defaults write com.github.atom ApplePressAndHoldEnabled -bool false
     fi
-    # if [[ -x $APM ]]; then
-    #     $APM install -c -q --packages-file "${ROOT}/packages.txt"
-    # fi
+    if [[ -x $APM ]]; then
+        $APM install -c -q --packages-file "${ROOT}/packages.txt"
+    fi
 }
 
 main $@

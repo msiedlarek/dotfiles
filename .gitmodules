@@ -52,6 +52,12 @@
 [submodule "dash.vim"]
     path = vim/.vim/bundle/dash.vim
     url = https://github.com/rizzatti/dash.vim.git
-[submodule "vim/.vim/bundle/vim-airline"]
+[submodule "vim-airline"]
     path = vim/.vim/bundle/vim-airline
     url = https://github.com/bling/vim-airline
+[submodule "salt-vim"]
+    path = vim/.vim/bundle/salt-vim
+    url = https://github.com/saltstack/salt-vim.git
+[submodule "tcomment_vim"]
+    path = vim/.vim/bundle/tcomment_vim
+    url = https://github.com/tomtom/tcomment_vim.git
