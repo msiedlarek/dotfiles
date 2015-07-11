@@ -11,6 +11,7 @@ readonly COMMON_PACKAGES=(
     shell
     tmux
     vim
+    ipython
     atom
 )
 
