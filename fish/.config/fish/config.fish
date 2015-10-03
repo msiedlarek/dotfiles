@@ -1,4 +1,4 @@
-if status --is-login
+# if status --is-login
     # Set locale.
     set -x LC_ALL en_US.UTF-8
     set -x LANG en_US.UTF-8
@@ -24,7 +24,9 @@ if status --is-login
     end
 
     # Prefer Java 8
-    if [ -x '/usr/libexec/java_home' ]
-        set -x JAVA_HOME (/usr/libexec/java_home -v 1.8)
+    if test -x '/usr/libexec/java_home'
+        set -x JAVA_HOME (/usr/libexec/java_home -v 1.8 ^/dev/null)
     end
-end
+
+    set -x NVM_DIR "$HOME/.nvm"
+# end
