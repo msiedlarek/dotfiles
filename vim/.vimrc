@@ -64,6 +64,7 @@ au BufNewFile,BufRead wscript set filetype=python
 au BufNewFile,BufRead Vagrantfile set filetype=ruby
 au BufNewFile,BufRead *.gradle set filetype=groovy
 au BufNewFile,BufRead ejabberd.cfg set filetype=erlang
+au BufNewFile,BufRead *.adoc set filetype=asciidoc
 
 function! SetTextWidth(width)
     execute "set textwidth=".a:width

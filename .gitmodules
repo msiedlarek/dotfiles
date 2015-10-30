@@ -61,3 +61,6 @@
 [submodule "tcomment_vim"]
     path = vim/.vim/bundle/tcomment_vim
     url = https://github.com/tomtom/tcomment_vim.git
+[submodule "vim-asciidoc"]
+    path = vim/.vim/bundle/vim-asciidoc
+    url = https://github.com/asciidoc/vim-asciidoc.git
