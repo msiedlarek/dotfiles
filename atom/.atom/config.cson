@@ -163,6 +163,8 @@
   "bracket-matcher":
     autocompleteBrackets: false
     autocompleteSmartQuotes: false
+  "markdown-preview":
+    useGitHubStyle: true
 ".protobuf.source":
   editor:
     tabLength: 4
