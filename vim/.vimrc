@@ -154,6 +154,9 @@ autocmd FileType ada,rst :call SetIndentation(3)
 " In Insert mode: Use the appropriate number of spaces to insert a <Tab>.
 set expandtab
 
+" Use normal \t tabs for some file types.
+autocmd FileType make,sql,go setlocal noexpandtab shiftwidth=4 softtabstop=0 tabstop=8
+
 " Show the current mode
 set showmode
 
@@ -176,9 +179,6 @@ nnoremap <leader>q :q<CR>
 " Reselect visual after indent/outdent
 vnoremap < <gv
 vnoremap > >gv
-
-" Use normal \t tabs for some file types.
-autocmd FileType make,sql,go setlocal noexpandtab
 
 " Toggle comment with leader-k.
 noremap <silent> <leader>k :TComment<CR>

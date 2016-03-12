@@ -28,5 +28,5 @@
         set -x JAVA_HOME (/usr/libexec/java_home -v 1.8 ^/dev/null)
     end
 
-    set -x NVM_DIR "$HOME/.nvm"
+    set -x GOPATH "$HOME/Projects/go"
 # end
