@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 readonly COMMON_PACKAGES=(
     bash
@@ -38,11 +38,13 @@ main() {
 
     for package in ${packages[*]}; do
         local install_script="${DOTFILES}/${package}/install.sh"
-        echo $install_script
         if [[ -x $install_script ]]; then
+            echo $install_script
             /bin/sh $install_script
         fi
     done
+
+    echo "Done."
 }
 
 main $@

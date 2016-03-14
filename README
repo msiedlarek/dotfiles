@@ -1,2 +1,2 @@
-git submodule update --init --recursive
+brew install stow
 ./install.sh
