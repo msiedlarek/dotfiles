@@ -10,7 +10,6 @@ readonly COMMON_PACKAGES=(
     screen
     shell
     tmux
-    vim
     neovim
     ipython
     atom
