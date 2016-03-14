@@ -12,7 +12,6 @@ readonly COMMON_PACKAGES=(
     tmux
     neovim
     ipython
-    atom
 )
 
 readonly LINUX_PACKAGES=(
