@@ -7,13 +7,14 @@ call plug#begin(s:nvim_home . '/plugged')
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
     Plug 'ctrlpvim/ctrlp.vim', {'commit': 'a86688c'}
     Plug 'dag/vim-fish', {'commit': '825853f'}
-    Plug 'fatih/vim-go', {'tag': 'v1.4'}
+    Plug 'fatih/vim-go', {'tag': 'v1.5'}
     Plug 'nathanaelkane/vim-indent-guides', {'commit': '49bde6f'}
     Plug 'scrooloose/syntastic', {'tag': '3.7.0'}
     Plug 'tomtom/tcomment_vim', {'tag': '3.08'}
     Plug 'tpope/vim-fugitive', {'tag': 'v2.2'}
     Plug 'vim-airline/vim-airline', {'tag': 'v0.8'}
     Plug 'vim-airline/vim-airline-themes', {'commit': '13bad30'}
+    Plug 'vim-scripts/a.vim', {'tag': '2.18'}
 call plug#end()
 
 filetype plugin on
@@ -136,9 +137,14 @@ let g:airline_theme='powerlineish'
 " Make ctrlp.vim ignore files listed in .gitignore.
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
 
+" setup a.vim.
+nnoremap <silent> <leader>a :AV<CR>
+
 " Setup vim-go.
 let g:go_fmt_command = "goimports"
 let g:go_fmt_fail_silently = 1
+let g:go_alternate_mode = "vsplit"
+autocmd FileType go :nnoremap <leader>a :GoAlternate!<CR>
 
 function! ClearWhiteSpace()
     let save_cursor = getpos('.')
