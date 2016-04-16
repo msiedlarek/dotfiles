@@ -20,7 +20,7 @@
     set -x MANPAGER 'less -X'
 
     # Enable colored grep output.
-    set -x GREP_OPTIONS '--color=auto'
+    alias grep 'grep --color=auto'
 
     # Add /usr/local/bin to PATH.
     set -x PATH '/usr/local/bin' $PATH

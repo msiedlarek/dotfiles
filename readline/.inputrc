@@ -1,11 +1,6 @@
 # Make Tab autocomplete regardless of filename case
 set completion-ignore-case on
 
-# Use the text that has already been typed as the prefix for searching through
-# commands (i.e. more intelligent Up/Down behavior)
-"\e[B": history-search-forward
-"\e[A": history-search-backward
-
 # Don’t prompt unless there are over 500 possible completions
 set completion-query-items 500
 
@@ -29,3 +24,11 @@ set skip-completed-text on
 set input-meta on
 set output-meta on
 set convert-meta off
+
+# Use the text that has already been typed as the prefix for searching through
+# commands (i.e. more intelligent Up/Down behavior)
+"\e[B": history-search-forward
+"\e[A": history-search-backward
+
+# Disable inserting backspace on Ctrl+H
+"\C-h": "^[[104;5u"

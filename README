@@ -1,2 +1,11 @@
-brew install stow
+Arch Linux
+----------
+
+sudo pacman -S stow neovim
+./install.sh
+
+Mac OS X
+--------
+
+brew install stow neovim
 ./install.sh

@@ -1,21 +1,13 @@
-! Copy/Paste:
-!   Mouse-Select         : Copy to PRIMARY
-!   Shift + Mouse-Select : Copy to CLIPBOARD
-!   Middle-Click         : Paste from PRIMARY
-!   Shift + Middle-Click : Paste from CLIPBOARD
-!   Ctrl+Shift+V         : Paste from CLIPBOARD
-!   Ctrl+Alt+Shift+V     : Paste from PRIMARY
-*VT100.Translations: #override \
-    ~Meta Shift Ctrl <Key>V:    insert-selection(CLIPBOARD) \n\
-     Meta Shift Ctrl <Key>V:    insert-selection(PRIMARY) \n\
-    ~Shift <Btn1Up>:            select-end(PRIMARY, CUT_BUFFER0) \n\
-     Shift <Btn1Up>:            select-end(CLIPBOARD, CUT_BUFFER1) \n\
-    ~Shift ~Ctrl ~Meta <Btn2Up>:insert-selection(PRIMARY, CUT_BUFFER0) \n\
-     Shift ~Ctrl ~Meta <Btn2Up>:insert-selection(CLIPBOARD, CUT_BUFFER1)
+Xft.dpi: 160
+Xft.autohint: 0
+Xft.lcdfilter: lcddefault
+Xft.hintstyle: hintfull
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgb
 
-! Font - unicode Terminus without bold
-*xterm*font: -*-terminus-medium-*-normal--12-*-*-*-*-*-iso10646-1
-*xterm*boldMode: false
+xterm*termName: xterm-256color
+xterm*faceName: Source Code Pro for Powerline:size=10:antialias=true
 
 ! Colors
 *background: #262729
@@ -44,3 +36,18 @@
 !white
 *color7: #767779
 *color15: #b6b8b9
+
+! Copy/Paste:
+!   Mouse-Select         : Copy to PRIMARY
+!   Shift + Mouse-Select : Copy to CLIPBOARD
+!   Middle-Click         : Paste from PRIMARY
+!   Shift + Middle-Click : Paste from CLIPBOARD
+!   Ctrl+Shift+V         : Paste from CLIPBOARD
+!   Ctrl+Alt+Shift+V     : Paste from PRIMARY
+*VT100.Translations: #override \
+    ~Meta Shift Ctrl <Key>V:    insert-selection(CLIPBOARD) \n\
+     Meta Shift Ctrl <Key>V:    insert-selection(PRIMARY) \n\
+    ~Shift <Btn1Up>:            select-end(PRIMARY, CUT_BUFFER0) \n\
+     Shift <Btn1Up>:            select-end(CLIPBOARD, CUT_BUFFER1) \n\
+    ~Shift ~Ctrl ~Meta <Btn2Up>:insert-selection(PRIMARY, CUT_BUFFER0) \n\
+     Shift ~Ctrl ~Meta <Btn2Up>:insert-selection(CLIPBOARD, CUT_BUFFER1)
