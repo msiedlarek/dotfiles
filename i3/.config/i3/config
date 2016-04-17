@@ -189,5 +189,6 @@ bindsym XF86AudioPrev exec playerctl previous
 bindsym XF86LaunchA exec maim -s --format png /dev/stdout | xclip -t image/png -sel clip
 bindsym XF86LaunchB exec maim --format png /dev/stdout | xclip -t image/png -sel clip
 
-# Lock key
-bindsym XF86PowerOff exec i3lock -d -c$color-background
+# Screen locking
+exec xss-lock -- i3lock -d -c$color-background &
+bindsym XF86PowerOff exec xdg-screensaver activate
