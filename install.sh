@@ -13,6 +13,7 @@ readonly COMMON_PACKAGES=(
     neovim
     ipython
     ranger
+    gtk
 )
 
 readonly LINUX_PACKAGES=(
