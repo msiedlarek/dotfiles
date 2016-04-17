@@ -1,7 +1,7 @@
 Arch Linux
 ----------
 
-sudo pacaur -S stow neovim xss-lock playerctl maim slop xclip xorg-xbacklight noto-fonts powerline-fonts-git ttf-font-awesome
+sudo pacaur -S stow neovim xss-lock playerctl maim slop xclip xorg-xbacklight kbdlight noto-fonts powerline-fonts-git ttf-font-awesome
 ./install.sh
 
 Mac OS X
