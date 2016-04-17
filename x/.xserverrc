@@ -1,0 +1,4 @@
+#!/bin/sh
+KEY_REPEAT_DELAY=200
+KEY_REPEAT_INTERVAL=40
+exec /usr/bin/X -nolisten tcp -ardelay $KEY_REPEAT_DELAY -arinterval $KEY_REPEAT_INTERVAL "$@"

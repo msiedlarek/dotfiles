@@ -1,53 +1,82 @@
-Xft.dpi: 160
-Xft.autohint: 0
-Xft.lcdfilter: lcddefault
-Xft.hintstyle: hintfull
-Xft.hinting: 1
-Xft.antialias: 1
-Xft.rgba: rgb
+! Retina display settings.
+xft.dpi: 160
+xft.autohint: 0
+xft.lcdfilter: lcddefault
+xft.hintstyle: hintfull
+xft.hinting: 1
+xft.antialias: 1
+xft.rgba: rgb
 
+! Cursor size.
+xcursor.size: 42
+
+! XTerm settings.
+xterm*locale: true
 xterm*termName: xterm-256color
-xterm*faceName: Source Code Pro for Powerline:size=10:antialias=true
+xterm*faceName: \
+    Source Code Pro for Powerline:size=10:antialias=true, \
+    Source Code Pro:size=10:antialias=true, \
+    FontAwesome:size=10:antialias=true
+xterm*allowBoldFonts: false
+xterm*scaleHeight: 1.03
+xterm*bellIsUrgent: true
 
-! Colors
-*background: #262729
-*foreground: #ffffff
-!black
-*color0: #262729
-*color8: #555544
-!red
-*color1: #ce5c00
-*color9: #f57900
-!green
-*color2: #668800
-*color10: #88aa22
-!brown/yellow
-*color3: #B88B10
-*color11: #FFC135
-!blue
-*color4: #5485a4
-*color12: #85A8C0
-!magenta
-*color5: #85608b
-*color13: #ad7fa8
-!cyan
-*color6: #807855
-*color14: #99916A
-!white
-*color7: #767779
-*color15: #b6b8b9
+! Copy/Paste in VT100 emulators:
+!   Ctrl+Shift+V : Paste from clipboard
+!   Ctrl+Shift+C : Copy to clipboard
+*vt100.translations: #override \
+    Shift Ctrl <Key>V:    insert-selection(CLIPBOARD) \n\
+    Shift Ctrl <Key>C:    copy-selection(CLIPBOARD)
 
-! Copy/Paste:
-!   Mouse-Select         : Copy to PRIMARY
-!   Shift + Mouse-Select : Copy to CLIPBOARD
-!   Middle-Click         : Paste from PRIMARY
-!   Shift + Middle-Click : Paste from CLIPBOARD
-!   Ctrl+Shift+V         : Paste from CLIPBOARD
-!   Ctrl+Alt+Shift+V     : Paste from PRIMARY
-*VT100.Translations: #override \
-    ~Meta Shift Ctrl <Key>V:    insert-selection(CLIPBOARD) \n\
-     Meta Shift Ctrl <Key>V:    insert-selection(PRIMARY) \n\
-    ~Shift <Btn1Up>:            select-end(PRIMARY, CUT_BUFFER0) \n\
-     Shift <Btn1Up>:            select-end(CLIPBOARD, CUT_BUFFER1) \n\
-    ~Shift ~Ctrl ~Meta <Btn2Up>:insert-selection(PRIMARY, CUT_BUFFER0) \n\
-     Shift ~Ctrl ~Meta <Btn2Up>:insert-selection(CLIPBOARD, CUT_BUFFER1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Base16 Tomorrow
+! Scheme: Chris Kempson (http://chriskempson.com)
+
+#define base00 #1d1f21
+#define base01 #282a2e
+#define base02 #373b41
+#define base03 #969896
+#define base04 #b4b7b4
+#define base05 #c5c8c6
+#define base06 #e0e0e0
+#define base07 #ffffff
+#define base08 #cc6666
+#define base09 #de935f
+#define base0A #f0c674
+#define base0B #b5bd68
+#define base0C #8abeb7
+#define base0D #81a2be
+#define base0E #b294bb
+#define base0F #a3685a
+
+*.foreground:   base05
+*.background:   base00
+*.cursorColor:  base05
+
+*.color0:       base00
+*.color1:       base08
+*.color2:       base0B
+*.color3:       base0A
+*.color4:       base0D
+*.color5:       base0E
+*.color6:       base0C
+*.color7:       base05
+
+*.color8:       base03
+*.color9:       base08
+*.color10:      base0B
+*.color11:      base0A
+*.color12:      base0D
+*.color13:      base0E
+*.color14:      base0C
+*.color15:      base07
+
+! Note: colors beyond 15 might not be loaded (e.g., xterm, urxvt),
+! use 'shell' template to set these if necessary
+*.color16:      base09
+*.color17:      base0F
+*.color18:      base01
+*.color19:      base02
+*.color20:      base04
+*.color21:      base06
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -12,6 +12,7 @@ readonly COMMON_PACKAGES=(
     tmux
     neovim
     ipython
+    ranger
 )
 
 readonly LINUX_PACKAGES=(

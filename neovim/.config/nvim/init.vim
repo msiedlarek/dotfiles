@@ -15,6 +15,7 @@ call plug#begin(s:nvim_home . '/plugged')
     Plug 'vim-airline/vim-airline', {'tag': 'v0.8'}
     Plug 'vim-airline/vim-airline-themes', {'commit': '13bad30'}
     Plug 'vim-scripts/a.vim', {'tag': '2.18'}
+    Plug 'PotatoesMaster/i3-vim-syntax', {'commit': 'a74c9bc'}
 call plug#end()
 
 filetype plugin on
@@ -25,6 +26,7 @@ if has('syntax')
 endif
 
 if $TERM != 'screen'
+    set background=dark
     colorscheme smyck
     hi VertSplit ctermfg=240 ctermbg=240
     hi Search ctermbg=11 ctermfg=0
@@ -77,9 +79,9 @@ noremap <leader>p :set invpaste<CR>
 
 " Jump to the last cursor position after opening a file.
 autocmd BufReadPost *
-	\ if line("'\"") > 0 && line("'\"") <= line('$') |
-	\   exe 'normal g`"' |
-	\ endif
+    \ if line("'\"") > 0 && line("'\"") <= line('$') |
+    \   exe 'normal g`"' |
+    \ endif
 
 " Highlight trailing whitespaces.
 match ErrorMsg /\s\+$/
@@ -102,12 +104,12 @@ autocmd FileType make,go :call SetIndentation(0)
 
 function! SetTextWidth(width)
     if a:width > 0
-	    execute 'set textwidth=' . a:width
-	    execute 'set colorcolumn=' . (a:width + 1)
-	else
-		set textwidth=0
-		set colorcolumn=0
-	end
+        execute 'set textwidth=' . a:width
+        execute 'set colorcolumn=' . (a:width + 1)
+    else
+        set textwidth=0
+        set colorcolumn=0
+    end
 endfunction
 call SetTextWidth(79)
 autocmd FileType gitcommit :call SetTextWidth(72)
@@ -132,7 +134,7 @@ nnoremap <silent> <leader>t :vsplit term://fish<CR>i
 
 " Set Airline looks.
 let g:airline_powerline_fonts = 1
-let g:airline_theme='powerlineish'
+let g:airline_theme='term'
 
 " Make ctrlp.vim ignore files listed in .gitignore.
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
