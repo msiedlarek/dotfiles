@@ -1,4 +1,5 @@
 set $color-background #131517
+set $color-background-stripped 131517
 set $color-base00 #1d1f21
 set $color-base01 #282a2e
 set $color-base02 #373b41
@@ -17,6 +18,9 @@ set $color-base0E #b294bb
 set $color-base0F #a3685a
 
 set $audio-sink-name "alsa_output.pci-0000_00_1b.0.analog-stereo"
+
+set $wallpaper-file "~/pictures/wallpaper"
+set $screensaver-file "~/pictures/screensaver"
 
 set $mod Mod4
 
@@ -194,5 +198,9 @@ bindsym XF86LaunchA exec maim -s --format png /dev/stdout | xclip -t image/png -
 bindsym XF86LaunchB exec maim --format png /dev/stdout | xclip -t image/png -sel clip
 
 # Screen locking
-exec xss-lock -- i3lock -d -c$color-background &
 bindsym XF86PowerOff exec xdg-screensaver activate
+
+# Setup screensaver. Execute in shell to allow ~ expansion.
+exec sh -c "exec xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --tiling --color=$color-background-stripped" &
+# Setup wallpaper.
+exec sh -c "test -f $wallpaper-file && feh --bg-scale $wallpaper-file"
