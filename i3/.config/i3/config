@@ -201,4 +201,4 @@ bindsym XF86PowerOff exec --no-startup-id xdg-screensaver activate
 # Setup screensaver. Execute in shell to allow ~ expansion.
 exec --no-startup-id xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --color=$color-background-stripped &
 # Setup wallpaper.
-exec --no-startup-id test -f $wallpaper-file && feh --bg-fill $wallpaper-file
+exec --no-startup-id sh -c "test -f $wallpaper-file && feh --bg-fill $wallpaper-file"
