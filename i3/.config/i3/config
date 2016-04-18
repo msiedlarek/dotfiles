@@ -180,27 +180,27 @@ bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume $audio-s
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute $audio-sink-name toggle # mute sound
 
 # Screen brightness controls
-bindsym XF86MonBrightnessUp exec xbacklight -inc 5 -time 1 # increase screen brightness
-bindsym XF86MonBrightnessDown exec xbacklight -dec 5 -time 1 # decrease screen brightness
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 5 -time 1 # increase screen brightness
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5 -time 1 # decrease screen brightness
 
 # Keyboard brightness controls
-bindsym XF86KbdBrightnessUp exec kbdlight up 5%
-bindsym XF86KbdBrightnessDown exec kbdlight down 5%
+bindsym XF86KbdBrightnessUp exec --no-startup-id kbdlight up 5%
+bindsym XF86KbdBrightnessDown exec --no-startup-id kbdlight down 5%
 
 # Media player controls
-bindsym XF86AudioPlay exec playerctl play
-bindsym XF86AudioPause exec playerctl pause
-bindsym XF86AudioNext exec playerctl next
-bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl play
+bindsym XF86AudioPause exec --no-startup-id playerctl pause
+bindsym XF86AudioNext exec --no-startup-id playerctl next
+bindsym XF86AudioPrev exec --no-startup-id playerctl previous
 
 # Screenshot keys
-bindsym XF86LaunchA exec maim -s --format png /dev/stdout | xclip -t image/png -sel clip
-bindsym XF86LaunchB exec maim --format png /dev/stdout | xclip -t image/png -sel clip
+bindsym XF86LaunchA exec --no-startup-id maim -s --format png /dev/stdout | xclip -t image/png -sel clip
+bindsym XF86LaunchB exec --no-startup-id maim --format png /dev/stdout | xclip -t image/png -sel clip
 
 # Screen locking
-bindsym XF86PowerOff exec xdg-screensaver activate
+bindsym XF86PowerOff exec --no-startup-id xdg-screensaver activate
 
 # Setup screensaver. Execute in shell to allow ~ expansion.
-exec sh -c "exec xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --tiling --color=$color-background-stripped" &
+exec --no-startup-id sh -c "exec xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --color=$color-background-stripped" &
 # Setup wallpaper.
-exec sh -c "test -f $wallpaper-file && feh --bg-scale $wallpaper-file"
+exec --no-startup-id sh -c "test -f $wallpaper-file && feh --bg-fill $wallpaper-file"

@@ -1,2 +1,3 @@
-.config/ranger/*
-!.config/ranger/rc.conf
+.config/ranger/bookmarks
+.config/ranger/history
+.config/ranger/tagged
