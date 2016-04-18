@@ -17,8 +17,6 @@ set $color-base0D #81a2be
 set $color-base0E #b294bb
 set $color-base0F #a3685a
 
-set $audio-sink-name "alsa_output.pci-0000_00_1b.0.analog-stereo"
-
 set $wallpaper-file "~/pictures/wallpaper"
 set $screensaver-file "~/pictures/screensaver"
 
@@ -175,13 +173,13 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+XF86PowerOff exit
 
 # Pulse Audio controls
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume $audio-sink-name +5% #increase sound volume
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume $audio-sink-name -5% #decrease sound volume
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute $audio-sink-name toggle # mute sound
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ 0 && pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ 0 && pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
 
 # Screen brightness controls
-bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 5 -time 1 # increase screen brightness
-bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5 -time 1 # decrease screen brightness
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 5 -time 1
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5 -time 1
 
 # Keyboard brightness controls
 bindsym XF86KbdBrightnessUp exec --no-startup-id kbdlight up 5%
@@ -201,6 +199,6 @@ bindsym XF86LaunchB exec --no-startup-id maim --format png /dev/stdout | xclip -
 bindsym XF86PowerOff exec --no-startup-id xdg-screensaver activate
 
 # Setup screensaver. Execute in shell to allow ~ expansion.
-exec --no-startup-id sh -c "exec xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --color=$color-background-stripped" &
+exec --no-startup-id xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --color=$color-background-stripped &
 # Setup wallpaper.
-exec --no-startup-id sh -c "test -f $wallpaper-file && feh --bg-fill $wallpaper-file"
+exec --no-startup-id test -f $wallpaper-file && feh --bg-fill $wallpaper-file
