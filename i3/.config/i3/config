@@ -1,3 +1,6 @@
+# Lock screen automatically, but not directly after boot.
+exec --no-startup-id test `cut -d. -f1 /proc/uptime` -lt 60 || xdg-screensaver activate
+
 set $color-background #131517
 set $color-background-stripped 131517
 set $color-base00 #1d1f21
@@ -205,5 +208,3 @@ bindsym XF86PowerOff exec --no-startup-id xset dpms force off
 exec --no-startup-id sh -c "exec xss-lock -- i3lock --show-failed-attempts -i $screensaver-file --color=$color-background-stripped" &
 # Setup wallpaper.
 exec --no-startup-id sh -c "test -f $wallpaper-file && exec feh --bg-fill $wallpaper-file"
-
-exec --no-startup-id test `cut -d. -f1 /proc/uptime` -lt 60 || xdg-screensaver activate
