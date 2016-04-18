@@ -11,7 +11,7 @@ export PAGER="less -X"
 export MANPAGER="less -X"
 
 # Always enable colored grep output
-export GREP_OPTIONS="--color=auto"
+alias grep="command grep --color=auto"
 
 # Prefer Java 8
 if [[ -x "/usr/libexec/java_home" ]]; then

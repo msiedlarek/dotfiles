@@ -199,9 +199,11 @@ bindsym XF86LaunchA exec --no-startup-id maim -s --format png /dev/stdout | xcli
 bindsym XF86LaunchB exec --no-startup-id maim --format png /dev/stdout | xclip -t image/png -sel clip
 
 # Screen locking
-bindsym XF86PowerOff exec --no-startup-id xdg-screensaver activate
+bindsym XF86PowerOff exec --no-startup-id xset dpms force off
 
 # Setup screensaver. Execute in shell to allow ~ expansion.
-exec --no-startup-id xss-lock -- i3lock --dpms --show-failed-attempts -i $screensaver-file --color=$color-background-stripped &
+exec --no-startup-id sh -c "exec xss-lock -- i3lock --show-failed-attempts -i $screensaver-file --color=$color-background-stripped" &
 # Setup wallpaper.
-exec --no-startup-id sh -c "test -f $wallpaper-file && feh --bg-fill $wallpaper-file"
+exec --no-startup-id sh -c "test -f $wallpaper-file && exec feh --bg-fill $wallpaper-file"
+
+exec --no-startup-id test `cut -d. -f1 /proc/uptime` -lt 60 || xdg-screensaver activate
