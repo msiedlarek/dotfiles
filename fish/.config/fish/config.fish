@@ -37,6 +37,6 @@
     end
 
     # Setup Go environment.
-    set -x GOPATH "$HOME/Projects/go"
+    set -x GOPATH "$HOME/projects/go"
     set -x PATH "$GOPATH/bin" $PATH
 # end
