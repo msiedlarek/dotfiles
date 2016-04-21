@@ -26,9 +26,9 @@ set $wallpaper-file "~/pictures/wallpaper"
 set $screensaver-file "~/pictures/screensaver"
 
 set $font-family Noto Sans
-set $font-size 8
+set $font-size 10
 
-set $mod Mod4
+set $mod Mod1
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -194,13 +194,14 @@ bindsym XF86KbdBrightnessUp exec --no-startup-id kbdlight up 5%
 bindsym XF86KbdBrightnessDown exec --no-startup-id kbdlight down 5%
 
 # Media player controls
+bindsym XF86AudioStop exec --no-startup-id playerctl stop
 bindsym XF86AudioPlay exec --no-startup-id playerctl play
 bindsym XF86AudioPause exec --no-startup-id playerctl pause
 bindsym XF86AudioNext exec --no-startup-id playerctl next
 bindsym XF86AudioPrev exec --no-startup-id playerctl previous
 
 # Screenshot keys
-bindsym XF86LaunchA exec --no-startup-id maim -s --format png /dev/stdout | xclip -t image/png -sel clip
+bindsym Print exec --no-startup-id maim -s --format png /dev/stdout | xclip -t image/png -sel clip
 bindsym XF86LaunchB exec --no-startup-id maim --format png /dev/stdout | xclip -t image/png -sel clip
 
 # Screen locking

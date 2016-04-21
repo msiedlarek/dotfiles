@@ -6,9 +6,6 @@ Xft.hinting: 1
 Xft.antialias: 1
 Xft.rgba: rgb
 
-! Cursor size.
-Xcursor.size: 48
-
 ! URxvt
 URxvt.font: \
     xft:Source Code Pro for Powerline:size=10:antialias=true, \
