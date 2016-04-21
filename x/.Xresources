@@ -9,18 +9,16 @@ Xft.rgba: rgb
 ! Cursor size.
 Xcursor.size: 48
 
-! URxvt
-URxvt.font: \
-    xft:Source Code Pro for Powerline:size=10:antialias=true, \
-    xft:Source Code Pro:size=10:antialias=true, \
-    xft:Font Awesome:size=10:antialias=true
-URxvt.boldFont:
-URxvt.scrollBar: false
-URxvt.letterSpace: -2
-URxvt.lineSpace: 1
-URxvt.scrollTtyOutput: false
-URxvt.scrollWithBuffer: true
-URxvt.scrollTtyKeypress: true
+! XTerm settings.
+xterm*locale: true
+xterm*termName: xterm-256color
+xterm*faceName: \
+    Source Code Pro for Powerline:size=10:antialias=true, \
+    Source Code Pro:size=10:antialias=true, \
+    FontAwesome:size=10:antialias=true
+xterm*allowBoldFonts: false
+xterm*scaleHeight: 1.01
+xterm*bellIsUrgent: true
 
 ! Copy/Paste in VT100 emulators:
 !   Ctrl+Shift+V : Paste from clipboard
