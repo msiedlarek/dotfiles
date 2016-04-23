@@ -167,7 +167,7 @@ bindsym $mod+Return exec --no-startup-id i3-sensible-terminal
 bindsym $mod+Shift+q kill
 
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop --dmenu="dmenu -i -fn '$font-family:size=$font-size'"
-bindsym $mod+d exec --no-startup-id i3-dmenu-desktop --dmenu="rofi -dmenu -fuzzy -p 'Run: '"
+bindsym $mod+d exec rofi -show combi
 
 # Reload the configuration file
 bindsym $mod+Shift+c reload

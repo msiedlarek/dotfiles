@@ -82,6 +82,16 @@ xterm*bellIsUrgent: true
 *.color21:      base06
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! Rofi configuration.
+rofi.modi: combi,window,drun,ssh
+rofi.combi-modi: window,drun,ssh
+rofi.kb-custom-1: SuperL-c
+rofi.kb-custom-2: SuperL-w
+rofi.kb-custom-3: SuperL-r
+rofi.kb-custom-4: SuperL-s
+rofi.kb-row-up: SuperL-k
+rofi.kb-row-down: SuperL-j
+
 ! Rofi theme.
 rofi.font: Source Code Pro for Powerline 18
 rofi.lines: 10
