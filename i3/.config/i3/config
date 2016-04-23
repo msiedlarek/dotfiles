@@ -26,7 +26,7 @@ set $wallpaper-file "~/pictures/wallpaper"
 set $screensaver-file "~/pictures/screensaver"
 
 set $font-family Noto Sans
-set $font-size 8
+set $font-size 7
 
 set $mod Mod4
 

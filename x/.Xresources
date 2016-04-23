@@ -1,4 +1,6 @@
-! Retina display settings.
+#define $FONT_SIZE 8
+
+! Font rendering.
 Xft.autohint: 0
 Xft.lcdfilter: lcddefault
 Xft.hintstyle: hintfull
@@ -13,14 +15,14 @@ Xcursor.size: 48
 xterm*locale: true
 xterm*termName: xterm-256color
 xterm*faceName: \
-    Source Code Pro for Powerline:size=10:antialias=true, \
-    Source Code Pro:size=10:antialias=true, \
-    FontAwesome:size=10:antialias=true
+    Source Code Pro for Powerline:size=$FONT_SIZE:antialias=true, \
+    Source Code Pro:size=$FONT_SIZE:antialias=true, \
+    FontAwesome:size=$FONT_SIZE:antialias=true
 xterm*allowBoldFonts: false
 xterm*scaleHeight: 1.01
 xterm*bellIsUrgent: true
 
-! Copy/Paste in VT100 emulators:
+! Copy/Paste in terminal emulator:
 !   Ctrl+Shift+V : Paste from clipboard
 !   Ctrl+Shift+C : Copy to clipboard
 *VT100.Translations: #override \

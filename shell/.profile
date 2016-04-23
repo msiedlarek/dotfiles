@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Prefer US English and use UTF-8
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
@@ -10,50 +12,11 @@ export VISUAL="$EDITOR"
 export PAGER="less -X"
 export MANPAGER="less -X"
 
-# Always enable colored grep output
-alias grep="command grep --color=auto"
-
-# Prefer Java 8
-if [[ -x "/usr/libexec/java_home" ]]; then
-    JAVA_HOME="`/usr/libexec/java_home -v 1.8`" && export JAVA_HOME
+if [ -x /usr/bin/xdpyinfo ]; then
+    export DPI=$(/usr/bin/xdpyinfo | sed -nr 's/.*([0-9]+)x\1 dots.*/\1/p')
+    if [ $DPI -gt 100 ]; then
+        export QT_AUTO_SCREEN_SCALE_FACTOR=1
+        export GDK_SCALE=2
+        # export GDK_DPI_SCALE=0.5
+    fi
 fi
-
-# Detect which `ls` flavor is in use
-if ls --color > /dev/null 2>&1; then
-    # GNU ls
-    alias ls="command ls --color"
-else
-    # BSD ls
-    alias ls="command ls -GFh"
-fi
-export LSCOLORS=ExFxBxDxCxegedabagacad
-
-if which osascript >/dev/null 2>&1; then
-    alias mute="osascript -e 'set volume output muted true'"
-    alias unmute="osascript -e 'set volume output muted false'"
-    function volume() {
-        if [ $# -ne 1 ]; then
-            echo "Usage: ${FUNCNAME} [1-7]"
-            return 1
-        fi
-        osascript -e "set volume $1"
-    }
-fi
-
-alias ..='cd ..'
-alias hr='printf "=%.0s" {1..'`tput cols`'} && printf "\n"'
-alias alert='tput bel'
-alias mypublicip='dig +short myip.opendns.com @resolver1.opendns.com'
-
-dump4chan() {
-    wget -O - $1 | grep -Eo 'i.4cdn.org/[^"]+' | uniq | xargs wget --no-clobber
-}
-
-clean_ds_store() {
-    find "$@" -name '.DS_Store*' -depth -exec rm -vrf '{}' \;
-}
-
-PATH="/usr/local/bin:$PATH"
-PATH="$PATH:/usr/local/opt/context/tex/texmf-osx-64/bin"
-PATH="$PATH:/usr/local/opt/gnat/bin"
-export PATH

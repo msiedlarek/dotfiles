@@ -100,7 +100,7 @@ endfunction
 call SetIndentation(4)
 autocmd FileType yaml,json,ruby :call SetIndentation(2)
 autocmd FileType ada :call SetIndentation(3)
-autocmd FileType make,go :call SetIndentation(0)
+autocmd FileType make,go,c :call SetIndentation(0)
 
 function! SetTextWidth(width)
     if a:width > 0
