@@ -12,6 +12,8 @@ export VISUAL="$EDITOR"
 export PAGER="less -X"
 export MANPAGER="less -X"
 
+export QT_STYLE_OVERRIDE=GTK+
+
 if [ -x /usr/bin/xdpyinfo ]; then
     export DPI=$(/usr/bin/xdpyinfo | sed -nr 's/.*([0-9]+)x\1 dots.*/\1/p')
     if [ $DPI -gt 100 ]; then
