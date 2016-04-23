@@ -1,7 +1,7 @@
 Arch Linux
 ----------
 
-sudo pacaur -S stow neovim xss-lock-git playerctl maim slop xclip light kbdlight noto-fonts powerline-fonts-git ttf-font-awesome gtk-theme-arc numix-icon-theme-git
+sudo pacaur -S stow neovim xss-lock-git playerctl maim slop xclip light kbdlight noto-fonts powerline-fonts-git ttf-font-awesome gtk-theme-arc numix-icon-theme-git rofi
 ./install.sh
 
 Mac OS X
