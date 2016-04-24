@@ -22,8 +22,8 @@ set $color-base0D #81a2be
 set $color-base0E #b294bb
 set $color-base0F #a3685a
 
-set $wallpaper-file "~/pictures/wallpaper"
-set $screensaver-file "~/pictures/screensaver"
+set $wallpaper-file "~/media/wallpaper"
+set $screensaver-file "~/media/screensaver"
 
 set $font-family Source Code Pro for Powerline
 set $font-size 7
