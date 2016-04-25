@@ -164,7 +164,7 @@ bar {
 bindsym $mod+Return exec --no-startup-id i3-sensible-terminal
 
 # Kill focused window
-bindsym $mod+Shift+q kill
+bindsym $mod+q kill
 
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop --dmenu="dmenu -i -fn '$font-family:size=$font-size'"
 bindsym $mod+d exec rofi -show combi
