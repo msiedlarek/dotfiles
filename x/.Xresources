@@ -1,4 +1,4 @@
-#define $FONT_SIZE 8
+#define $FONT_SIZE 9
 
 ! Font rendering.
 Xft.autohint: 0
@@ -26,8 +26,10 @@ xterm*bellIsUrgent: true
 !   Ctrl+Shift+V : Paste from clipboard
 !   Ctrl+Shift+C : Copy to clipboard
 *VT100.Translations: #override \
+    <Key>BackSpace: string(0x7F) \n\
     Shift Ctrl <Key>V:    insert-selection(CLIPBOARD) \n\
     Shift Ctrl <Key>C:    copy-selection(CLIPBOARD)
+*ttyModes: erase ^?
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! Base16 Tomorrow

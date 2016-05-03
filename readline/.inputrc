@@ -29,6 +29,3 @@ set convert-meta off
 # commands (i.e. more intelligent Up/Down behavior)
 "\e[B": history-search-forward
 "\e[A": history-search-backward
-
-# Disable inserting backspace on Ctrl+H
-"\C-h": "^[[104;5u"

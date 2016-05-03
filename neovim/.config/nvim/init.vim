@@ -3,19 +3,20 @@ let s:nvim_home=expand('~/.config/nvim')
 set shell=/bin/bash
 
 call plug#begin(s:nvim_home . '/plugged')
+    Plug 'PotatoesMaster/i3-vim-syntax', {'commit': 'a74c9bc'}
     Plug 'airblade/vim-gitgutter', {'commit': '28353bd'}
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
     Plug 'ctrlpvim/ctrlp.vim', {'commit': 'a86688c'}
     Plug 'dag/vim-fish', {'commit': '825853f'}
     Plug 'fatih/vim-go', {'tag': 'v1.5'}
     Plug 'nathanaelkane/vim-indent-guides', {'commit': '49bde6f'}
+    Plug 'peterhoeg/vim-qml', {'commit': 'fba69d1'}
     Plug 'scrooloose/syntastic', {'tag': '3.7.0'}
     Plug 'tomtom/tcomment_vim', {'tag': '3.08'}
     Plug 'tpope/vim-fugitive', {'tag': 'v2.2'}
     Plug 'vim-airline/vim-airline', {'tag': 'v0.8'}
     Plug 'vim-airline/vim-airline-themes', {'commit': '13bad30'}
     Plug 'vim-scripts/a.vim', {'tag': '2.18'}
-    Plug 'PotatoesMaster/i3-vim-syntax', {'commit': 'a74c9bc'}
 call plug#end()
 
 filetype plugin on
