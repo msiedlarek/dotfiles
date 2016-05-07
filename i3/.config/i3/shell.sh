@@ -1,7 +1,12 @@
 #!/bin/bash
 # Tries to start shell in the currently focused window's path.
 
-terminal=xterm
+if command -v termite >/dev/null 2>&1; then
+    terminal=termite
+else
+    terminal=i3-sensible-terminal
+fi
+
 path=''
 
 window_id=$(xdpyinfo | sed -n 's/^focus: \+window \+\([x0-9a-fA-F]\+\),.*/\1/p')

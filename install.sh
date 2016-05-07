@@ -13,13 +13,14 @@ readonly COMMON_PACKAGES=(
     neovim
     ipython
     ranger
-    xdg
-    gtk
 )
 
 readonly LINUX_PACKAGES=(
+    gtk
     i3
+    termite
     x
+    xdg
 )
 
 readonly DOTFILES=$(dirname $0)

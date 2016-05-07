@@ -72,6 +72,9 @@ nmap <silent> <leader>/ :nohlsearch<CR>
 vnoremap < <gv
 vnoremap > >gv
 
+" Rebalance splits after window resize.
+autocmd VimResized * wincmd =
+
 " Toggle comment with <leader>k.
 noremap <silent> <leader>k :TComment<CR>
 
