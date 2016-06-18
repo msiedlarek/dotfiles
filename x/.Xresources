@@ -14,10 +14,7 @@ Xcursor.size: 48
 ! XTerm settings.
 xterm*locale: true
 xterm*termName: xterm-256color
-xterm*faceName: \
-    Source Code Pro for Powerline:size=$FONT_SIZE:antialias=true, \
-    Source Code Pro:size=$FONT_SIZE:antialias=true, \
-    FontAwesome:size=$FONT_SIZE:antialias=true
+xterm*faceName: Source Code Pro:style=regular:size=$FONT_SIZE:antialias=true
 xterm*allowBoldFonts: false
 xterm*scaleHeight: 1.01
 xterm*bellIsUrgent: true
@@ -95,7 +92,7 @@ rofi.kb-row-up: SuperL-k
 rofi.kb-row-down: SuperL-j
 
 ! Rofi theme.
-rofi.font: Source Code Pro for Powerline 18
+rofi.font: Source Code Pro 18
 rofi.lines: 10
 rofi.bw: 0
 rofi.padding: 30

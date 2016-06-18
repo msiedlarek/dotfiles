@@ -1,7 +1,5 @@
-# Setup screensaver. Execute in shell to allow ~ expansion.
-exec --no-startup-id sh -c "exec xss-lock -- i3lock --show-failed-attempts -i $screensaver-file --color=$color-background-stripped" &
 # Lock screen automatically, but not directly after boot.
-exec --no-startup-id test `cut -d. -f1 /proc/uptime` -lt 60 || xdg-screensaver activate
+exec --no-startup-id test `cut -d. -f1 /proc/uptime` -lt 60 || light-locker-command -l
 
 set $color-background #131517
 set $color-background-stripped 131517
@@ -25,7 +23,7 @@ set $color-base0F #a3685a
 set $wallpaper-file "~/media/wallpaper"
 set $screensaver-file "~/media/screensaver"
 
-set $font-family Source Code Pro for Powerline
+set $font-family Source Code Pro
 set $font-size 7
 
 set $mod Mod4
@@ -150,6 +148,7 @@ client.urgent            $color-base08      $color-base08      $color-base05  #0
 bar {
     status_command i3status -c ~/.config/i3/i3status.conf
     separator_symbol "/"
+    tray_padding 4
     colors {
         background $color-background
         # Bar colors
@@ -182,12 +181,12 @@ bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-mute @DEFAULT_S
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
 
 # Screen brightness controls
-bindsym XF86MonBrightnessUp exec --no-startup-id light -s gmux_backlight -A 5
-bindsym XF86MonBrightnessDown exec --no-startup-id light -s gmux_backlight -U 5
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 10
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 10
 
 # Keyboard brightness controls
-bindsym XF86KbdBrightnessUp exec --no-startup-id kbdlight up 5%
-bindsym XF86KbdBrightnessDown exec --no-startup-id kbdlight down 5%
+bindsym XF86KbdBrightnessUp exec --no-startup-id sh -c 'cd /sys/class/leds/smc::kbd_backlight && expr $(cat brightness) + $(expr $(cat max_brightness) / 20) | sudo tee brightness'
+bindsym XF86KbdBrightnessDown exec --no-startup-id sh -c 'cd /sys/class/leds/smc::kbd_backlight && expr $(cat brightness) - $(expr $(cat max_brightness) / 20) | sudo tee brightness'
 
 # Media player controls
 bindsym XF86AudioStop exec --no-startup-id playerctl stop
@@ -203,7 +202,9 @@ bindsym XF86LaunchA exec --no-startup-id maim -s --format png /dev/stdout | xcli
 bindsym XF86LaunchB exec --no-startup-id maim --format png /dev/stdout | xclip -t image/png -sel clip
 
 # Screen locking
-bindsym XF86PowerOff exec --no-startup-id xset dpms force off
+bindsym XF86PowerOff exec --no-startup-id light-locker-command -l
 
 # Setup wallpaper.
 exec --no-startup-id sh -c "test -f $wallpaper-file && exec feh --bg-fill $wallpaper-file"
+# Run XDG autostart.
+exec --no-startup-id dex -a -e i3 &

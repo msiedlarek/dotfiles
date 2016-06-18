@@ -1,6 +1,6 @@
 [options]
 allow_bold = false
-font = Source Code Pro for Powerline 9
+font = Source Code Pro 9
 cursor_blink = off
 scrollback_lines = 65536
 

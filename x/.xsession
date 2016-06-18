@@ -1,3 +1,4 @@
 #!/bin/sh
 SCREENSAVER_DELAY=300
 xset s $SCREENSAVER_DELAY
+exec i3
