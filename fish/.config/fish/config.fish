@@ -22,8 +22,9 @@
     # Enable colored grep output.
     alias grep 'grep --color=auto'
 
-    # Add /usr/local/bin to PATH.
+    # Configure PATH.
     set -x PATH '/usr/local/bin' $PATH
+    set -x PATH $PATH "/opt/google-cloud-sdk/bin"
 
     # Run private scripts that cannot be released in public dotfiles
     # repository.

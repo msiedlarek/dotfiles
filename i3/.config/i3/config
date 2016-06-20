@@ -206,5 +206,7 @@ bindsym XF86PowerOff exec --no-startup-id light-locker-command -l
 
 # Setup wallpaper.
 exec --no-startup-id sh -c "test -f $wallpaper-file && exec feh --bg-fill $wallpaper-file"
+# Start Compton for tear-free OpenGL compositing.
+exec --no-startup-id compton --backend glx --glx-no-stencil --paint-on-overlay --vsync opengl-swc &
 # Run XDG autostart.
 exec --no-startup-id dex -a -e i3 &
