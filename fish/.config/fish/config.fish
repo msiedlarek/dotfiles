@@ -22,6 +22,9 @@
     # Enable colored grep output.
     alias grep 'grep --color=auto'
 
+    # Aliases
+    alias off 'sudo systemctl poweroff'
+
     # Configure PATH.
     set -x PATH '/usr/local/bin' $PATH
     set -x PATH $PATH "/opt/google-cloud-sdk/bin"
