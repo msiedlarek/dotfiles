@@ -4,18 +4,19 @@ set shell=/bin/bash
 
 call plug#begin(s:nvim_home . '/plugged')
     Plug 'PotatoesMaster/i3-vim-syntax', {'commit': 'a74c9bc'}
-    Plug 'airblade/vim-gitgutter', {'commit': '28353bd'}
+    Plug 'airblade/vim-gitgutter', {'commit': '5d1a0bf'}
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
-    Plug 'ctrlpvim/ctrlp.vim', {'commit': 'a86688c'}
+    Plug 'ctrlpvim/ctrlp.vim', {'tag': '1.80'}
     Plug 'dag/vim-fish', {'commit': '825853f'}
-    Plug 'fatih/vim-go', {'tag': 'v1.5'}
-    Plug 'nathanaelkane/vim-indent-guides', {'commit': '49bde6f'}
+    Plug 'fatih/vim-go', {'tag': 'v1.11'}
+    Plug 'nathanaelkane/vim-indent-guides', {'commit': '018298e'}
     Plug 'peterhoeg/vim-qml', {'commit': 'fba69d1'}
-    Plug 'scrooloose/syntastic', {'tag': '3.7.0'}
-    Plug 'tomtom/tcomment_vim', {'tag': '3.08'}
-    Plug 'tpope/vim-fugitive', {'tag': 'v2.2'}
-    Plug 'vim-airline/vim-airline', {'tag': 'v0.8'}
-    Plug 'vim-airline/vim-airline-themes', {'commit': '13bad30'}
+    Plug 'posva/vim-vue', {'commit': 'f6694b4'}
+    Plug 'scrooloose/syntastic', {'tag': '3.8.0'}
+    Plug 'tomtom/tcomment_vim', {'commit': 'b26182b'}
+    Plug 'tpope/vim-fugitive', {'commit': 'f44845e'}
+    Plug 'vim-airline/vim-airline', {'commit': 'b66c1ef'}
+    Plug 'vim-airline/vim-airline-themes', {'commit': '6026eb7'}
     Plug 'vim-scripts/a.vim', {'tag': '2.18'}
 call plug#end()
 

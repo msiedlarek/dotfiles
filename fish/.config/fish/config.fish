@@ -27,7 +27,6 @@
 
     # Configure PATH.
     set -x PATH '/usr/local/bin' $PATH
-    set -x PATH $PATH "/opt/google-cloud-sdk/bin"
 
     # Run private scripts that cannot be released in public dotfiles
     # repository.
@@ -41,6 +40,6 @@
     end
 
     # Setup Go environment.
-    set -x GOPATH "$HOME/projects/go"
+    set -x GOPATH "$HOME/Projects/go"
     set -x PATH "$GOPATH/bin" $PATH
 # end
