@@ -1,5 +1,7 @@
 source ~/.config/nvim/init.vim
-map <C-p> :action GotoFile<CR>
-map <leader>a :action GotoRelated<CR>
-map <leader>k :action CommentByLineComment<CR>
-map <leader>t :action ActivateTerminalToolWindow<CR>
+imap <C-n> <C-o>:action HippieCompletion<CR>
+imap <C-p> <C-o>:action GotoFile<CR>
+nmap <C-p> :action GotoFile<CR>
+nmap <leader>a :action GotoRelated<CR>
+nmap <leader>k :action CommentByLineComment<CR>
+nmap <leader>t :action ActivateTerminalToolWindow<CR>

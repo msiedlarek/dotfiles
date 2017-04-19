@@ -132,7 +132,7 @@ tnoremap <C-k> <C-\><C-n><C-w>k
 tnoremap <C-l> <C-\><C-n><C-w>l
 
 " Enter normal mode in terminal with <Esc>.
-:tnoremap <Esc> <C-\><C-n>
+tnoremap <Esc> <C-\><C-n>
 
 " Open terminal in split with <leader>t.
 nnoremap <silent> <leader>t :vsplit term://fish<CR>i
