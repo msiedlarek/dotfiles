@@ -8,6 +8,7 @@ call plug#begin(s:nvim_home . '/plugged')
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
     Plug 'ctrlpvim/ctrlp.vim', {'tag': '1.80'}
     Plug 'dag/vim-fish', {'commit': '825853f'}
+    Plug 'dln/avro-vim', {'commit': '3af1c69'}
     Plug 'fatih/vim-go', {'tag': 'v1.11'}
     Plug 'nathanaelkane/vim-indent-guides', {'commit': '018298e'}
     Plug 'peterhoeg/vim-qml', {'commit': 'fba69d1'}
