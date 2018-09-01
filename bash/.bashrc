@@ -1,5 +1,9 @@
-if [ -e "$HOME/.profile" ]; then
-    source "$HOME/.profile"
+if [ -f /etc/bashrc ]; then
+    source /etc/bashrc
+fi
+
+if [ -f ~/.profile ]; then
+    source ~/.profile
 fi
 
 # Larger bash history (allow 32³ entries; default is 500)
@@ -35,8 +39,3 @@ function parse_git_branch() {
     fi
 }
 PS1="\u@\h:\w\$(parse_git_branch)\$ "
-
-# Autocompletion for Homebrew packages
-if which brew >/dev/null 2>&1 && [ -d "$(brew --prefix)/etc/bash_completion.d" ]; then
-    source "$(brew --prefix)/etc/bash_completion.d/"*
-fi

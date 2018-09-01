@@ -9,18 +9,10 @@ readonly COMMON_PACKAGES=(
     readline
     screen
     shell
-    tmux
     neovim
-    ipython
-    ranger
 )
 
 readonly LINUX_PACKAGES=(
-    gtk
-    i3
-    termite
-    x
-    xdg
 )
 
 readonly DOTFILES=$(dirname $0)

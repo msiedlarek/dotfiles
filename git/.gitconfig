@@ -1,58 +1,10 @@
 [alias]
-    # View the SHA, description, and history graph of the latest 20 commits
-    lo = log --pretty=oneline -n 20 --graph
-    # View the current working tree status using the short format
+    l = log --pretty=oneline -n 20 --graph
     st = status -s
-    # Diff
     df = diff --patch-with-stat
-    dfs = diff --stat
-    # Diff HEAD
     dfh = diff --patch-with-stat HEAD
-    dfhs = diff --stat HEAD
-    # Checkout
     co = checkout
-    # Branch
-    br = branch
-    # Add all
     aa = add --all
-    cp = cherry-pick
-[apply]
-    # Detect whitespace errors when applying a patch
-    whitespace = fix
-[core]
-    # Treat spaces before tabs, lines that are indented with 8 or more spaces,
-    # and all kinds of trailing whitespace as an error
-    whitespace = space-before-tab,indent-with-non-tab,trailing-space
-[color]
-    # Use colors in Git commands that are capable of colored output when
-    # outputting to the terminal
-    ui = auto
-[color "branch"]
-    current = yellow reverse
-    local = yellow
-    remote = green
-[color "diff"]
-    meta = yellow bold
-    frag = magenta bold
-    old = red bold
-    new = green bold
-[color "status"]
-    added = yellow
-    changed = green
-    untracked = cyan
-[merge]
-    tool = vimdiff
-[mergetool]
-    keepBackup = false
-[push]
-    default = simple
-[pull]
-    default = simple
 [user]
     name = Mikołaj Siedlarek
     email = mikolaj@siedlarek.pl
-[filter "lfs"]
-    process = git-lfs filter-process
-    required = true
-    clean = git-lfs clean -- %f
-    smudge = git-lfs smudge -- %f

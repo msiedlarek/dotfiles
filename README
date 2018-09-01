@@ -1,17 +1,10 @@
-Arch Linux
-----------
+Requirements
+------------
 
-sudo pacaur -S stow neovim
-./install.sh
+neovim
+stow
 
-Gentoo
-------
+Installation
+------------
 
-sudo emerge --ask app-admin/stow
-./install.sh
-
-Mac OS X
---------
-
-brew install stow neovim
 ./install.sh

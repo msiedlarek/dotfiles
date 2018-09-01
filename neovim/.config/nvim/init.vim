@@ -3,21 +3,18 @@ let s:nvim_home=expand('~/.config/nvim')
 set shell=/bin/bash
 
 call plug#begin(s:nvim_home . '/plugged')
-    Plug 'PotatoesMaster/i3-vim-syntax', {'commit': 'a74c9bc'}
-    Plug 'airblade/vim-gitgutter', {'commit': '5d1a0bf'}
+    Plug 'airblade/vim-gitgutter', {'commit': '50a7062'}
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
-    Plug 'ctrlpvim/ctrlp.vim', {'tag': '1.80'}
-    Plug 'dag/vim-fish', {'commit': '825853f'}
-    Plug 'dln/avro-vim', {'commit': '3af1c69'}
-    Plug 'fatih/vim-go', {'tag': 'v1.11'}
-    Plug 'nathanaelkane/vim-indent-guides', {'commit': '018298e'}
-    Plug 'peterhoeg/vim-qml', {'commit': 'fba69d1'}
-    Plug 'posva/vim-vue', {'commit': 'f6694b4'}
-    Plug 'scrooloose/syntastic', {'tag': '3.8.0'}
-    Plug 'tomtom/tcomment_vim', {'commit': 'b26182b'}
-    Plug 'tpope/vim-fugitive', {'commit': 'f44845e'}
-    Plug 'vim-airline/vim-airline', {'commit': 'b66c1ef'}
-    Plug 'vim-airline/vim-airline-themes', {'commit': '6026eb7'}
+    Plug 'ctrlpvim/ctrlp.vim', {'tag': '43cc73b'}
+    Plug 'dag/vim-fish', {'commit': '50b95cb'}
+    Plug 'fatih/vim-go', {'tag': 'v1.18'}
+    Plug 'nathanaelkane/vim-indent-guides', {'commit': '54d889a'}
+    Plug 'scrooloose/nerdtree', {'commit': '808f5b2'}
+    Plug 'scrooloose/syntastic', {'tag': '3.9.0'}
+    Plug 'tomtom/tcomment_vim', {'commit': '3.08.1'}
+    Plug 'tpope/vim-fugitive', {'commit': 'v2.4'}
+    Plug 'vim-airline/vim-airline', {'commit': 'c7fb175'}
+    Plug 'vim-airline/vim-airline-themes', {'commit': '6e798f9'}
     Plug 'vim-scripts/a.vim', {'tag': '2.18'}
 call plug#end()
 
@@ -53,8 +50,8 @@ set formatoptions=tcqronl1
 set scrolloff=5
 set sidescrolloff=5
 
-" Show relative line numbers.
-set relativenumber
+" Show line numbers.
+set number
 
 " Ignore case when searching, except when pattern contains uppercase
 " characters.
@@ -144,6 +141,11 @@ let g:airline_theme='term'
 
 " Make ctrlp.vim ignore files listed in .gitignore.
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
+
+map <C-n> :NERDTreeToggle<CR>
+let NERDTreeQuitOnOpen = 1
+let NERDTreeMinimalUI = 1
+let NERDTreeIgnore = ['\.o$', '\.py[cod]$', '__pycache__']
 
 " setup a.vim.
 nnoremap <silent> <leader>a :AV<CR>
