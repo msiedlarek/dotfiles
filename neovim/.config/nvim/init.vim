@@ -9,6 +9,7 @@ call plug#begin(s:nvim_home . '/plugged')
     Plug 'dag/vim-fish', {'commit': '50b95cb'}
     Plug 'fatih/vim-go', {'tag': 'v1.18'}
     Plug 'nathanaelkane/vim-indent-guides', {'commit': '54d889a'}
+    Plug 'rust-lang/rust.vim', {'commit': 'e2b16e2'}
     Plug 'scrooloose/nerdtree', {'commit': '808f5b2'}
     Plug 'scrooloose/syntastic', {'tag': '3.9.0'}
     Plug 'tomtom/tcomment_vim', {'commit': '3.08.1'}
@@ -38,6 +39,8 @@ if $TERM != 'screen'
 endif
 
 set undofile
+
+set updatetime=100
 
 exec 'set backupdir=' . s:nvim_home . '/backup'
 exec 'set undodir=' . s:nvim_home . '/undo'
@@ -155,6 +158,18 @@ let g:go_fmt_command = "goimports"
 let g:go_fmt_fail_silently = 1
 let g:go_alternate_mode = "vsplit"
 autocmd FileType go :nnoremap <leader>a :GoAlternate!<CR>
+
+" Setup rust.vim.
+let g:rustfmt_autosave = 1
+
+" Setup syntastic.
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
 
 function! ClearWhiteSpace()
     let save_cursor = getpos('.')
