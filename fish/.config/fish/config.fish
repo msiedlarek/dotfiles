@@ -11,3 +11,6 @@ end
 
 # Enable colored grep output.
 alias grep 'grep --color=auto'
+
+alias vi nvim
+alias vim nvim
