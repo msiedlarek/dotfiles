@@ -3,22 +3,19 @@ let s:nvim_home=expand('~/.config/nvim')
 set shell=/bin/bash
 
 call plug#begin(s:nvim_home . '/plugged')
-    Plug 'PotatoesMaster/i3-vim-syntax', {'commit': 'a74c9bc'}
-    Plug 'airblade/vim-gitgutter', {'commit': '5d1a0bf'}
+    Plug 'airblade/vim-gitgutter', {'commit': 'da2c785'}
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
-    Plug 'ctrlpvim/ctrlp.vim', {'tag': '1.80'}
-    Plug 'dag/vim-fish', {'commit': '825853f'}
-    Plug 'dln/avro-vim', {'commit': '3af1c69'}
-    Plug 'fatih/vim-go', {'tag': 'v1.11'}
-    Plug 'nathanaelkane/vim-indent-guides', {'commit': '018298e'}
-    Plug 'peterhoeg/vim-qml', {'commit': 'fba69d1'}
-    Plug 'posva/vim-vue', {'commit': 'f6694b4'}
-    Plug 'scrooloose/syntastic', {'tag': '3.8.0'}
-    Plug 'tomtom/tcomment_vim', {'commit': 'b26182b'}
-    Plug 'tpope/vim-fugitive', {'commit': 'f44845e'}
-    Plug 'vim-airline/vim-airline', {'commit': 'b66c1ef'}
-    Plug 'vim-airline/vim-airline-themes', {'commit': '6026eb7'}
+    Plug 'ctrlpvim/ctrlp.vim', {'commit': '585143a'}
+    Plug 'dag/vim-fish', {'commit': '50b95cb'}
+    Plug 'fatih/vim-go', {'tag': 'v1.22'}
+    Plug 'nathanaelkane/vim-indent-guides', {'commit': '54d889a'}
+    Plug 'scrooloose/syntastic', {'tag': '3.10.0'}
+    Plug 'tomtom/tcomment_vim', {'commit': '239c0c0'}
+    Plug 'tpope/vim-fugitive', {'tag': 'v3.2'}
+    Plug 'vim-airline/vim-airline', {'tag': 'v0.11'}
+    Plug 'vim-airline/vim-airline-themes', {'commit': '6270e7d'}
     Plug 'vim-scripts/a.vim', {'tag': '2.18'}
+    Plug 'rhysd/vim-clang-format', {'commit': '95593b6'}
 call plug#end()
 
 filetype plugin on
@@ -38,6 +35,10 @@ if $TERM != 'screen'
     let g:indent_guides_auto_colors = 0
     hi IndentGuidesOdd ctermbg=235
     hi IndentGuidesEven ctermbg=236
+
+    highlight GitGutterAdd guifg=#009900 guibg=NONE ctermfg=2 ctermbg=NONE
+    highlight GitGutterChange guifg=#bbbb00 guibg=NONE ctermfg=3 ctermbg=NONE
+    highlight GitGutterDelete guifg=#ff2222 guibg=NONE ctermfg=1 ctermbg=NONE
 endif
 
 set undofile
@@ -53,8 +54,8 @@ set formatoptions=tcqronl1
 set scrolloff=5
 set sidescrolloff=5
 
-" Show relative line numbers.
-set relativenumber
+" Show line numbers.
+set number
 
 " Ignore case when searching, except when pattern contains uppercase
 " characters.
@@ -106,18 +107,20 @@ endfunction
 call SetIndentation(4)
 autocmd FileType yaml,json,ruby :call SetIndentation(2)
 autocmd FileType ada :call SetIndentation(3)
-autocmd FileType make,go,c :call SetIndentation(0)
+autocmd FileType go,cmake,make,c,cpp :call SetIndentation(0)
 
 function! SetTextWidth(width)
     if a:width > 0
         execute 'set textwidth=' . a:width
         execute 'set colorcolumn=' . (a:width + 1)
+        execute 'set winwidth=' . (a:width + 4)
     else
         set textwidth=0
         set colorcolumn=0
     end
 endfunction
 call SetTextWidth(79)
+autocmd FileType java,cpp :call SetTextWidth(100)
 autocmd FileType gitcommit :call SetTextWidth(72)
 autocmd FileType rust :call SetTextWidth(99)
 autocmd FileType go :call SetTextWidth(0)
@@ -141,6 +144,8 @@ nnoremap <silent> <leader>t :vsplit term://fish<CR>i
 " Set Airline looks.
 let g:airline_powerline_fonts = 1
 let g:airline_theme='term'
+let g:airline_symbols = {}
+let g:airline_symbols.dirty=' ~'
 
 " Make ctrlp.vim ignore files listed in .gitignore.
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
@@ -153,6 +158,19 @@ let g:go_fmt_command = "goimports"
 let g:go_fmt_fail_silently = 1
 let g:go_alternate_mode = "vsplit"
 autocmd FileType go :nnoremap <leader>a :GoAlternate!<CR>
+
+" Setup gitgutter
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '~'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '-'
+let g:gitgutter_sign_modified_removed = '~'
+
+" Setup vim-clang-format
+let g:clang_format#detect_style_file=1
+autocmd FileType c,cpp nnoremap <buffer><Leader>f :<C-u>ClangFormat<CR>
+autocmd FileType c,cpp vnoremap <buffer><Leader>f :ClangFormat<CR>
+autocmd FileType c,cpp :ClangFormatAutoEnable
 
 function! ClearWhiteSpace()
     let save_cursor = getpos('.')

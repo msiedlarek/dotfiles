@@ -11,6 +11,12 @@
         set -x EDITOR vim
     end
 
+    alias g git
+    alias k kubectl
+    alias kc kubectx
+    alias kn kubens
+    alias tf terraform
+
     if test -n $EDITOR
         set -x VISUAL $EDITOR
     end
@@ -42,4 +48,7 @@
     # Setup Go environment.
     set -x GOPATH "$HOME/Projects/go"
     set -x PATH "$GOPATH/bin" $PATH
+
+    # Setup Krew environment
+    set -x PATH "$HOME/.krew/bin" $PATH
 # end
