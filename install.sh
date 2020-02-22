@@ -13,6 +13,7 @@ readonly COMMON_PACKAGES=(
     neovim
     ipython
     ranger
+    youtube-dl
 )
 
 readonly LINUX_PACKAGES=(
