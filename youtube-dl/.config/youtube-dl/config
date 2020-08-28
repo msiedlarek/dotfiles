@@ -8,3 +8,7 @@
 --embed-subs
 --embed-thumbnail
 --add-metadata
+
+--ignore-errors
+
+--no-call-home
