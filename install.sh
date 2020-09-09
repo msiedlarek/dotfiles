@@ -5,14 +5,11 @@ readonly COMMON_PACKAGES=(
     bash
     fish
     git
-    mercurial
     readline
     screen
     shell
     tmux
     neovim
-    ipython
-    ranger
     youtube-dl
 )
 

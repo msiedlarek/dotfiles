@@ -37,6 +37,13 @@ function parse_git_branch() {
 PS1="\u@\h:\w\$(parse_git_branch)\$ "
 
 # Autocompletion for Homebrew packages
-if which brew >/dev/null 2>&1 && [ -d "$(brew --prefix)/etc/bash_completion.d" ]; then
-    source "$(brew --prefix)/etc/bash_completion.d/"*
+if type brew &>/dev/null; then
+  HOMEBREW_PREFIX="$(brew --prefix)"
+  if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+    source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
+  else
+    for COMPLETION in "${HOMEBREW_PREFIX}/etc/bash_completion.d/"*; do
+      [[ -r "$COMPLETION" ]] && source "$COMPLETION"
+    done
+  fi
 fi
