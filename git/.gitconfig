@@ -50,7 +50,7 @@
     default = simple
 [user]
     name = Mikołaj Siedlarek
-    email = mikolaj@siedlarek.pl
+    email = mikolaj@siedlarek.net
 [filter "lfs"]
     process = git-lfs filter-process
     required = true
