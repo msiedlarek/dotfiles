@@ -11,6 +11,7 @@ readonly COMMON_PACKAGES=(
     tmux
     neovim
     youtube-dl
+    zsh
 )
 
 readonly LINUX_PACKAGES=(
