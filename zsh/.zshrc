@@ -38,6 +38,10 @@ zplugin ice atload'!_zsh_git_prompt_precmd_hook' lucid
 zplugin load woefe/git-prompt.zsh
 ZSH_THEME_GIT_PROMPT_PREFIX="("
 ZSH_THEME_GIT_PROMPT_SUFFIX=") "
+ZSH_THEME_GIT_PROMPT_DETACHED="%{$fg[cyan]%}:"
+ZSH_THEME_GIT_PROMPT_BRANCH="%{$fg[magenta]%}"
+ZSH_THEME_GIT_PROMPT_UPSTREAM_SYMBOL="%{$fg[yellow]%}⟳ "
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✔"
 
 zinit snippet OMZP::shrink-path
 function custom_prompt {
