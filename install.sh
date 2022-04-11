@@ -4,12 +4,12 @@ set -eo pipefail
 readonly COMMON_PACKAGES=(
     bash
     git
+    neovim
     readline
     screen
     shell
     tmux
-    neovim
-    youtube-dl
+    yt-dlp
     zsh
 )
 

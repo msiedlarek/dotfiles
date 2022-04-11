@@ -1,2 +1,2 @@
-brew install stow neovim fzf
+brew install stow neovim fzf yt-dlp aria2
 ./install.sh
