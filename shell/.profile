@@ -19,3 +19,5 @@ if [ -x /usr/bin/xdpyinfo ]; then
         # export GDK_DPI_SCALE=0.5
     fi
 fi
+
+export PATH="${HOME}/go/bin:${PATH}"
