@@ -1,4 +1,5 @@
 zstyle ':completion:*' menu yes select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion::complete:*' cache-path ~/.zcompcache
 autoload -Uz compinit && compinit
@@ -63,13 +64,13 @@ PS1='$(custom_prompt)'
 if [[ "$(uname)" == "Linux" ]]; then
   test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
   alias ls='ls --color=auto'
+  alias diff='diff --color=auto'
 elif [[ "$(uname)" == "Darwin" ]]; then
   alias ls='ls -G'
 fi
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-alias diff='diff --color=auto'
 
 function tx {
  tmux new-session -A -s ${1:-main};
