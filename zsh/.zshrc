@@ -76,5 +76,13 @@ function tx {
  tmux new-session -A -s ${1:-main};
 }
 
-alias vi=vim
+alias vi=nvim
+alias vim=nvim
 alias stayawake='caffeinate -disu -t 86400'
+
+alias k=kubectl
+alias kc=kubectx
+alias kn=kubens
+alias tf=terraform
+
+alias mediashell='kubectl exec --context=sigma --namespace=default --tty --stdin deployment/mediatools -- tmux -2 new -As main'
