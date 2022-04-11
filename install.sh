@@ -3,7 +3,6 @@ set -eo pipefail
 
 readonly COMMON_PACKAGES=(
     bash
-    fish
     git
     readline
     screen
