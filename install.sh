@@ -32,10 +32,6 @@ main() {
         packages+=(${LINUX_PACKAGES[*]})
     fi
 
-    # We don't want Stow's tree folding here - we prefer it to be a real
-    # directory.
-    mkdir -p "${HOME}/.config/fish"
-
     $STOW $additional_stow_args ${packages[*]}
 
     for package in ${packages[*]}; do
