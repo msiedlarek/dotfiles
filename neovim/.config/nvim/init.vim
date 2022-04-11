@@ -3,19 +3,19 @@ let s:nvim_home=expand('~/.config/nvim')
 set shell=/bin/bash
 
 call plug#begin(s:nvim_home . '/plugged')
-    Plug 'airblade/vim-gitgutter', {'commit': '94ee004'}
+    Plug 'airblade/vim-gitgutter', {'commit': '18d1298'}
     Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
-    Plug 'ctrlpvim/ctrlp.vim', {'commit': 'd93d978'}
-    Plug 'dag/vim-fish', {'commit': '50b95cb'}
-    Plug 'fatih/vim-go', {'tag': 'v1.23'}
-    Plug 'nathanaelkane/vim-indent-guides', {'commit': '54d889a'}
+    Plug 'ctrlpvim/ctrlp.vim', {'commit': '40ee62e'}
+    Plug 'fatih/vim-go', {'tag': 'v1.25'}
+    Plug 'nathanaelkane/vim-indent-guides', {'commit': '765084d'}
     Plug 'vim-syntastic/syntastic', {'tag': '3.10.0'}
-    Plug 'tomtom/tcomment_vim', {'commit': '25bdb50'}
-    Plug 'tpope/vim-fugitive', {'tag': 'v3.2'}
+    Plug 'tomtom/tcomment_vim', {'commit': '3729ae4'}
+    Plug 'tpope/vim-fugitive', {'tag': 'v3.6'}
     Plug 'vim-airline/vim-airline', {'tag': 'v0.11'}
     Plug 'vim-airline/vim-airline-themes', {'commit': '155bce6'}
     Plug 'vim-scripts/a.vim', {'tag': '2.18'}
-    Plug 'rhysd/vim-clang-format', {'commit': '95593b6'}
+    Plug 'rhysd/vim-clang-format', {'commit': '6b79182'}
+    Plug 'junegunn/goyo.vim', {'commit': 'a9c7283'}
 call plug#end()
 
 filetype plugin on
@@ -139,7 +139,7 @@ tnoremap <C-l> <C-\><C-n><C-w>l
 tnoremap <Esc> <C-\><C-n>
 
 " Open terminal in split with <leader>t.
-nnoremap <silent> <leader>t :vsplit term://fish<CR>i
+nnoremap <silent> <leader>t :vsplit term://zsh<CR>i
 
 " Set Airline looks.
 let g:airline_powerline_fonts = 1
