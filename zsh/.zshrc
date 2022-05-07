@@ -85,4 +85,6 @@ alias kc=kubectx
 alias kn=kubens
 alias tf=terraform
 
+alias bazel=bazelisk
+
 alias mediashell='kubectl exec --context=sigma --namespace=default --tty --stdin deployment/mediatools -- tmux -2 new -As main'

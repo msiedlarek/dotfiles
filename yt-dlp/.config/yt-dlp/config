@@ -2,12 +2,13 @@
 --no-mark-watched
 --concurrent-fragments=2
 --downloader=aria2c
---downloader-args="aria2c:--continue"
+--downloader-args="aria2c:--continue --user-agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.96 Safari/537.36'"
 --paths="temp:/tmp"
 --output-na-placeholder="NA"
 --windows-filenames
 --no-overwrites
 --continue
+--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.96 Safari/537.36"
 --format="bestvideo+bestaudio/best"
 --format-sort="lang,quality,res,fps,+vext:mp4,+aext:m4a,size,br,asr,proto,ext,hasaud,source,id"
 --no-prefer-free-formats

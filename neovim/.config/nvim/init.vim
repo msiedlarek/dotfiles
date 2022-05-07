@@ -36,9 +36,7 @@ if $TERM != 'screen'
     hi IndentGuidesOdd ctermbg=235
     hi IndentGuidesEven ctermbg=236
 
-    highlight GitGutterAdd guifg=#009900 guibg=NONE ctermfg=2 ctermbg=NONE
-    highlight GitGutterChange guifg=#bbbb00 guibg=NONE ctermfg=3 ctermbg=NONE
-    highlight GitGutterDelete guifg=#ff2222 guibg=NONE ctermfg=1 ctermbg=NONE
+    highlight! link SignColumn LineNr
 endif
 
 set undofile
@@ -46,6 +44,9 @@ set undofile
 exec 'set backupdir=' . s:nvim_home . '/backup'
 exec 'set undodir=' . s:nvim_home . '/undo'
 exec 'set directory=' . s:nvim_home . '/swap'
+
+" Enable mouse support.
+set mouse=a
 
 " Set formatting options for text blocks.
 set formatoptions=tcqronl1
@@ -146,6 +147,7 @@ let g:airline_powerline_fonts = 1
 let g:airline_theme='term'
 let g:airline_symbols = {}
 let g:airline_symbols.dirty=' ~'
+set noshowmode
 
 " Make ctrlp.vim ignore files listed in .gitignore.
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
