@@ -1,49 +1,37 @@
-let s:nvim_home=expand('~/.config/nvim')
-
-set shell=/bin/bash
-
-call plug#begin(s:nvim_home . '/plugged')
-    Plug 'airblade/vim-gitgutter', {'commit': '18d1298'}
-    Plug 'brendonrapp/smyck-vim', {'commit': '91fd8b6'}
-    Plug 'ctrlpvim/ctrlp.vim', {'commit': '40ee62e'}
-    Plug 'fatih/vim-go', {'tag': 'v1.25'}
-    Plug 'nathanaelkane/vim-indent-guides', {'commit': '765084d'}
-    Plug 'vim-syntastic/syntastic', {'tag': '3.10.0'}
-    Plug 'tomtom/tcomment_vim', {'commit': '3729ae4'}
-    Plug 'tpope/vim-fugitive', {'tag': 'v3.6'}
-    Plug 'vim-airline/vim-airline', {'tag': 'v0.11'}
-    Plug 'vim-airline/vim-airline-themes', {'commit': '155bce6'}
-    Plug 'vim-scripts/a.vim', {'tag': '2.18'}
-    Plug 'rhysd/vim-clang-format', {'commit': '6b79182'}
-    Plug 'junegunn/goyo.vim', {'commit': 'a9c7283'}
-call plug#end()
-
-filetype plugin on
-filetype indent on
-
-if has('syntax')
-    syntax on
+" A mix of Vim, Neovim and tpope/vim-sensible sane defaults.
+filetype plugin indent on
+syntax enable
+set nocompatible
+set autoindent
+set autoread
+set backspace=indent,eol,start
+set belloff=all
+set complete-=i
+set display=lastline
+set encoding=utf-8
+set history=10000
+set incsearch
+set nrformats=bin,hex
+set ruler
+set sessionoptions-=options
+set smarttab
+set tabpagemax=50
+set viewoptions-=options
+set viminfo^=!
+set wildmenu
+inoremap <c-u> <c-g>u<c-u>
+if !has('nvim')
+  set ttimeout
+  set ttimeoutlen=100
 endif
 
-if $TERM != 'screen'
-    set background=dark
-    colorscheme smyck
-    hi VertSplit ctermfg=240 ctermbg=240
-    hi Search ctermbg=11 ctermfg=0
-    hi ColorColumn ctermbg=236
-
-    let g:indent_guides_auto_colors = 0
-    hi IndentGuidesOdd ctermbg=235
-    hi IndentGuidesEven ctermbg=236
-
-    highlight! link SignColumn LineNr
+if $TERM == 'xterm-256color'
+  " Enable 24-bit colors.
+  set termguicolors
 endif
 
-set undofile
-
-exec 'set backupdir=' . s:nvim_home . '/backup'
-exec 'set undodir=' . s:nvim_home . '/undo'
-exec 'set directory=' . s:nvim_home . '/swap'
+" Show line numbers.
+set number
 
 " Enable mouse support.
 set mouse=a
@@ -51,135 +39,131 @@ set mouse=a
 " Set formatting options for text blocks.
 set formatoptions=tcqronl1
 
-" Start scrolling n lines before the horizontal window border.
+" Start scrolling n lines before the window border.
 set scrolloff=5
 set sidescrolloff=5
-
-" Show line numbers.
-set number
 
 " Ignore case when searching, except when pattern contains uppercase
 " characters.
 set ignorecase
 set smartcase
 
-" Don’t show the intro message when starting NeoVim.
-set shortmess=atI
+" Hide file info in command line.
+set shortmess+=F
 
-" Remap leader to comma
-let mapleader = ','
+" Don’t show the intro message on start.
+set shortmess+=I
 
-" Clear search highlights with <leader>/.
-nmap <silent> <leader>/ :nohlsearch<CR>
-
-" Reselect visual after indent/outdent
-vnoremap < <gv
-vnoremap > >gv
-
-" Rebalance splits after window resize.
-autocmd VimResized * wincmd =
-
-" Toggle comment with <leader>k.
-noremap <silent> <leader>k :TComment<CR>
-
-" Toggle paste mode with <leader>p.
-noremap <leader>p :set invpaste<CR>
-
-" Jump to the last cursor position after opening a file.
-autocmd BufReadPost *
-    \ if line("'\"") > 0 && line("'\"") <= line('$') |
-    \   exe 'normal g`"' |
-    \ endif
+" Set how whitespace characters are displayed in ':set list' mode.
+set listchars=tab:▸·,trail:·,precedes:«,extends:»,eol:↲
 
 " Highlight trailing whitespaces.
 match ErrorMsg /\s\+$/
 
-function! SetIndentation(size)
-    if a:size > 0
-        set expandtab
-        execute 'set tabstop=' . a:size
-        execute 'set shiftwidth=' . a:size
-        execute 'set softtabstop=' . a:size
-    else
-        set noexpandtab
-        set tabstop=4
-    end
-endfunction
-call SetIndentation(4)
-autocmd FileType yaml,json,ruby :call SetIndentation(2)
-autocmd FileType ada :call SetIndentation(3)
-autocmd FileType go,cmake,make,c,cpp :call SetIndentation(0)
+" Hide end-of-buffer ~ markers.
+set fillchars=eob:\ ,
 
-function! SetTextWidth(width)
-    if a:width > 0
-        execute 'set textwidth=' . a:width
-        execute 'set colorcolumn=' . (a:width + 1)
-        execute 'set winwidth=' . (a:width + 4)
-    else
-        set textwidth=0
-        set colorcolumn=0
-    end
-endfunction
-call SetTextWidth(79)
-autocmd FileType java,cpp :call SetTextWidth(100)
-autocmd FileType gitcommit :call SetTextWidth(72)
-autocmd FileType rust :call SetTextWidth(99)
-autocmd FileType go :call SetTextWidth(0)
+" Enable undo file for Neovim.
+if has('nvim')
+  set undofile
+else
+  set noundofile
+endif
 
-" Navigate through windows with <C-direction>, also in terminal.
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
-tnoremap <C-h> <C-\><C-n><C-w>h
-tnoremap <C-j> <C-\><C-n><C-w>j
-tnoremap <C-k> <C-\><C-n><C-w>k
-tnoremap <C-l> <C-\><C-n><C-w>l
+if has('nvim')
+  " Use global statusline instead of one per window.
+  set laststatus=3
+else
+  set laststatus=2
+endif
 
-" Enter normal mode in terminal with <Esc>.
-tnoremap <Esc> <C-\><C-n>
+augroup init_splits
+  autocmd!
+  " Rebalance splits after window resize.
+  autocmd VimResized * wincmd =
+augroup END
 
-" Open terminal in split with <leader>t.
-nnoremap <silent> <leader>t :vsplit term://zsh<CR>i
+augroup init_restore
+  autocmd!
+  " When editing a file, always jump to the last known cursor position.
+  " Don't do it when the position is invalid, when inside an event handler
+  " (happens when dropping a file on gvim) and for a commit message (it's
+  " likely a different one than last time).
+  autocmd BufReadPost *
+    \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+    \ |   exe "normal! g`\""
+    \ | endif
+augroup END
 
-" Set Airline looks.
-let g:airline_powerline_fonts = 1
-let g:airline_theme='term'
-let g:airline_symbols = {}
-let g:airline_symbols.dirty=' ~'
-set noshowmode
+augroup init_terminal
+  autocmd!
+  if has('nvim')
+    " Automatically disable line numbers and go to insert mode in a new terminal.
+    autocmd TermOpen * setlocal nonumber | normal! i
+    " Automatically go to insert mode when switching to a terminal buffer.
+    autocmd BufEnter term://* normal i
+    " Close the terminal on shell exit.
+    autocmd TermClose * execute 'bdelete! ' . expand('<abuf>')
+  else
+    " Automatically disable line numbers in a new terminal.
+    autocmd TerminalWinOpen * setlocal nonumber
+    " Automatically go to insert mode when switching to a terminal buffer.
+    autocmd BufEnter * silent! if &buftype == 'terminal' | normal i | endif
+  endif
+augroup END
 
-" Make ctrlp.vim ignore files listed in .gitignore.
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
+" Set leader to tab.
+let mapleader = "\<tab>"
 
-" setup a.vim.
-nnoremap <silent> <leader>a :AV<CR>
+" Map ; to : for commands.
+nnoremap ; :
+vnoremap ; :
 
-" Setup vim-go.
-let g:go_fmt_command = "goimports"
-let g:go_fmt_fail_silently = 1
-let g:go_alternate_mode = "vsplit"
-autocmd FileType go :nnoremap <leader>a :GoAlternate!<CR>
+" Reselect visual after indent/outdent.
+vnoremap < <gv
+vnoremap > >gv
 
-" Setup gitgutter
-let g:gitgutter_sign_added = '+'
-let g:gitgutter_sign_modified = '~'
-let g:gitgutter_sign_removed = '-'
-let g:gitgutter_sign_removed_first_line = '-'
-let g:gitgutter_sign_modified_removed = '~'
+" Navigate through windows with <c-direction>, also in terminal.
+nnoremap <c-h> <c-w>h
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-l> <c-w>l
+tnoremap <c-h> <c-\><c-n><c-w>h
+tnoremap <c-j> <c-\><c-n><c-w>j
+tnoremap <c-k> <c-\><c-n><c-w>k
+tnoremap <c-l> <c-\><c-n><c-w>l
 
-" Setup vim-clang-format
-let g:clang_format#detect_style_file=1
-autocmd FileType c,cpp nnoremap <buffer><Leader>f :<C-u>ClangFormat<CR>
-autocmd FileType c,cpp vnoremap <buffer><Leader>f :ClangFormat<CR>
-autocmd FileType c,cpp :ClangFormatAutoEnable
+" Enter normal mode in terminal with <esc>.
+tnoremap <esc> <c-\><c-n>
 
-function! ClearWhiteSpace()
-    let save_cursor = getpos('.')
-    " Remove white spaces from ends of lines.
-    :silent! %s#\s\+$##
-    " Make sure that there is exactly one newline at the end of the file.
-    :silent! %s#\($\n\s*\)\+\%$##
-    call setpos('.', save_cursor)
-endfunction
-noremap <leader>c :call ClearWhiteSpace()<CR>
+" Use <c-L> to clear the highlighting of :set hlsearch.
+nnoremap <silent> <leader>/ <cmd>nohlsearch<cr>
+
+" Alternate between alternate buffers with <leader><leader>.
+nnoremap <leader><leader> <cmd>b#<cr>
+" Switch between buffers.
+nnoremap <leader>[ <cmd>bp<cr>
+nnoremap <leader>] <cmd>bn<cr>
+
+fun! g:OpenTerminal()
+  let l:height=winheight(0)/4
+  if has('nvim')
+    exec 'belowright' l:height.'split' '+terminal'
+  else
+    exec 'belowright' 'terminal' '++rows='.l:height
+  endif
+endfun
+command! Terminal call g:OpenTerminal()
+nnoremap <leader>t <cmd>Terminal<cr>
+
+if has('nvim')
+  func! g:PluginRecompile()
+    execute 'luafile ' . stdpath('config') . '/lua/plugins.lua'
+    PackerCompile
+  endfunc
+  augroup init_reload
+    autocmd!
+    autocmd BufWritePost $MYVIMRC source <afile>
+    execute 'autocmd BufWritePost ' . resolve(stdpath('config')) . '/lua/* call g:PluginRecompile()'
+  augroup end
+endif
