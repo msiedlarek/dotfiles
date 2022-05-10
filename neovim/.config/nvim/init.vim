@@ -25,11 +25,6 @@ if !has('nvim')
   set ttimeoutlen=100
 endif
 
-if $TERM == 'xterm-256color'
-  " Enable 24-bit colors.
-  set termguicolors
-endif
-
 " Show line numbers.
 set number
 
@@ -70,13 +65,6 @@ else
   set noundofile
 endif
 
-if has('nvim')
-  " Use global statusline instead of one per window.
-  set laststatus=3
-else
-  set laststatus=2
-endif
-
 augroup init_splits
   autocmd!
   " Rebalance splits after window resize.
@@ -93,23 +81,6 @@ augroup init_restore
     \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
     \ |   exe "normal! g`\""
     \ | endif
-augroup END
-
-augroup init_terminal
-  autocmd!
-  if has('nvim')
-    " Automatically disable line numbers and go to insert mode in a new terminal.
-    autocmd TermOpen * setlocal nonumber | normal! i
-    " Automatically go to insert mode when switching to a terminal buffer.
-    autocmd BufEnter term://* normal i
-    " Close the terminal on shell exit.
-    autocmd TermClose * execute 'bdelete! ' . expand('<abuf>')
-  else
-    " Automatically disable line numbers in a new terminal.
-    autocmd TerminalWinOpen * setlocal nonumber
-    " Automatically go to insert mode when switching to a terminal buffer.
-    autocmd BufEnter * silent! if &buftype == 'terminal' | normal i | endif
-  endif
 augroup END
 
 " Set leader to tab.
@@ -133,37 +104,52 @@ tnoremap <c-j> <c-\><c-n><c-w>j
 tnoremap <c-k> <c-\><c-n><c-w>k
 tnoremap <c-l> <c-\><c-n><c-w>l
 
-" Enter normal mode in terminal with <esc>.
-tnoremap <esc> <c-\><c-n>
-
-" Use <c-L> to clear the highlighting of :set hlsearch.
+" Use <leader>l to clear the highlighting of :set hlsearch.
 nnoremap <silent> <leader>/ <cmd>nohlsearch<cr>
 
-" Alternate between alternate buffers with <leader><leader>.
+" Alternate between buffers with <leader><leader>.
 nnoremap <leader><leader> <cmd>b#<cr>
 " Switch between buffers.
 nnoremap <leader>[ <cmd>bp<cr>
 nnoremap <leader>] <cmd>bn<cr>
 
-fun! g:OpenTerminal()
-  let l:height=winheight(0)/4
-  if has('nvim')
-    exec 'belowright' l:height.'split' '+terminal'
-  else
-    exec 'belowright' 'terminal' '++rows='.l:height
-  endif
-endfun
-command! Terminal call g:OpenTerminal()
-nnoremap <leader>t <cmd>Terminal<cr>
+packadd! fugitive
+packadd! jellybeans
+packadd! sleuth
+
+runtime! config/*.vim
 
 if has('nvim')
-  func! g:PluginRecompile()
-    execute 'luafile ' . stdpath('config') . '/lua/plugins.lua'
-    PackerCompile
-  endfunc
-  augroup init_reload
-    autocmd!
-    autocmd BufWritePost $MYVIMRC source <afile>
-    execute 'autocmd BufWritePost ' . resolve(stdpath('config')) . '/lua/* call g:PluginRecompile()'
-  augroup end
+  let g:neo_tree_remove_legacy_commands = 1
+
+  packadd! impatient
+  lua require('impatient')
+
+  packadd! fix_cursor_hold
+
+  packadd! command_center
+  packadd! comment
+  packadd! devicons
+  packadd! gitsigns
+  packadd! lsp_colors
+  packadd! lspconfig
+  packadd! lualine
+  packadd! neo_tree
+  packadd! nui " required by: neo_tree
+  packadd! plenary " required by: neo_tree, telescope
+  packadd! telescope
+  packadd! telescope_ui_select
+  packadd! treesitter
+
+  packadd! cmp_buffer
+  packadd! cmp_cmdline
+  packadd! cmp_luasnip
+  packadd! cmp_nvim_lsp
+  packadd! cmp_nvim_lsp_signature_help
+  packadd! cmp_path
+  packadd! lspkind
+  packadd! luasnip
+  packadd! nvim_cmp
+
+  runtime! config/*.lua
 endif

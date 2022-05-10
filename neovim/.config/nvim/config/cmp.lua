@@ -4,6 +4,9 @@ local luasnip = require('luasnip')
 
 vim.cmd('set completeopt=menu,menuone,noselect')
 
+local window_opts = {
+  winhighlight = 'Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None',
+}
 cmp.setup({
   snippet = {
     expand = function(args)
@@ -16,8 +19,8 @@ cmp.setup({
     }),
   },
   window = {
-    completion = cmp.config.window.bordered(),
-    documentation = cmp.config.window.bordered(),
+    completion = cmp.config.window.bordered(window_opts),
+    documentation = cmp.config.window.bordered(window_opts),
   },
   sorting = {
     comparators = {

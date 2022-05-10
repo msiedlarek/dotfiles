@@ -1,4 +1,8 @@
-require('nvim-treesitter.configs').setup {
+-- Remember to :TSUpdate on plugin updates.
+
+local treesitter_configs = require('nvim-treesitter.configs')
+
+treesitter_configs.setup {
   ensure_installed = {
     'bash',
     'c',

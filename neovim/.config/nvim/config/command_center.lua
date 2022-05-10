@@ -181,4 +181,3 @@ command_center.add({
     keybindings={{'n', '<leader>g', opts}},
   },
 })
-
