@@ -1,19 +1,20 @@
+ZSH_PLUGINS="${${(%):-%N}:A:h}/plugins"
+
+source "${ZSH_PLUGINS}/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+
+source "${ZSH_PLUGINS}/git-prompt/git-prompt.plugin.zsh"
+source "${ZSH_PLUGINS}/shrink-path.plugin.zsh"
+source "${ZSH_PLUGINS}/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh"
+source "${ZSH_PLUGINS}/zsh-history-substring-search/zsh-history-substring-search.plugin.zsh"
+
 zstyle ':completion:*' menu yes select
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path ~/.zcompcache
-autoload -Uz compinit && compinit
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' use-cache 1
+zstyle ':completion:*' cache-path ~/.cache/zsh/completion
 
-source ~/.zinit/bin/zinit.zsh
-zinit wait lucid light-mode for \
-  atinit"zicompinit; zicdreplay" \
-      zdharma/fast-syntax-highlighting \
-  atload"_zsh_autosuggest_start" \
-      zsh-users/zsh-autosuggestions
-
-zplugin light zsh-users/zsh-history-substring-search
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+if ! type brew &>/dev/null; then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+fi
 
 if [[ -d /usr/local/opt/fzf/shell ]]; then
   fzf_path=/usr/local/opt/fzf/shell
@@ -25,9 +26,19 @@ if [[ -n $fzf_path ]]; then
   source $fzf_path/key-bindings.zsh
 fi
 
+autoload -Uz compinit
+ZSH_COMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+# Update completion cache only once per day.
+if [[ $(date +'%j') != $(stat -f '%Sm' -t '%j' "${ZSH_COMPDUMP}" 2>/dev/null) ]]; then
+  compinit -d "${ZSH_COMPDUMP}"
+  zcompile "${ZSH_COMPDUMP}"
+else
+  compinit -C
+fi
+
 bindkey -e
-bindkey '^[[1;5C' forward-word # ctrl-right
-bindkey '^[[1;5D' backward-word # ctrl-left
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
 
 HISTFILE=~/.zsh_history
 HISTSIZE=64000
@@ -35,16 +46,12 @@ SAVEHIST=$HISTSIZE
 setopt appendhistory
 setopt share_history
 
-zplugin ice atload'!_zsh_git_prompt_precmd_hook' lucid
-zplugin load woefe/git-prompt.zsh
 ZSH_THEME_GIT_PROMPT_PREFIX="("
 ZSH_THEME_GIT_PROMPT_SUFFIX=") "
 ZSH_THEME_GIT_PROMPT_DETACHED="%{$fg[cyan]%}:"
 ZSH_THEME_GIT_PROMPT_BRANCH="%{$fg[magenta]%}"
 ZSH_THEME_GIT_PROMPT_UPSTREAM_SYMBOL="%{$fg[yellow]%}⟳ "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[green]%}✔"
-
-zinit snippet OMZP::shrink-path
 function custom_prompt {
   hostuser=
   if [[ $USER != msiedlarek ]]; then
