@@ -40,6 +40,11 @@ bindkey -e
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
+bindkey "^[^[[C" forward-word
+bindkey "^[^[[D" backward-word
+
+WORDCHARS=${WORDCHARS/\/}
+
 HISTFILE=~/.zsh_history
 HISTSIZE=64000
 SAVEHIST=$HISTSIZE
