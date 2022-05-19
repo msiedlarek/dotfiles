@@ -14,6 +14,7 @@ telescope.setup{
         ['<C-v>'] = 'select_vertical',
         ['<C-j>'] = 'move_selection_next',
         ['<C-k>'] = 'move_selection_previous',
+        ['<C-l>'] = actions.smart_add_to_qflist + actions.open_qflist,
       },
     },
   },
@@ -33,3 +34,4 @@ telescope.setup{
 }
 telescope.load_extension('ui-select')
 telescope.load_extension('command_center')
+telescope.load_extension('live_grep_raw')

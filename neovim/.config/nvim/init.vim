@@ -113,6 +113,19 @@ nnoremap <leader><leader> <cmd>b#<cr>
 nnoremap <leader>[ <cmd>bp<cr>
 nnoremap <leader>] <cmd>bn<cr>
 
+if executable('rg')
+  " Prefer ripgrep when available.
+  set grepprg=rg\ --vimgrep\ $*
+  set grepformat=%f:%l:%c:%m
+endif
+
+augroup init_quickfix
+  " Automatically open quickfix and loclist.
+  autocmd!
+  autocmd QuickFixCmdPost [^l]* cwindow
+  autocmd QuickFixCmdPost l* lwindow
+augroup END
+
 packadd! fugitive
 packadd! jellybeans
 packadd! sleuth
@@ -138,6 +151,7 @@ if has('nvim')
   packadd! nui " required by: neo_tree
   packadd! plenary " required by: neo_tree, telescope
   packadd! telescope
+  packadd! telescope_rg
   packadd! telescope_ui_select
   packadd! treesitter
 

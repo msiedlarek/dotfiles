@@ -118,7 +118,7 @@ command_center.add({
   {
     description = 'Close file tree',
     cmd='<cmd>Neotree close<cr>',
-    keybindings={{'n', 'rc', opts}},
+    keybindings={{'n', 'tc', opts}},
   },
   {
     description = 'Find file',
@@ -141,9 +141,14 @@ command_center.add({
     keybindings={{'n', 'fm', opts}},
   },
   {
-    description = 'Search workspace (grep)',
-    cmd='<cmd>Telescope live_grep<cr>',
+    description = 'Search (grep) workspace',
+    cmd='<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>',
     keybindings={{'n', 'fg', opts}},
+  },
+  {
+    description = 'Search (grep) for string under the cursor',
+    cmd='<cmd>Telescope grep_string<cr>',
+    keybindings={{'n', 'sf', opts}},
   },
   {
     description = 'Search help tags',
