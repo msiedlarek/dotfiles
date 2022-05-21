@@ -1,16 +1,30 @@
 local lualine = require('lualine')
 
+local base_colors
+if vim.api.nvim_get_option('background') == 'light' then
+  base_colors = {
+    a = { bg = '#dddddd' },
+    b = { bg = '#eeeeee' },
+    c = { bg = '#eeeeee' },
+    x = { bg = '#eeeeee' },
+    y = { bg = '#eeeeee' },
+    z = { bg = '#dddddd' },
+  }
+else
+  base_colors = {
+    a = { bg = '#384048' },
+    b = { bg = '#1c1c1c' },
+    c = { bg = '#1c1c1c' },
+    x = { bg = '#1c1c1c' },
+    y = { bg = '#1c1c1c' },
+    z = { bg = '#384048' },
+  }
+end
+
 local theme = 'auto'
 if vim.api.nvim_get_option('termguicolors') then
   theme = {
-    normal = {
-      a = { bg = '#384048' },
-      b = { bg = '#1c1c1c' },
-      c = { bg = '#1c1c1c' },
-      x = { bg = '#1c1c1c' },
-      y = { bg = '#1c1c1c' },
-      z = { bg = '#384048' },
-    },
+    normal = base_colors,
     insert = {
       a = { fg = '#151515', bg = '#99ad6a' },
     },

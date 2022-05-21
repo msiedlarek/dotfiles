@@ -2,6 +2,7 @@ local neo_tree = require('neo-tree')
 
 neo_tree.setup({
   close_if_last_window = true,
+  popup_border_style='rounded',
   default_component_configs = {
     indent = {
       with_markers = false,

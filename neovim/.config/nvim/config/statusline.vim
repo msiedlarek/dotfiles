@@ -5,6 +5,9 @@ else
   set laststatus=2
 endif
 
+" Wait, do we really need statusline?
+set laststatus=0
+
 function! g:StatuslineMode()
   let l:mode=mode()
   if l:mode==#"n"

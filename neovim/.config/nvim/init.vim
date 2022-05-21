@@ -126,8 +126,15 @@ augroup init_quickfix
   autocmd QuickFixCmdPost l* lwindow
 augroup END
 
+if $ITERM_PROFILE == 'Light'
+  set background=light
+else
+  set background=dark
+endif
+
 packadd! fugitive
 packadd! jellybeans
+packadd! papercolor
 packadd! sleuth
 
 runtime! config/*.vim
