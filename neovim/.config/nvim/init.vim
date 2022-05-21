@@ -58,6 +58,10 @@ match ErrorMsg /\s\+$/
 " Hide end-of-buffer ~ markers.
 set fillchars=eob:\ ,
 
+" Statusline is overrated.
+set laststatus=0
+set noruler
+
 " Enable undo file for Neovim.
 if has('nvim')
   set undofile
@@ -153,7 +157,6 @@ if has('nvim')
   packadd! gitsigns
   packadd! lsp_colors
   packadd! lspconfig
-  packadd! lualine
   packadd! neo_tree
   packadd! nui " required by: neo_tree
   packadd! plenary " required by: neo_tree, telescope
