@@ -153,7 +153,6 @@ if has('nvim')
   packadd! telescope
   packadd! telescope_rg
   packadd! telescope_ui_select
-  packadd! treesitter
 
   packadd! cmp_buffer
   packadd! cmp_cmdline
