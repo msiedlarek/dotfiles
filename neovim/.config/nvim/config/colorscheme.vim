@@ -43,6 +43,9 @@ if &background == 'light'
 
   hi TelescopeSelection guibg=#dddddd
   hi TelescopeMatching guifg=#333333 guibg=#fad07a
+
+  hi StatusLine ctermfg=LightGrey ctermbg=NONE cterm=NONE guifg=#eeeeee guibg=NONE gui=NONE
+  hi StatusLineNC ctermfg=LightGrey ctermbg=White cterm=NONE guifg=#eeeeee guibg=NONE gui=NONE
 else
   colorscheme jellybeans
 
@@ -70,11 +73,6 @@ else
   hi TelescopeSelectionCaret guifg=#ffb964
   hi TelescopePromptPrefix guifg=#ffb964
 
-  if $TERM == 'xterm-256color'
-    hi StatusLine ctermfg=255 ctermbg=235
-    hi StatusLineNC ctermfg=240 ctermbg=233
-  else
-    hi StatusLine ctermfg=White ctermbg=DarkGrey
-    hi StatusLineNC ctermfg=White ctermbg=DarkGrey
-  endif
+  hi StatusLine ctermfg=DarkGrey ctermbg=NONE cterm=NONE guifg=#403c41 guibg=NONE gui=NONE
+  hi StatusLineNC ctermfg=DarkGrey ctermbg=Black cterm=NONE guifg=#403c41 guibg=NONE gui=NONE
 endif

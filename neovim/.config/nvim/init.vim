@@ -55,10 +55,11 @@ set listchars=tab:▸·,trail:·,precedes:«,extends:»,eol:↲
 " Highlight trailing whitespaces.
 match ErrorMsg /\s\+$/
 
-" Hide end-of-buffer ~ markers.
-set fillchars=eob:\ ,
+" Use nice borders for splits and hide end-of-buffer ~ markers.
+set fillchars+=eob:\ ,stl:⎯,stlnc:⎯,vert:│
 
 " Statusline is overrated.
+set statusline=⎯
 set laststatus=0
 set noruler
 
