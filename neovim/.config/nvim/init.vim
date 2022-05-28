@@ -49,6 +49,9 @@ set shortmess+=F
 " Don’t show the intro message on start.
 set shortmess+=I
 
+" Open folds by default.
+set nofoldenable
+
 " Set how whitespace characters are displayed in ':set list' mode.
 set listchars=tab:▸·,trail:·,precedes:«,extends:»,eol:↲
 
@@ -62,6 +65,7 @@ set fillchars+=eob:\ ,stl:⎯,stlnc:⎯,vert:│
 set statusline=⎯
 set laststatus=0
 set noruler
+set noshowmode
 
 " Enable undo file for Neovim.
 if has('nvim')
@@ -90,10 +94,6 @@ augroup END
 
 " Set leader to tab.
 let mapleader = "\<tab>"
-
-" Map ; to : for commands.
-nnoremap ; :
-vnoremap ; :
 
 " Reselect visual after indent/outdent.
 vnoremap < <gv
@@ -142,9 +142,17 @@ packadd! jellybeans
 packadd! papercolor
 packadd! sleuth
 
+packadd! black
+packadd! beancount
+
 runtime! config/*.vim
 
 if has('nvim')
+  let g:nvim_virtualenv_path = stdpath('data') . '/pyenv'
+  if executable(g:nvim_virtualenv_path . '/bin/python')
+    let g:python3_host_prog=g:nvim_virtualenv_path . '/bin/python'
+  endif
+
   let g:neo_tree_remove_legacy_commands = 1
 
   packadd! impatient

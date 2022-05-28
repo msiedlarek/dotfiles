@@ -12,12 +12,12 @@ zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 
 zstyle ':completion:*' use-cache 1
 zstyle ':completion:*' cache-path ~/.cache/zsh/completion
 
-if ! type brew &>/dev/null; then
-  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+if [[ -d /opt/local/share/zsh/site-functions ]]; then
+  fpath=(/opt/local/share/zsh/site-functions $fpath)
 fi
 
-if [[ -d /usr/local/opt/fzf/shell ]]; then
-  fzf_path=/usr/local/opt/fzf/shell
+if [[ -d /opt/local/share/fzf/shell ]]; then
+  fzf_path=/opt/local/share/fzf/shell
 elif [[ -d /usr/share/doc/fzf/examples ]]; then
   fzf_path=/usr/share/doc/fzf/examples
 fi
@@ -98,5 +98,7 @@ alias kn=kubens
 alias tf=terraform
 
 alias bazel=bazelisk
+
+alias py=ipython
 
 alias mediashell='kubectl exec --context=sigma --namespace=default --tty --stdin deployment/mediatools -- tmux -2 new -As main'

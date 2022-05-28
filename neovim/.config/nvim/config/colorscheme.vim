@@ -26,15 +26,19 @@ if &background == 'light'
   hi VertSplit ctermbg=NONE ctermfg=LightGrey guifg=#eeeeee guibg=NONE
   hi FloatBorder ctermfg=DarkGrey ctermbg=NONE guifg=#333333 guibg=NONE
   hi SignColumn ctermbg=NONE ctermfg=Black guibg=NONE guifg=#151515
+  hi! def link FoldColumn SignColumn
 
   hi GitSignsAdd guifg=#008700
   hi GitSignsChange guifg=#d75f00
   hi GitSignsDelete guifg=#af0000
 
+  hi DiffText ctermbg=225 guifg=#444444 guibg=#ffd787
+  hi DiffChange ctermbg=9 guifg=#0087af guibg=#ffffd7
+
   hi DiagnosticSignError guifg=#e83333
   hi DiagnosticSignWarn guifg=#d75f00
   hi DiagnosticSignInfo guifg=#55a9cf
-  hi DiagnosticSignHint guifg=#55a9cf
+  hi! def link DiagnosticSignHint DiagnosticSignInfo
 
   hi NeoTreeGitAdded guifg=#008700
   hi NeoTreeGitModified guifg=#d75f00
@@ -55,17 +59,22 @@ else
   hi Search ctermfg=Black ctermbg=Yellow cterm=NONE guifg=#151515 guibg=#fad07a gui=NONE
   hi FloatBorder ctermfg=White ctermbg=NONE guifg=#8197bf guibg=NONE
   hi SignColumn ctermfg=DarkGrey ctermbg=NONE guibg=#151515 guifg=#151515
+  hi! def link FoldColumn SignColumn
 
-  hi GitSignsAdd guifg=#70b950
-  hi GitSignsChange guifg=#ffb964
-  hi GitSignsDelete guifg=#c05050
+  hi GitSignsAdd guifg=#99ad6a
+  hi GitSignsChange guifg=#fad07a
+  hi GitSignsDelete guifg=#cf6a4c
 
   hi NeoTreeDirectoryName guifg=#b0d0f0
   hi NeoTreeDirectoryIcon guifg=#b0d0f0
-  hi NeoTreeNormal guifg=#cccccc guibg=#1c1c1c
-  hi NeoTreeNormalNC guifg=#cccccc guibg=#1c1c1c
+  hi NeoTreeNormal guifg=#cccccc guibg=NONE
+  hi NeoTreeNormalNC guifg=#cccccc guibg=NONE
   hi NeoTreeCursorLine guibg=#252525
-  hi NeoTreeWinSeparator guibg=#151515 guifg=#151515
+  hi NeoTreeWinSeparator guibg=#151515 guifg=#403c41
+
+  hi DiagnosticError guifg=#dc5050
+  hi DiagnosticWarn guifg=#fad07a
+  hi DiagnosticHint guifg=#999999
 
   hi TelescopeBorder guifg=#8197bf
   hi TelescopeSelection guifg=#a3b9df

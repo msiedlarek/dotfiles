@@ -18,13 +18,27 @@ augroup END
 " Enter normal mode in terminal with <esc>.
 tnoremap <esc> <c-\><c-n>
 
-fun! g:OpenTerminal()
-  let l:height=winheight(0)/4
-  if has('nvim')
-    exec 'belowright' l:height.'split' '+terminal'
+let s:term_buf_nr = -1
+function! s:ToggleTerminal() abort
+  if s:term_buf_nr == -1
+    if has('nvim')
+      execute 'terminal'
+    else
+      execute 'terminal ++curwin'
+    endif
+    let s:term_buf_nr = bufnr()
+  elseif s:term_buf_nr == bufnr()
+    execute 'buffer! #'
+  elseif bufexists(s:term_buf_nr)
+    execute 'buffer! ' . s:term_buf_nr
   else
-    exec 'belowright' 'terminal' '++rows='.l:height
+    let s:term_buf_nr = -1
+    call s:ToggleTerminal()
   endif
-endfun
-command! Terminal call g:OpenTerminal()
-nnoremap <leader>t <cmd>Terminal<cr>
+endfunction
+
+command! Terminal call <SID>ToggleTerminal()
+
+nnoremap <silent> <c-t> <cmd>Terminal<cr>
+inoremap <silent> <c-t> <esc><cmd>Terminal<cr>
+tnoremap <silent> <c-t> <c-\><c-n><cmd>Terminal<cr>
