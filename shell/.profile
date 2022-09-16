@@ -20,5 +20,6 @@ if [ -x /usr/bin/xdpyinfo ]; then
     fi
 fi
 
+export PATH="/usr/local/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 export PATH="${HOME}/.cargo/bin:${PATH}"
