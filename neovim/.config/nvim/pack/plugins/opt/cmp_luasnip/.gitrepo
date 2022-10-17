@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/saadparwaiz1/cmp_luasnip.git
-	branch = a9de941bcbda508d0a45d28ae366bb3f08db2e36
+	branch = master
 	commit = a9de941bcbda508d0a45d28ae366bb3f08db2e36
 	parent = f21d9366b739227a9ff208fc24455351e7ea51d5
 	method = merge
