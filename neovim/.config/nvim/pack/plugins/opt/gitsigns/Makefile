@@ -3,55 +3,78 @@ export PJ_ROOT=$(PWD)
 
 FILTER ?= .*
 
-INIT_LUAROCKS := eval $$(luarocks --lua-version=5.1 path) &&
+LUA_VERSION   := 5.1
+TL_VERSION    := 0.14.1
+NEOVIM_BRANCH := master
+
+DEPS_DIR := $(PWD)/deps/nvim-$(NEOVIM_BRANCH)
+
+LUAROCKS       := luarocks --lua-version=$(LUA_VERSION)
+LUAROCKS_TREE  := $(DEPS_DIR)/luarocks/usr
+LUAROCKS_LPATH := $(LUAROCKS_TREE)/share/lua/$(LUA_VERSION)
+LUAROCKS_INIT  := eval $$($(LUAROCKS) --tree $(LUAROCKS_TREE) path) &&
 
 .DEFAULT_GOAL := build
 
-NEOVIM_BRANCH := master
-
-deps/neovim:
-	@mkdir -p deps
+$(DEPS_DIR)/neovim:
+	@mkdir -p $(DEPS_DIR)
 	git clone --depth 1 https://github.com/neovim/neovim --branch $(NEOVIM_BRANCH) $@
-	make -C $@
+	@# disable LTO to reduce compile time
+	make -C $@ \
+		DEPS_BUILD_DIR=$(dir $(LUAROCKS_TREE)) \
+		CMAKE_BUILD_TYPE=RelWithDebInfo \
+		CMAKE_EXTRA_FLAGS=-DENABLE_LTO=OFF
 
-deps/plenary.nvim:
-	@mkdir -p deps
-	git clone --depth 1 https://github.com/nvim-lua/plenary.nvim $@
+TL := $(LUAROCKS_TREE)/bin/tl
 
-export VIMRUNTIME=$(PWD)/deps/neovim/runtime
+$(TL):
+	@mkdir -p $@
+	$(LUAROCKS) --tree $(LUAROCKS_TREE) install tl $(TL_VERSION)
+
+INSPECT := $(LUAROCKS_LPATH)/inspect.lua
+
+$(INSPECT):
+	@mkdir -p $@
+	$(LUAROCKS) --tree $(LUAROCKS_TREE) install inspect
+
+.PHONY: lua_deps
+lua_deps: $(TL) $(INSPECT)
+
+.PHONY: test_deps
+test_deps: $(DEPS_DIR)/neovim
+
+export VIMRUNTIME=$(DEPS_DIR)/neovim/runtime
 export TEST_COLORS=1
 
 .PHONY: test
-test: deps/neovim deps/plenary.nvim
-	$(INIT_LUAROCKS) deps/neovim/.deps/usr/bin/busted \
+test: $(DEPS_DIR)/neovim
+	$(LUAROCKS_INIT) busted \
 		-v \
 		--lazy \
 		--helper=$(PWD)/test/preload.lua \
 		--output test.busted.outputHandlers.nvim \
-		--lpath=$(PWD)/deps/neovim/?.lua \
-		--lpath=$(PWD)/deps/neovim/build/?.lua \
-		--lpath=$(PWD)/deps/neovim/runtime/lua/?.lua \
-		--lpath=$(PWD)/deps/?.lua \
+		--lpath=$(DEPS_DIR)/neovim/?.lua \
+		--lpath=$(DEPS_DIR)/neovim/build/?.lua \
+		--lpath=$(DEPS_DIR)/neovim/runtime/lua/?.lua \
+		--lpath=$(DEPS_DIR)/?.lua \
 		--lpath=$(PWD)/lua/?.lua \
-		--lpath=$(PWD)/deps/plenary.nvim/lua/?.lua \
-		--lpath=$(PWD)/deps/plenary.nvim/lua/?/init.lua \
 		--filter="$(FILTER)" \
 		$(PWD)/test
 
 	-@stty sane
 
 .PHONY: tl-check
-tl-check:
-	$(INIT_LUAROCKS) tl check teal/*.tl teal/**/*.tl
+tl-check: $(TL)
+	$(TL) check teal/*.tl teal/**/*.tl
 
 .PHONY: tl-build
-tl-build: tlconfig.lua
-	@$(INIT_LUAROCKS) tl build
+tl-build: tlconfig.lua $(TL)
+	@$(TL) build
 	@echo Updated lua files
 
 .PHONY: gen_help
-gen_help:
-	@$(INIT_LUAROCKS) ./gen_help.lua
+gen_help: $(INSPECT)
+	@$(LUAROCKS_INIT) ./gen_help.lua
 	@echo Updated help
 
 .PHONY: build

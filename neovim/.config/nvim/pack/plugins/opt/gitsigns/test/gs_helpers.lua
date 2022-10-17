@@ -70,6 +70,8 @@ function M.setup_git()
   M.git{'config', 'color.decorate'   , 'always'}
   M.git{'config', 'color.showbranch' , 'always'}
 
+  M.git{'config', 'merge.conflictStyle', 'merge'}
+
   M.git{'config', 'user.email', 'tester@com.com'}
   M.git{'config', 'user.name' , 'tester'}
 
@@ -91,7 +93,7 @@ end
 
 function M.expectf(cond, interval)
   local duration = 0
-  interval = interval or 5
+  interval = interval or 1
   while duration < timeout do
     if pcall(cond) then
       return
@@ -142,11 +144,11 @@ function M.match_lines(lines, spec)
     end
   end
   if i < #spec + 1 then
-    -- print('Lines:')
-    -- for _, l in ipairs(lines) do
-    --   print(string.format(   '"%s"', l))
-    -- end
-    error(('Did not match pattern \'%s\''):format(spec[i]))
+    local msg = {'lines:'}
+    for _, l in ipairs(lines) do
+      msg[#msg+1] = string.format(   '"%s"', l)
+    end
+    error(('Did not match pattern \'%s\' with %s'):format(spec[i], table.concat(msg, '\n')))
   end
 end
 
@@ -173,11 +175,18 @@ local function match_lines2(lines, spec)
   end
 
   if i < #spec + 1 then
-    local unmatched = {}
-    for j = i, #spec do
-      table.insert(unmatched, spec[j].text or spec[j])
-    end
-    error(('Did not match patterns:\n    - %s'):format(table.concat(unmatched, '\n    - ')))
+    local unmatched_msg = table.concat(helpers.tbl_map(function(v)
+      return string.format('    - %s', v.text or v)
+    end, spec), '\n')
+
+    local lines_msg = table.concat(helpers.tbl_map(function(v)
+      return string.format('    - %s', v)
+    end, lines), '\n')
+
+    error(('Did not match patterns:\n%s\nwith:\n%s'):format(
+      unmatched_msg,
+      lines_msg
+    ))
   end
 end
 
@@ -221,7 +230,7 @@ local id = 0
 M.it = function(it)
   return function(name, test)
     id = id+1
-    return it(name..' #'..id, test)
+    return it(name..' #'..id..'#', test)
   end
 end
 
@@ -270,14 +279,14 @@ function M.check(attrs, interval)
         signs[k] = signs[k] or 0
       end
 
-      local buf_signs = fn.sign_getplaced("%", {group='gitsigns_ns'})[1].signs
+      local buf_signs = fn.sign_getplaced("%", {group='*'})[1].signs
 
       for _, s in ipairs(buf_signs) do
         if     s.name == "GitSignsAdd"          then act.added        = act.added   + 1
         elseif s.name == "GitSignsChange"       then act.changed      = act.changed + 1
         elseif s.name == "GitSignsDelete"       then act.delete       = act.delete + 1
-        elseif s.name == "GitSignsChangeDelete" then act.changedelete = act.changedelete + 1
-        elseif s.name == "GitSignsTopDelete"    then act.topdelete    = act.topdelete + 1
+        elseif s.name == "GitSignsChangedelete" then act.changedelete = act.changedelete + 1
+        elseif s.name == "GitSignsTopdelete"    then act.topdelete    = act.topdelete + 1
         end
       end
 

@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/lewis6991/gitsigns.nvim.git
 	branch = main
-	commit = f4648dcc055a10573f36e83343592824155ab466
-	parent = 791b9c53b143dd1193dbf465f4bcf67dfcd26452
+	commit = 56e01cb0ea52635854e97bd2dd2587c8ebfab978
+	parent = fbffae1cc39acb31203e6b9a2188ebad9fa43de2
 	method = merge
 	cmdver = 0.4.5

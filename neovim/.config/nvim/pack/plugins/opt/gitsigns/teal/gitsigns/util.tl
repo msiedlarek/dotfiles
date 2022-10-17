@@ -1,4 +1,6 @@
 local record M
+  type FmtInfo = {string:string|integer|{string}}
+
   path_sep: string
 end
 
@@ -45,6 +47,15 @@ function M.buf_lines(bufnr: integer): {string}
   return buftext
 end
 
+function M.set_lines(bufnr: integer, start_row: integer, end_row: integer, lines: {string})
+  if vim.bo[bufnr].fileformat == 'dos' then
+    for i = 1, #lines do
+      lines[i] = lines[i]:gsub('\r$', '')
+    end
+  end
+  vim.api.nvim_buf_set_lines(bufnr, start_row, end_row, false, lines)
+end
+
 function M.tmpname(): string
   if is_unix then
     return os.tmpname()
@@ -88,6 +99,87 @@ function M.get_relative_time(timestamp: number): string
   else
     return to_relative_string(elapsed, year_seconds, 'year')
   end
+end
+
+function M.copy_array<T>(x: {T}): {T}
+  local r = {}
+  for i, e in ipairs(x) do
+    r[i] = e
+  end
+  return r
+end
+
+-- Strip '\r' from the EOL of each line only if all lines end with '\r'
+function M.strip_cr(xs0: {string}): {string}
+  for i = 1, #xs0 do
+    if xs0[i]:sub(-1) ~= '\r' then
+      -- don't strip, return early
+      return xs0
+    end
+  end
+  -- all lines end with '\r', need to strip
+  local xs = vim.deepcopy(xs0)
+  for i = 1, #xs do
+    xs[i] = xs[i]:sub(1, -2)
+  end
+  return xs
+end
+
+function M.calc_base(base: string): string
+  if base and base:sub(1, 1):match('[~\\^]') then
+    base = 'HEAD'..base
+  end
+  return base
+end
+
+function M.emptytable<T>(): T
+  return setmetatable({} as T, {
+    __index = function(t: table, k: any): any
+      t[k] = {}
+      return t[k]
+    end
+  })
+end
+
+local function expand_date(fmt: string, time: integer): string
+  if fmt == '%R' then
+    return M.get_relative_time(time)
+  end
+  return os.date(fmt, time)
+end
+
+---@param reltime Use relative time as the default date format
+function M.expand_format(fmt: string, info: M.FmtInfo, reltime: boolean): string
+  local ret = {}
+
+  for _ = 1, 20 do -- loop protection
+    -- Capture <name> or <name:format>
+    local scol, ecol, match, key, time_fmt = fmt:find('(<([^:>]+):?([^>]*)>)')
+    if not match then
+      break
+    end
+
+    ret[#ret+1], fmt = fmt:sub(1, scol-1), fmt:sub(ecol+1)
+
+    local v = info[key]
+
+    if v then
+      if v is {string} then
+        v = table.concat(v, '\n')
+      end
+      if vim.endswith(key, '_time') then
+        if time_fmt == '' then
+          time_fmt = reltime and '%R' or '%Y-%m-%d'
+        end
+        v = expand_date(time_fmt, v as integer)
+      end
+      match = tostring(v)
+    end
+    ret[#ret+1] = match
+  end
+
+  ret[#ret+1] = fmt
+  return table.concat(ret, '')
 end
 
 return M

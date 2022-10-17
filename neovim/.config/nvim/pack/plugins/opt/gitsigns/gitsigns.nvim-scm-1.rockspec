@@ -16,7 +16,6 @@ description = {
 
 dependencies = {
   'lua == 5.1',
-  'plenary.nvim',
 }
 
 source = {
@@ -32,30 +31,6 @@ end
 
 build = {
   type = 'builtin',
-  modules = {
-    ['gitsigns']                       = 'lua/gitsigns.lua',
-    ['gitsigns.actions']               = 'lua/gitsigns/actions.lua',
-    ['gitsigns.cache']                 = 'lua/gitsigns/cache.lua',
-    ['gitsigns.config']                = 'lua/gitsigns/config.lua',
-    ['gitsigns.current_line_blame']    = 'lua/gitsigns/current_line_blame.lua',
-    ['gitsigns.debounce']              = 'lua/gitsigns/debounce.lua',
-    ['gitsigns.debug']                 = 'lua/gitsigns/debug.lua',
-    ['gitsigns.diff_ext']              = 'lua/gitsigns/diff_ext.lua',
-    ['gitsigns.diff_int']              = 'lua/gitsigns/diff_int.lua',
-    ['gitsigns.diff_int.xdl_diff_ffi'] = 'lua/gitsigns/diff_int/xdl_diff_ffi.lua',
-    ['gitsigns.git']                   = 'lua/gitsigns/git.lua',
-    ['gitsigns.highlight']             = 'lua/gitsigns/highlight.lua',
-    ['gitsigns.hunks']                 = 'lua/gitsigns/hunks.lua',
-    ['gitsigns.manager']               = 'lua/gitsigns/manager.lua',
-    ['gitsigns.mappings']              = 'lua/gitsigns/mappings.lua',
-    ['gitsigns.message']               = 'lua/gitsigns/message.lua',
-    ['gitsigns.popup']                 = 'lua/gitsigns/popup.lua',
-    ['gitsigns.repeat']                = 'lua/gitsigns/repeat.lua',
-    ['gitsigns.signs']                 = 'lua/gitsigns/signs.lua',
-    ['gitsigns.status']                = 'lua/gitsigns/status.lua',
-    ['gitsigns.subprocess']            = 'lua/gitsigns/subprocess.lua',
-    ['gitsigns.util']                  = 'lua/gitsigns/util.lua',
-  },
   copy_directories = {
     'doc'
   }

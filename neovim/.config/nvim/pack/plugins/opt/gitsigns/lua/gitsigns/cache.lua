@@ -1,8 +1,5 @@
 local Hunk = require("gitsigns.hunks").Hunk
-local Sign = require('gitsigns.signs').Sign
 local GitObj = require('gitsigns.git').Obj
-
-local util = require('gitsigns.util')
 
 local M = {CacheEntry = {}, CacheObj = {}, }
 
@@ -49,25 +46,30 @@ CacheEntry.get_compare_rev = function(self, base)
    return string.format(':%d', stage)
 end
 
-CacheEntry.get_compare_text = function(self)
-   if self.compare_text then
-      return self.compare_text
-   end
-   return util.file_lines(self.compare_file)
+CacheEntry.get_rev_bufname = function(self, rev)
+   rev = rev or self:get_compare_rev()
+   return string.format(
+   'gitsigns://%s/%s:%s',
+   self.git_obj.repo.gitdir,
+   rev,
+   self.git_obj.relpath)
+
+end
+
+CacheEntry.invalidate = function(self)
+   self.compare_text = nil
+   self.hunks = nil
 end
 
 CacheEntry.new = function(o)
-   o.hunks = o.hunks
    o.staged_diffs = o.staged_diffs or {}
-   o.compare_file = o.compare_file or util.tmpname()
    return setmetatable(o, { __index = CacheEntry })
 end
 
 CacheEntry.destroy = function(self)
-   os.remove(self.compare_file)
    local w = self.gitdir_watcher
-   if w then
-      w:stop()
+   if w and not w:is_closing() then
+      w:close()
    end
 end
 
