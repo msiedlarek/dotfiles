@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/FeiyouG/command_center.nvim.git
-	branch = fa028e9ce8c0984ac34a5512a03f50ecafd50346
+	branch = main
 	commit = fa028e9ce8c0984ac34a5512a03f50ecafd50346
 	parent = c6b5760fb2bb03bb67712778a95990253860f578
 	method = merge
