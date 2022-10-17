@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/folke/lsp-colors.nvim.git
 	branch = main
-	commit = 517fe3ab6b63f9907b093bc9443ef06b56f804f3
-	parent = 3c40155fec308fc7f17467278d172365bf627385
+	commit = 4e6da1984d23da88a947805866580c48fc3cc8d7
+	parent = c6caea743af716cad0f9829c767a1bdfb86a8ca8
 	method = merge
 	cmdver = 0.4.5
