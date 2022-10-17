@@ -1,5 +1,5 @@
 local helpers = require("test.functional.helpers")(after_each)
-local exec_lua, feed = helpers.exec_lua, helpers.feed
+local exec_lua, feed, exec = helpers.exec_lua, helpers.feed, helpers.exec
 local ls_helpers = require("helpers")
 local Screen = require("test.functional.ui.screen")
 
@@ -43,6 +43,35 @@ describe("snippets_basic", function()
 			{0:~                                                 }|
 			{2:-- INSERT --}                                      |]],
 			unchanged = true,
+		})
+	end)
+
+	it("Can accept custom jump_into_func.", function()
+		local snip = [[
+		]]
+		exec_lua([[
+			ls.add_snippets("all", {
+				s("trig", {
+					i(1, "test"),
+					i(2, "test")
+				})
+			})
+		]])
+
+		feed("itrig")
+		exec_lua([[
+			ls.expand({
+				jump_into_func = function(snip)
+					izero = snip.insert_nodes[0]
+					require("luasnip.util.util").no_region_check_wrap(izero.jump_into, izero, 1)
+				end
+			})
+		]])
+		screen:expect({
+			grid = [[
+			testtest^                                          |
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
 		})
 	end)
 
@@ -419,6 +448,72 @@ describe("snippets_basic", function()
 			grid = [[
 			        the snippet expands                       |
 			        and is indeted properly.^                  |
+			{2:-- INSERT --}                                      |]],
+		})
+	end)
+
+	it("Tabs are expanded correctly", function()
+		local snip = [[
+			parse("trig", "\ta", {dedent = false})
+		]]
+		feed("i<Space><Space>")
+		exec("set expandtab | set shiftwidth=8")
+		exec_lua("ls.snip_expand(" .. snip .. ")")
+		screen:expect({
+			grid = [[
+			        a^                                         |
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+	end)
+
+	it("ISN also expands tabs correctly.", function()
+		local snip = [[
+			s("trig", {
+				isn(1, {
+					t{"", "\ta"}
+				}, "$PARENT_INDENT  ")
+			})
+		]]
+		exec("set expandtab | set shiftwidth=8")
+
+		feed("7i<Space><Esc>i")
+		exec_lua("ls.snip_expand(" .. snip .. ")")
+
+		-- a is indented to the 16th column, not just the 8th.
+		screen:expect({
+			grid = [[
+			                                                  |
+			                a^                                 |
+			{2:-- INSERT --}                                      |]],
+		})
+		--  .......|.......|
+	end)
+
+	it("env is extended", function()
+		local snip = [[
+			s("trig", {
+				l(l.EXTENDED)
+			}, {
+				callbacks = {
+					[-1] = {
+						[events.pre_expand] = function()
+							return {
+								env_override = {
+									EXTENDED = "woah :o"
+								}
+							}
+						end
+					}
+				}
+			})
+		]]
+		exec_lua("ls.snip_expand(" .. snip .. ")")
+
+		screen:expect({
+			grid = [[
+			woah :o^                                           |
+			{0:~                                                 }|
 			{2:-- INSERT --}                                      |]],
 		})
 	end)

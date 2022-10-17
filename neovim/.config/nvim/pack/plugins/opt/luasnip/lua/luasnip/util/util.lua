@@ -57,8 +57,18 @@ local function indent(text, indentstring)
 	return text
 end
 
--- in-place expand tabs in leading whitespace.
-local function expand_tabs(text, tabwidth)
+--- In-place expands tabs in `text`.
+--- Difficulties:
+--- we cannot simply replace tabs with a given number of spaces, the tabs align
+--- text at multiples of `tabwidth`. This is also the reason we need the number
+--- of columns the text is already indented by (otherwise we can only start a 0).
+---@param text string[], multiline string.
+---@param tabwidth number, displaycolumns one tab should shift following text
+--- by.
+---@param parent_indent_displaycolumns number, displaycolumn this text is
+--- already at.
+---@return string[], `text` (only for simple nesting).
+local function expand_tabs(text, tabwidth, parent_indent_displaycolumns)
 	for i, line in ipairs(text) do
 		local new_line = ""
 		local start_indx = 1
@@ -69,7 +79,14 @@ local function expand_tabs(text, tabwidth)
 			if tab_indx then
 				-- #new_line is index of this tab in new_line.
 				new_line = new_line
-					.. string.rep(" ", tabwidth - #new_line % tabwidth)
+					.. string.rep(
+						" ",
+						tabwidth
+							- (
+								(parent_indent_displaycolumns + #new_line)
+								% tabwidth
+							)
+					)
 			else
 				-- reached end of string.
 				break
@@ -126,12 +143,7 @@ local function cursor_set_keys(pos, before)
 			-- pos2 is set to last columnt of previous line.
 			-- # counts bytes, but win_set_cursor expects bytes, so all's good.
 			pos[2] =
-				#vim.api.nvim_buf_get_lines(
-					0,
-					pos[1],
-					pos[1] + 1,
-					false
-				)[1]
+				#vim.api.nvim_buf_get_lines(0, pos[1], pos[1] + 1, false)[1]
 		else
 			pos[2] = pos[2] - 1
 		end
@@ -177,6 +189,7 @@ end
 local function insert_move_on(new_cur_pos)
 	-- maybe feedkeys this too.
 	set_cursor_0ind(new_cur_pos)
+	vim.api.nvim_command("redraw!")
 end
 
 local function multiline_equal(t1, t2)
@@ -221,12 +234,21 @@ local function put(text, pos)
 	pos[2] = (#text > 1 and 0 or pos[2]) + #text[#text]
 end
 
--- Wrap a value in a table if it isn't one already
-local function wrap_value(value)
-	if not value or type(value) == "table" then
-		return value
+--[[ Wraps the value in a table if it's not one, makes
+  the first element an empty str if the table is empty]]
+local function to_string_table(value)
+	if not value then
+		return { "" }
 	end
-	return { value }
+	if type(value) == "string" then
+		return { value }
+	end
+	-- at this point it's a table
+	if #value == 0 then
+		return { "" }
+	end
+	-- non empty table
+	return value
 end
 
 -- Wrap node in a table if it is not one
@@ -352,10 +374,8 @@ local function store_selection()
 		if #min_indent > end_col then
 			select_dedent[#select_dedent] = ""
 		else
-			select_dedent[#select_dedent] = select_dedent[#select_dedent]:gsub(
-				"^" .. min_indent,
-				""
-			)
+			select_dedent[#select_dedent] =
+				select_dedent[#select_dedent]:gsub("^" .. min_indent, "")
 		end
 	else
 		-- in block: if indent is in block, remove the part of it that is inside
@@ -415,7 +435,7 @@ local function buffer_comment_chars()
 end
 
 local function to_line_table(table_or_string)
-	local tbl = wrap_value(table_or_string)
+	local tbl = to_string_table(table_or_string)
 
 	-- split entries at \n.
 	local line_table = {}
@@ -436,14 +456,9 @@ local function find_outer_snippet(node)
 	return node
 end
 
--- filetype: string formatted like `'filetype'`.
-local function get_snippet_filetypes()
-	local config = require("luasnip.session").config
-	local fts = config.ft_func()
-	-- add all last.
-	table.insert(fts, "all")
-
+local function redirect_filetypes(fts)
 	local snippet_fts = {}
+
 	for _, ft in ipairs(fts) do
 		vim.list_extend(snippet_fts, session.ft_redirect[ft])
 	end
@@ -462,6 +477,15 @@ local function deduplicate(list)
 		end
 	end
 	return ret
+end
+
+local function get_snippet_filetypes()
+	local config = require("luasnip.session").config
+	local fts = config.ft_func()
+	-- add all last.
+	table.insert(fts, "all")
+
+	return deduplicate(redirect_filetypes(fts))
 end
 
 local json_decode
@@ -524,6 +548,26 @@ local function no_region_check_wrap(fn, ...)
 	return fn(...)
 end
 
+local function id(a)
+	return a
+end
+
+local function no()
+	return false
+end
+
+local function yes()
+	return false
+end
+
+local function reverse_lookup(t)
+	local rev = {}
+	for k, v in pairs(t) do
+		rev[v] = k
+	end
+	return rev
+end
+
 return {
 	get_cursor_0ind = get_cursor_0ind,
 	set_cursor_0ind = set_cursor_0ind,
@@ -538,7 +582,7 @@ return {
 	multiline_equal = multiline_equal,
 	word_under_cursor = word_under_cursor,
 	put = put,
-	wrap_value = wrap_value,
+	to_string_table = to_string_table,
 	wrap_nodes = wrap_nodes,
 	store_selection = store_selection,
 	get_selection = get_selection,
@@ -552,6 +596,7 @@ return {
 	string_wrap = string_wrap,
 	to_line_table = to_line_table,
 	find_outer_snippet = find_outer_snippet,
+	redirect_filetypes = redirect_filetypes,
 	get_snippet_filetypes = get_snippet_filetypes,
 	json_encode = json_encode,
 	json_decode = json_decode,
@@ -562,4 +607,8 @@ return {
 	pop_front = pop_front,
 	key_sorted_pairs = key_sorted_pairs,
 	no_region_check_wrap = no_region_check_wrap,
+	id = id,
+	no = no,
+	yes = yes,
+	reverse_lookup = reverse_lookup,
 }

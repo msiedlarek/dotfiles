@@ -23,6 +23,7 @@ local function new_cache()
 	return setmetatable({
 		-- maps ft to list of files. Each file provides snippets for the given
 		-- filetype.
+		-- The file-paths are normalized.
 		-- In snipmate:
 		-- {
 		--	lua = {"~/snippets/lua.snippets"},
@@ -33,12 +34,18 @@ local function new_cache()
 		-- ft -> {true, nil}.
 		-- Keep track of which filetypes were already lazy_loaded to prevent
 		-- duplicates.
-		lazy_loaded_ft = {},
+		--
+		-- load "all" by default, makes no sense to include it again and again,
+		-- just once on startup seems nicer.
+		lazy_loaded_ft = { all = true },
 
-		-- key is file type, value are paths of .snippets files.
+		-- key is file type, value are normalized!! paths of .snippets files.
 		ft_paths = {},
 
-		path_snippets = {}, -- key is file path, value are parsed snippets in it.
+		-- key is _normalized!!!!_ file path, value are loader-specific.
+		-- Might contain the snippets from the file, or the filetype(s) it
+		-- contributes to.
+		path_snippets = {},
 	}, {
 		__index = Cache,
 	})

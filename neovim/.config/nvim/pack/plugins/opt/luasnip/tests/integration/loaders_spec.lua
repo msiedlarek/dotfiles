@@ -94,9 +94,6 @@ local function for_all_loaders(message, fn)
 			load("snippets")
 			-- triggers actual load for `lazy_load()`s'
 			exec("doautocmd Filetype")
-			-- wait a bit for async-operations to finish
-			-- Bad, load (even lazy_load) will be synchronous (soon).
-			exec('call wait(200, "0")')
 			fn()
 		end)
 	end
@@ -122,6 +119,51 @@ describe("loaders:", function()
 	after_each(function()
 		screen:detach()
 	end)
+
+	local function reload_test(message, load_fn, snippet_file, edit_keys)
+		it(message, function()
+			load_fn()
+
+			-- check unmodified.
+			feed("iall1")
+			exec_lua("ls.expand()")
+
+			screen:expect({
+				grid = [[
+				expands? jumps? ^  !                               |
+				{0:~                                                 }|
+				{0:~                                                 }|
+				{0:~                                                 }|
+				{2:-- INSERT --}                                      |]],
+			})
+
+			-- edit snippet-file to ensure hot-reload works.
+			exec(([[
+				edit %s
+			]]):format(os.getenv("LUASNIP_SOURCE") .. snippet_file))
+
+			-- edit snippet-file, and check for reload.
+			feed(edit_keys)
+
+			exec_lua("ls.expand()")
+
+			-- undo changes to snippet-file before checking results.
+			feed("<Esc><C-I>u:w<Cr><C-O>")
+
+			-- re-enter current placeholder
+			exec_lua("ls.jump(-1)")
+			exec_lua("ls.jump(1)")
+
+			screen:expect({
+				grid = [[
+				replaces? jumps? ^  !                              |
+				{0:~                                                 }|
+				{0:~                                                 }|
+				{0:~                                                 }|
+				{2:-- INSERT --}                                      |]],
+			})
+		end)
+	end
 
 	for_all_loaders("loads `all`-(autotriggered) snippet", function()
 		-- expand loaded snippet manually.
@@ -177,4 +219,316 @@ describe("loaders:", function()
 		-- one snippet from vim.snippets, one from lua.snippets
 		assert.are.same(2, exec_lua('return #ls.get_snippets("vim")'))
 	end)
+
+	it("separates snippets from different collection for `extends`", function()
+		-- load from both snippets (where vim extends lua) and snippets1 (where
+		-- it doesn't).
+		exec_lua(
+			string.format(
+				[[require("luasnip.loaders.from_snipmate").load({paths={"%s", "%s"}})]],
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/snipmate-snippets/snippets",
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/snipmate-snippets/snippets1"
+			)
+		)
+
+		assert.are.same(3, exec_lua('return #ls.get_snippets("vim")'))
+	end)
+
+	it("respects {override,default}_priority", function()
+		-- just the filetype the test-snippets are added for.
+		exec("set ft=prio")
+
+		exec_lua(
+			string.format(
+				[[require("luasnip.loaders.from_snipmate").load({
+					paths={"%s"},
+					override_priority = 2000
+				})]],
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/snipmate-snippets/snippets"
+			)
+		)
+
+		feed("iaaaa")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			snipmate^                                          |
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+
+		exec_lua(string.format(
+			[[require("luasnip.loaders.from_vscode").load({
+					paths={"%s"},
+					override_priority = 3000
+				})]],
+			os.getenv("LUASNIP_SOURCE") .. "/tests/data/vscode-snippets"
+		))
+
+		feed("<Cr>aaaa")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			snipmate                                          |
+			vscode^                                            |
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+
+		exec_lua(
+			string.format(
+				[[require("luasnip.loaders.from_snipmate").load({
+					paths={"%s"},
+					override_priority = 4000
+				})]],
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/snipmate-snippets/snippets"
+			)
+		)
+
+		feed("<Cr>aaaa")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			snipmate                                          |
+			vscode                                            |
+			snipmate^                                          |
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+
+		exec_lua(
+			string.format(
+				[[require("luasnip.loaders.from_lua").load({
+					paths={"%s"},
+					default_priority = 5000
+				})]],
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/lua-snippets/luasnippets"
+			)
+		)
+
+		feed("<Cr>aaaa")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			snipmate                                          |
+			vscode                                            |
+			snipmate                                          |
+			lua^                                               |
+			{2:-- INSERT --}                                      |]],
+		})
+
+		-- make sure that not just the last loaded snippet is triggered.
+		exec_lua(
+			string.format(
+				[[require("luasnip.loaders.from_snipmate").load({
+					paths={"%s"},
+					default_priority = 4999
+				})]],
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/snipmate-snippets/snippets"
+			)
+		)
+
+		feed("<Cr>aaaa")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			vscode                                            |
+			snipmate                                          |
+			lua                                               |
+			lua^                                               |
+			{2:-- INSERT --}                                      |]],
+		})
+	end)
+
+	it("vscode-options work.", function()
+		loaders["vscode(rtp)"]()
+		exec("set ft=prio")
+
+		feed("ibbbb")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			2^                                                 |
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+
+		exec_lua(string.format(
+			[[require("luasnip.loaders.from_vscode").load({
+					paths={"%s"},
+					default_priority = 2002
+				})]],
+			os.getenv("LUASNIP_SOURCE") .. "/tests/data/vscode-snippets"
+		))
+
+		feed("<Cr>bbbb")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			2                                                 |
+			3^                                                 |
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+	end)
+
+	it("snipmate-options work.", function()
+		loaders["snipmate(rtp)"]()
+		exec("set ft=prio")
+
+		feed("ibbbb")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			2^                                                 |
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+
+		exec_lua(
+			string.format(
+				[[require("luasnip.loaders.from_snipmate").load({
+					paths={"%s"},
+					default_priority = 2002
+				})]],
+				os.getenv("LUASNIP_SOURCE")
+					.. "/tests/data/snipmate-snippets/snippets"
+			)
+		)
+
+		feed("<Cr>bbbb")
+		exec_lua("ls.expand()")
+		screen:expect({
+			grid = [[
+			2                                                 |
+			3^                                                 |
+			{0:~                                                 }|
+			{0:~                                                 }|
+			{2:-- INSERT --}                                      |]],
+		})
+	end)
+
+	reload_test(
+		"snipmate-reload works",
+		loaders["snipmate(rtp)"],
+		"/tests/data/snipmate-snippets/snippets/all.snippets",
+		"<Esc>2jwcereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"vscode-reload works",
+		loaders["vscode(rtp)"],
+		"/tests/data/vscode-snippets/snippets/all.json",
+		"<Esc>4jwlcereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"lua-reload works",
+		loaders["lua(rtp)"],
+		"/tests/data/lua-snippets/luasnippets/all.lua",
+		"<Esc>jfecereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"snipmate-reload: load symlinked and edit real",
+		function()
+			exec_lua(
+				string.format(
+					[[require("luasnip.loaders.from_snipmate").lazy_load({paths="%s"})]],
+					os.getenv("LUASNIP_SOURCE")
+						.. "/tests/symlinked_data/snipmate-snippets/snippets"
+				)
+			)
+		end,
+		"/tests/data/snipmate-snippets/snippets/all.snippets",
+		"<Esc>2jwcereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"vscode-reload: load symlinked and edit real",
+		function()
+			exec_lua(
+				string.format(
+					[[require("luasnip.loaders.from_vscode").lazy_load({paths="%s"})]],
+					os.getenv("LUASNIP_SOURCE")
+						.. "/tests/symlinked_data/vscode-snippets"
+				)
+			)
+		end,
+		"/tests/data/vscode-snippets/snippets/all.json",
+		"<Esc>4jwlcereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"lua-reload: load symlinked and edit real",
+		function()
+			exec_lua(
+				string.format(
+					[[require("luasnip.loaders.from_lua").lazy_load({paths="%s"})]],
+					os.getenv("LUASNIP_SOURCE")
+						.. "/tests/symlinked_data/lua-snippets/luasnippets"
+				)
+			)
+		end,
+		"/tests/data/lua-snippets/luasnippets/all.lua",
+		"<Esc>jfecereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"snipmate-reload: load real and edit symlinked",
+		function()
+			exec_lua(
+				string.format(
+					[[require("luasnip.loaders.from_snipmate").lazy_load({paths="%s"})]],
+					os.getenv("LUASNIP_SOURCE")
+						.. "/tests/data/snipmate-snippets/snippets"
+				)
+			)
+		end,
+		"/tests/symlinked_data/snipmate-snippets/snippets/all.snippets",
+		"<Esc>2jwcereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"vscode-reload: load real and edit symlinked",
+		function()
+			exec_lua(
+				string.format(
+					[[require("luasnip.loaders.from_vscode").lazy_load({paths="%s"})]],
+					os.getenv("LUASNIP_SOURCE") .. "/tests/data/vscode-snippets"
+				)
+			)
+		end,
+		"/tests/symlinked_data/vscode-snippets/snippets/all.json",
+		"<Esc>4jwlcereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
+
+	reload_test(
+		"lua-reload: load real and edit symlinked",
+		function()
+			exec_lua(
+				string.format(
+					[[require("luasnip.loaders.from_lua").lazy_load({paths="%s"})]],
+					os.getenv("LUASNIP_SOURCE")
+						.. "/tests/data/lua-snippets/luasnippets"
+				)
+			)
+		end,
+		"/tests/symlinked_data/lua-snippets/luasnippets/all.lua",
+		"<Esc>jfecereplaces<Esc>:w<Cr><C-O>ccall1"
+	)
 end)

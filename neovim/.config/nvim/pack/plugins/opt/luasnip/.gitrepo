@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/L3MON4D3/LuaSnip.git
 	branch = master
-	commit = cc0086390c6cd2eaebae1834b115c891649ec95f
-	parent = 850e2f3dc2bf39f96470648c3eeda3074b23c95a
+	commit = 663d54482b11bca1ce94f56993b9f6ab485a13dc
+	parent = 7614a5755f8f4134653602bbc3b05d1c4a83d7d6
 	method = merge
 	cmdver = 0.4.5
