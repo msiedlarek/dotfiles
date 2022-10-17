@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/NLKNguyen/papercolor-theme.git
 	branch = master
-	commit = beb86c7630e19314f5990acef81f9823bbb5bf3c
-	parent = 4760264127c83f9172a4fb00bd461af0d3e10cc5
+	commit = 9051480ad9129ff4ab4fffb38b44779b9081626f
+	parent = 4e5833a242f6ea50cad1cc13520717a135a578ae
 	method = merge
 	cmdver = 0.4.5
