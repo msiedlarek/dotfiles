@@ -4,8 +4,12 @@ local vim = vim
 local fs_actions = require("neo-tree.sources.filesystem.lib.fs_actions")
 local utils = require("neo-tree.utils")
 local renderer = require("neo-tree.ui.renderer")
+local events = require("neo-tree.events")
+local inputs = require("neo-tree.ui.inputs")
+local popups = require("neo-tree.ui.popups")
 local log = require("neo-tree.log")
-local help= require("neo-tree.sources.common.help")
+local help = require("neo-tree.sources.common.help")
+local Preview = require("neo-tree.sources.common.preview")
 
 ---Gets the node parent folder recursively
 ---@param tree table to look for nodes
@@ -19,6 +23,28 @@ local function get_folder_node(tree, node)
     return node
   end
   return get_folder_node(tree, tree:get_node(node:get_parent_id()))
+end
+
+---The using_root_directory is used to decide what part of the filename to show
+-- the user when asking for a new filename to e.g. create, copy to or move to.
+---@param state table The state of the source
+---@return string The root path from which the relative source path should be taken
+local function get_using_root_directory(state)
+  -- default to showing only the basename of the path
+  local using_root_directory = get_folder_node(state.tree):get_id()
+  local show_path = state.config.show_path
+  if show_path == "absolute" then
+    using_root_directory = ""
+  elseif show_path == "relative" then
+    using_root_directory = state.path
+  elseif show_path ~= nil and show_path ~= "none" then
+    log.warn(
+      'A neo-tree mapping was setup with a config.show_path option with invalid value: "'
+        .. show_path
+        .. '", falling back to its default: nil/"none"'
+    )
+  end
+  return using_root_directory
 end
 
 local M = {}
@@ -41,14 +67,8 @@ end
 M.add = function(state, callback)
   local tree = state.tree
   local node = get_folder_node(tree)
-
   local in_directory = node:get_id()
-  local using_root_directory = in_directory
-  if state.config.show_path == "absolute" then
-    using_root_directory = ""
-  elseif state.config.show_path == "relative" then
-    using_root_directory = state.path
-  end
+  local using_root_directory = get_using_root_directory(state)
   fs_actions.create_node(in_directory, callback, using_root_directory)
 end
 
@@ -58,19 +78,44 @@ end
 M.add_directory = function(state, callback)
   local tree = state.tree
   local node = get_folder_node(tree)
-
   local in_directory = node:get_id()
-  local using_root_directory = in_directory
-  if state.config.show_path == "absolute" then
-    using_root_directory = ""
-  elseif state.config.show_path == "relative" then
-    using_root_directory = state.path
-  end
+  local using_root_directory = get_using_root_directory(state)
   fs_actions.create_directory(in_directory, callback, using_root_directory)
 end
 
 M.close_all_nodes = function(state)
   renderer.collapse_all_nodes(state.tree)
+  renderer.redraw(state)
+end
+
+M.expand_all_nodes = function(state, toggle_directory)
+  if toggle_directory == nil then
+    toggle_directory = function(_, node)
+      node:expand()
+    end
+  end
+  --state.explicitly_opened_directories = state.explicitly_opened_directories or {}
+
+  local expand_node
+  expand_node = function(node)
+    local id = node:get_id()
+    if node.type == "directory" and not node:is_expanded() then
+      toggle_directory(state, node)
+      node = state.tree:get_node(id)
+    end
+    local children = state.tree:get_nodes(id)
+    if children then
+      for _, child in ipairs(children) do
+        if child.type == "directory" then
+          expand_node(child)
+        end
+      end
+    end
+  end
+
+  for _, node in ipairs(state.tree:get_nodes()) do
+    expand_node(node)
+  end
   renderer.redraw(state)
 end
 
@@ -97,7 +142,7 @@ M.close_window = function(state)
   renderer.close(state)
 end
 
-local copy_node_to_clipboard = function (state, node)
+local copy_node_to_clipboard = function(state, node)
   state.clipboard = state.clipboard or {}
   local existing = state.clipboard[node.id]
   if existing and existing.action == "copy" then
@@ -120,7 +165,7 @@ M.copy_to_clipboard = function(state, callback)
   end
 end
 
-M.copy_to_clipboard_visual = function (state, selected_nodes, callback)
+M.copy_to_clipboard_visual = function(state, selected_nodes, callback)
   for _, node in ipairs(selected_nodes) do
     if node.type ~= "message" then
       copy_node_to_clipboard(state, node)
@@ -151,7 +196,7 @@ M.cut_to_clipboard = function(state, callback)
   end
 end
 
-M.cut_to_clipboard_visual = function (state, selected_nodes, callback)
+M.cut_to_clipboard_visual = function(state, selected_nodes, callback)
   for _, node in ipairs(selected_nodes) do
     if node.type ~= "message" then
       cut_node_to_clipboard(state, node)
@@ -160,6 +205,146 @@ M.cut_to_clipboard_visual = function (state, selected_nodes, callback)
   if callback then
     callback()
   end
+end
+
+--------------------------------------------------------------------------------
+-- Git commands
+--------------------------------------------------------------------------------
+
+M.git_add_file = function(state)
+  local node = state.tree:get_node()
+  if node.type == "message" then
+    return
+  end
+  local path = node:get_id()
+  local cmd = { "git", "add", path }
+  vim.fn.system(cmd)
+  events.fire_event(events.GIT_EVENT)
+end
+
+M.git_add_all = function(state)
+  local cmd = { "git", "add", "-A" }
+  vim.fn.system(cmd)
+  events.fire_event(events.GIT_EVENT)
+end
+
+M.git_commit = function(state, and_push)
+  local width = vim.fn.winwidth(0) - 2
+  local row = vim.api.nvim_win_get_height(0) - 3
+  local popup_options = {
+    relative = "win",
+    position = {
+      row = row,
+      col = 0,
+    },
+    size = width,
+  }
+
+  inputs.input("Commit message: ", "", function(msg)
+    local cmd = { "git", "commit", "-m", msg }
+    local title = "git commit"
+    local result = vim.fn.systemlist(cmd)
+    if vim.v.shell_error ~= 0 or (#result > 0 and vim.startswith(result[1], "fatal:")) then
+      popups.alert("ERROR: git commit", result)
+      return
+    end
+    if and_push then
+      title = "git commit && git push"
+      cmd = { "git", "push" }
+      local result2 = vim.fn.systemlist(cmd)
+      table.insert(result, "")
+      for i = 1, #result2 do
+        table.insert(result, result2[i])
+      end
+    end
+    events.fire_event(events.GIT_EVENT)
+    popups.alert(title, result)
+  end, popup_options)
+end
+
+M.git_commit_and_push = function(state)
+  M.git_commit(state, true)
+end
+
+M.git_push = function(state)
+  inputs.confirm("Are you sure you want to push your changes?", function(yes)
+    if yes then
+      local result = vim.fn.systemlist({ "git", "push" })
+      events.fire_event(events.GIT_EVENT)
+      popups.alert("git push", result)
+    end
+  end)
+end
+
+M.git_unstage_file = function(state)
+  local node = state.tree:get_node()
+  if node.type == "message" then
+    return
+  end
+  local path = node:get_id()
+  local cmd = { "git", "reset", "--", path }
+  vim.fn.system(cmd)
+  events.fire_event(events.GIT_EVENT)
+end
+
+M.git_revert_file = function(state)
+  local node = state.tree:get_node()
+  if node.type == "message" then
+    return
+  end
+  local path = node:get_id()
+  local cmd = { "git", "checkout", "HEAD", "--", path }
+  local msg = string.format("Are you sure you want to revert %s?", node.name)
+  inputs.confirm(msg, function(yes)
+    if yes then
+      vim.fn.system(cmd)
+      events.fire_event(events.GIT_EVENT)
+    end
+  end)
+end
+
+--------------------------------------------------------------------------------
+-- END Git commands
+--------------------------------------------------------------------------------
+
+M.next_source = function(state)
+  local sources = require("neo-tree").config.sources
+  local next_source = sources[1]
+  for i, source in ipairs(sources) do
+    if source == state.name then
+      next_source = sources[i + 1]
+      if not next_source then
+        next_source = sources[1]
+      end
+      break
+    end
+  end
+
+  require("neo-tree.command").execute({
+    source = next_source,
+    position = state.current_position,
+    action = "focus",
+  })
+end
+
+M.prev_source = function(state)
+  local sources = require("neo-tree").config.sources
+  local next_source = sources[#sources]
+  for i, source in ipairs(sources) do
+    if source == state.name then
+      next_source = sources[i - 1]
+      if not next_source then
+        next_source = sources[#sources]
+      end
+      break
+    end
+  end
+
+  require("neo-tree.command").execute({
+    source = next_source,
+    position = state.current_position,
+    action = "focus",
+  })
 end
 
 M.show_debug_info = function(state)
@@ -226,7 +411,8 @@ M.copy = function(state, callback)
   if node.type == "message" then
     return
   end
-  fs_actions.copy_node(node.path, nil, callback)
+  local using_root_directory = get_using_root_directory(state)
+  fs_actions.copy_node(node.path, nil, callback, using_root_directory)
 end
 
 ---Moves a node to a new location, using typed input.
@@ -237,26 +423,40 @@ M.move = function(state, callback)
   if node.type == "message" then
     return
   end
-  fs_actions.move_node(node.path, nil, callback)
+  local using_root_directory = get_using_root_directory(state)
+  fs_actions.move_node(node.path, nil, callback, using_root_directory)
 end
 
 M.delete = function(state, callback)
   local tree = state.tree
   local node = tree:get_node()
-  if node.type == "message" then
-    return
+  if node.type == "file" or node.type == "directory" then
+    fs_actions.delete_node(node.path, callback)
+  else
+    log.warn("The `delete` command can only be used on files and directories")
   end
-  fs_actions.delete_node(node.path, callback)
 end
 
 M.delete_visual = function(state, selected_nodes, callback)
   local paths_to_delete = {}
   for _, node_to_delete in pairs(selected_nodes) do
-    if node_to_delete.type ~= "message" then
+    if node_to_delete.type == "file" or node_to_delete.type == "directory" then
       table.insert(paths_to_delete, node_to_delete.path)
     end
   end
   fs_actions.delete_nodes(paths_to_delete, callback)
+end
+
+M.preview = function(state)
+  Preview.show(state)
+end
+
+M.revert_preview = function()
+  Preview.hide()
+end
+
+M.toggle_preview = function(state)
+  Preview.toggle(state)
 end
 
 ---Open file or directory
@@ -276,11 +476,20 @@ local open_with_cmd = function(state, open_cmd, toggle_directory, open_file)
   end
 
   local function open()
-    local path = node:get_id()
+    M.revert_preview()
+    local path = node.path or node:get_id()
     if type(open_file) == "function" then
       open_file(state, path, open_cmd)
     else
       utils.open_file(state, path, open_cmd)
+    end
+    local extra = node.extra or {}
+    local pos = extra.position or extra.end_position
+    if pos ~= nil then
+      vim.api.nvim_win_set_cursor(0, { (pos[1] or 0) + 1, pos[2] or 0 })
+      vim.api.nvim_win_call(0, function()
+        vim.cmd("normal! zvzz") -- expand folds and center cursor
+      end)
     end
   end
 
@@ -288,7 +497,7 @@ local open_with_cmd = function(state, open_cmd, toggle_directory, open_file)
     if toggle_directory and node.type == "directory" then
       toggle_directory(node)
     elseif node:has_children() then
-      if node:is_expanded() and node.type == "file" then
+      if node:is_expanded() and node.type ~= "directory" then
         return open()
       end
 
@@ -337,6 +546,22 @@ end
 ---open/closed
 M.open_tabnew = function(state, toggle_directory)
   open_with_cmd(state, "tabnew", toggle_directory)
+end
+
+---Open file or directory or focus it if a buffer already exists with it
+---@param state table The state of the source
+---@param toggle_directory function The function to call to toggle a directory
+---open/closed
+M.open_drop = function(state, toggle_directory)
+  open_with_cmd(state, "drop", toggle_directory)
+end
+
+---Open file or directory in new tab or focus it if a buffer already exists with it
+---@param state table The state of the source
+---@param toggle_directory function The function to call to toggle a directory
+---open/closed
+M.open_tab_drop = function(state, toggle_directory)
+  open_with_cmd(state, "tab drop", toggle_directory)
 end
 
 M.rename = function(state, callback)
@@ -392,26 +617,37 @@ local use_window_picker = function(state, path, cmd)
     )
     return
   end
+  local events = require("neo-tree.events")
+  local event_result = events.fire_event(events.FILE_OPEN_REQUESTED, {
+    state = state,
+    path = path,
+    open_cmd = cmd,
+  }) or {}
+  if event_result.handled then
+    events.fire_event(events.FILE_OPENED, path)
+    return
+  end
   local picked_window_id = picker.pick_window()
   if picked_window_id then
     vim.api.nvim_set_current_win(picked_window_id)
-    vim.cmd(cmd .. ' ' .. vim.fn.fnameescape(path))
+    vim.cmd(cmd .. " " .. vim.fn.fnameescape(path))
   end
+  events.fire_event(events.FILE_OPENED, path)
 end
 
 ---Marks potential windows with letters and will open the give node in the picked window.
 M.open_with_window_picker = function(state, toggle_directory)
-  open_with_cmd(state, 'edit', toggle_directory, use_window_picker)
+  open_with_cmd(state, "edit", toggle_directory, use_window_picker)
 end
 
 ---Marks potential windows with letters and will open the give node in a split next to the picked window.
 M.split_with_window_picker = function(state, toggle_directory)
-  open_with_cmd(state, 'split', toggle_directory, use_window_picker)
+  open_with_cmd(state, "split", toggle_directory, use_window_picker)
 end
 
 ---Marks potential windows with letters and will open the give node in a vertical split next to the picked window.
 M.vsplit_with_window_picker = function(state, toggle_directory)
-  open_with_cmd(state, 'vsplit', toggle_directory, use_window_picker)
+  open_with_cmd(state, "vsplit", toggle_directory, use_window_picker)
 end
 
 M.show_help = function(state)

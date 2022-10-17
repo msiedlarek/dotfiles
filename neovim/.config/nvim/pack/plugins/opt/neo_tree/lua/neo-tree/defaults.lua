@@ -1,4 +1,14 @@
 local config = {
+  -- If a user has a sources list it will replace this one.
+  -- Only sources listed here will be loaded.
+  -- You can also add an external source by adding it's name to this list.
+  -- The name used here must be the same name you would use in a require() call.
+  sources = {
+    "filesystem",
+    "buffers",
+    "git_status",
+  },
+  add_blank_line_at_top = false, -- Add a blank line at the top of the tree.
   close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
   -- popup_border_style is for input and confirmation dialogs.
   -- Configurtaion of floating window is done in the individual source sections.
@@ -17,6 +27,9 @@ local config = {
     max_lines = 10000, -- How many lines of git status results to process. Anything after this will be dropped.
                        -- Anything before this will be used. The last items to be processed are the untracked files.
   },
+  hide_root_node = false, -- Hide the root node.
+  retain_hidden_root_indent = false, -- IF the root node is hidden, keep the indentation anyhow. 
+                                     -- This is needed if you use expanders because they render in the indent.
   log_level = "info", -- "trace", "debug", "info", "warn", "error", "fatal"
   log_to_file = false, -- true, false, "/path/to/file.log", use :NeoTreeLogs to show the file
   open_files_in_last_window = true, -- false = open files in top left window
@@ -25,8 +38,53 @@ local config = {
                                -- set to -1 to disable the resize timer entirely
   --                           -- NOTE: this will speed up to 50 ms for 1 second following a resize
   sort_case_insensitive = false, -- used when sorting files and directories in the tree
+  sort_function = nil , -- uses a custom function for sorting files and directories in the tree
   use_popups_for_input = true, -- If false, inputs will use vim.ui.input() instead of custom floats.
   use_default_mappings = true,
+  -- source_selector provides clickable tabs to switch between sources.
+  source_selector = {
+    winbar = false, -- toggle to show selector on winbar
+    statusline = false, -- toggle to show selector on statusline
+    show_scrolled_off_parent_node = false, -- this will replace the tabs with the parent path
+                                           -- of the top visible node when scrolled down.
+    tab_labels = { -- falls back to source_name if nil
+      filesystem = "  Files ",
+      buffers =    "  Buffers ",
+      git_status = "  Git ",
+      diagnostics = " 裂Diagnostics ",
+    },
+    content_layout = "start", -- only with `tabs_layout` = "equal", "focus"
+    --                start  : |/ 裡 bufname     \/...
+    --                end    : |/     裡 bufname \/...
+    --                center : |/   裡 bufname   \/...
+    tabs_layout = "equal", -- start, end, center, equal, focus
+    --             start  : |/  a  \/  b  \/  c  \            |
+    --             end    : |            /  a  \/  b  \/  c  \|
+    --             center : |      /  a  \/  b  \/  c  \      |
+    --             equal  : |/    a    \/    b    \/    c    \|
+    --             active : |/  focused tab    \/  b  \/  c  \|
+    truncation_character = "…", -- character to use when truncating the tab label
+    tabs_min_width = nil, -- nil | int: if int padding is added based on `content_layout`
+    tabs_max_width = nil, -- this will truncate text even if `text_trunc_to_fit = false`
+    padding = 0, -- can be int or table
+    -- padding = { left = 2, right = 0 },
+    -- separator = "▕", -- can be string or table, see below
+     separator = { left = "▏", right= "▕" },
+    -- separator = { left = "/", right = "\\", override = nil },     -- |/  a  \/  b  \/  c  \...
+    -- separator = { left = "/", right = "\\", override = "right" }, -- |/  a  \  b  \  c  \...
+    -- separator = { left = "/", right = "\\", override = "left" },  -- |/  a  /  b  /  c  /...
+    -- separator = { left = "/", right = "\\", override = "active" },-- |/  a  / b:active \  c  \...
+    -- separator = "|",                                              -- ||  a  |  b  |  c  |...
+    separator_active = nil, -- set separators around the active tab. nil falls back to `source_selector.separator`
+    show_separator_on_edge = false,
+    --                       true  : |/    a    \/    b    \/    c    \|
+    --                       false : |     a    \/    b    \/    c     |
+    highlight_tab = "NeoTreeTabInactive",
+    highlight_tab_active = "NeoTreeTabActive",
+    highlight_background = "NeoTreeTabInactive",
+    highlight_separator = "NeoTreeTabSeparatorInactive",
+    highlight_separator_active = "NeoTreeTabSeparatorActive",
+  },
   --
   --event_handlers = {
   --  {
@@ -74,12 +132,52 @@ local config = {
   --    handler = function()
   --      vim.cmd 'highlight! Cursor guibg=#5f87af blend=0'
   --    end
-  --  }
+  --  },
+  -- {
+  --   event = "neo_tree_window_before_open",
+  --   handler = function(args)
+  --     print("neo_tree_window_before_open", vim.inspect(args))
+  --   end
+  -- },
+  -- {
+  --   event = "neo_tree_window_after_open",
+  --   handler = function(args)
+  --     vim.cmd("wincmd =")
+  --   end
+  -- },
+  -- {
+  --   event = "neo_tree_window_before_close",
+  --   handler = function(args)
+  --     print("neo_tree_window_before_close", vim.inspect(args))
+  --   end
+  -- },
+  -- {
+  --   event = "neo_tree_window_after_close",
+  --   handler = function(args)
+  --     vim.cmd("wincmd =")
+  --   end
+  -- }
   --},
   default_component_configs = {
     container = {
-      enable_character_fade = true
+      enable_character_fade = true,
+      width = "100%",
+      right_padding = 0,
     },
+    --diagnostics = {
+    --  symbols = {
+    --    hint = "H",
+    --    info = "I",
+    --    warn = "!",
+    --    error = "X",
+    --  },
+    --  highlights = {
+    --    hint = "DiagnosticSignHint",
+    --    info = "DiagnosticSignInfo",
+    --    warn = "DiagnosticSignWarn",
+    --    error = "DiagnosticSignError",
+    --  },
+    --},
     indent = {
       indent_size = 2,
       padding = 1,
@@ -104,7 +202,7 @@ local config = {
       highlight = "NeoTreeFileIcon"
     },
     modified = {
-      symbol = "[+]",
+      symbol = "[+] ",
       highlight = "NeoTreeModified",
     },
     name = {
@@ -136,9 +234,6 @@ local config = {
       { "current_filter" },
       {
         "container",
-        width = "100%",
-        right_padding = 1,
-        --max_width = 60,
         content = {
           { "name", zindex = 10 },
           -- {
@@ -148,6 +243,7 @@ local config = {
           -- },
           { "clipboard", zindex = 10 },
           { "diagnostics", errors_only = true, zindex = 20, align = "right" },
+          { "git_status", zindex = 20, align = "right" },
         },
       },
     },
@@ -156,13 +252,9 @@ local config = {
       { "icon" },
       {
         "container",
-        width = "100%",
-        right_padding = 1,
-        --max_width = 60,
         content = {
           {
             "name",
-            use_git_status_colors = true,
             zindex = 10
           },
           -- {
@@ -192,8 +284,9 @@ local config = {
   nesting_rules = {},
   window = { -- see https://github.com/MunifTanjim/nui.nvim/tree/main/lua/nui/popup for
              -- possible options. These can also be functions that return these options.
-    position = "left", -- left, right, float, current
+    position = "left", -- left, right, top, bottom, float, current
     width = 40, -- applies to left and right positions
+    height = 15, -- applies to top and bottom positions
     popup = { -- settings that apply to float position only
       size = {
         height = "80%",
@@ -216,14 +309,19 @@ local config = {
       },
       ["<2-LeftMouse>"] = "open",
       ["<cr>"] = "open",
+      ["<esc>"] = "revert_preview",
+      ["P"] = { "toggle_preview", config = { use_float = true } },
       ["S"] = "open_split",
       -- ["S"] = "split_with_window_picker",
       ["s"] = "open_vsplit",
       -- ["s"] = "vsplit_with_window_picker",
       ["t"] = "open_tabnew",
+      -- ["<cr>"] = "open_drop",
+      -- ["t"] = "open_tab_drop",
       ["w"] = "open_with_window_picker",
       ["C"] = "close_node",
       ["z"] = "close_all_nodes",
+      --["Z"] = "expand_all_nodes",
       ["R"] = "refresh",
       ["a"] = {
         "add",
@@ -238,10 +336,12 @@ local config = {
       ["y"] = "copy_to_clipboard",
       ["x"] = "cut_to_clipboard",
       ["p"] = "paste_from_clipboard",
-      ["c"] = "copy", -- takes text input for destination
-      ["m"] = "move", -- takes text input for destination
+      ["c"] = "copy", -- takes text input for destination, also accepts the config.show_path option
+      ["m"] = "move", -- takes text input for destination, also accepts the config.show_path option
       ["q"] = "close_window",
       ["?"] = "show_help",
+      ["<"] = "prev_source",
+      [">"] = "next_source",
     },
   },
   filesystem = {
@@ -249,6 +349,7 @@ local config = {
       mappings = {
         ["H"] = "toggle_hidden",
         ["/"] = "fuzzy_finder",
+        ["D"] = "fuzzy_finder_directory",
         --["/"] = "filter_as_you_type", -- this was the default until v1.28
         ["f"] = "filter_on_submit",
         ["<C-x>"] = "clear_filter",
@@ -262,6 +363,10 @@ local config = {
                                    -- "always" means directory scans are always async.
                                    -- "never"  means directory scans are never async.
     bind_to_cwd = true, -- true creates a 2-way binding between vim's cwd and neo-tree's root
+    cwd_target = {
+      sidebar = "tab",   -- sidebar is when position = left or right
+      current = "window" -- current is when position = current
+    },
     -- The renderer section provides the renderers that will be used to render the tree.
     --   The first level is the node type.
     --   For each node type, you can specify a list of components to render.
@@ -271,7 +376,7 @@ local config = {
     filtered_items = {
       visible = false, -- when true, they will just be displayed differently than normal items
       force_visible_in_empty_folder = false, -- when true, hidden files will be shown if the root folder is otherwise empty
-      show_hidden_count = false, -- when true, the number of hidden items in each folder will be shown as the last entry
+      show_hidden_count = true, -- when true, the number of hidden items in each folder will be shown as the last entry
       hide_dotfiles = true,
       hide_gitignored = true,
       hide_hidden = true, -- only works on Windows for hidden files/directories
@@ -281,11 +386,18 @@ local config = {
         --"node_modules",
       },
       hide_by_pattern = { -- uses glob style patterns
-        --"*.meta"
+        --"*.meta",
+        --"*/src/*/tsconfig.json"
       },
-      never_show = { -- remains hidden even if visible is toggled to true
+      always_show = { -- remains visible even if other settings would normally hide it
+        --".gitignored",
+      },
+      never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
         --".DS_Store",
         --"thumbs.db"
+      },
+      never_show_by_pattern = { -- uses glob style patterns
+        --".null-ls_*",
       },
     },
     find_by_full_path_words = false,  -- `false` means it only searches the tail of a path.
@@ -356,6 +468,23 @@ local config = {
         ["gc"] = "git_commit",
         ["gp"] = "git_push",
         ["gg"] = "git_commit_and_push",
+      },
+    },
+  },
+  example = {
+    renderers = {
+      custom = {
+        {"indent"},
+        {"icon", default="C" },
+        {"custom"},
+        {"name"}
+      }
+    },
+    window = {
+      mappings = {
+        ["<cr>"] = "toggle_node",
+        ["e"] = "example_command",
+        ["d"] = "show_debug_info",
       },
     },
   },

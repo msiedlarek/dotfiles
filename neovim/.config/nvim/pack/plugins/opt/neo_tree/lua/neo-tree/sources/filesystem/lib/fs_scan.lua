@@ -8,8 +8,9 @@ local file_items = require("neo-tree.sources.common.file-items")
 local log = require("neo-tree.log")
 local fs_watch = require("neo-tree.sources.filesystem.lib.fs_watch")
 local git = require("neo-tree.git")
+local events = require("neo-tree.events")
 
-local Path = require "plenary.path"
+local Path = require("plenary.path")
 local os_sep = Path.path.sep
 
 local M = {}
@@ -23,13 +24,22 @@ local on_directory_loaded = function(context, dir_path)
   if state.use_libuv_file_watcher then
     local root = context.folders[dir_path]
     if root then
-      if root.is_link then
-        log.trace("Adding fs watcher for ", root.link_to)
-        fs_watch.watch_folder(root.link_to)
-      else
-        log.trace("Adding fs watcher for ", root.path)
-        fs_watch.watch_folder(root.path)
-      end
+      local target_path = root.is_link and root.link_to or root.path
+      local fs_watch_callback = vim.schedule_wrap(function(err, fname)
+        if err then
+          log.error("file_event_callback: ", err)
+          return
+        end
+        if context.is_a_never_show_file(fname) then
+          -- don't fire events for nodes that are designated as "never show"
+          return
+        else
+          events.fire_event(events.FS_EVENT, { afile = target_path })
+        end
+      end)
+
+      log.trace("Adding fs watcher for ", target_path)
+      fs_watch.watch_folder(target_path, fs_watch_callback)
     end
   end
 end
@@ -61,6 +71,46 @@ local dir_complete = function(context, dir_path)
   return next_path
 end
 
+local job_complete = function(context)
+  local state = context.state
+  local root = context.root
+  local parent_id = context.parent_id
+  if state.filtered_items.hide_gitignored or state.enable_git_status then
+    local git_ignored = git.mark_ignored(state, context.all_items)
+    if parent_id then
+      vim.list_extend(state.git_ignored, git_ignored)
+    else
+      state.git_ignored = git_ignored
+    end
+  end
+
+  if not parent_id and state.use_libuv_file_watcher and state.enable_git_status then
+    log.trace("Starting .git folder watcher")
+    local path = root.path
+    if root.is_link then
+      path = root.link_to
+    end
+    fs_watch.watch_git_index(path)
+  end
+  fs_watch.updated_watched()
+
+  file_items.deep_sort(root.children)
+  if parent_id then
+    -- lazy loading a child folder
+    renderer.show_nodes(root.children, state, parent_id, context.callback)
+  else
+    -- full render of the tree
+    renderer.show_nodes({ root }, state, nil, context.callback)
+  end
+
+  context.state = nil
+  context.callback = nil
+  context.all_items = nil
+  context.root = nil
+  context.parent_id = nil
+  context = nil
+end
+
 -- async_scan scans all the directories in context.paths_to_load
 -- and adds them as items to render in the UI.
 local function async_scan(context, path)
@@ -68,14 +118,15 @@ local function async_scan(context, path)
   -- prepend the root path
   table.insert(context.paths_to_load, 1, path)
 
-  local directories_scanned = 0
+  context.directories_scanned = 0
+  context.directories_to_scan = #context.paths_to_load
 
-  local on_exit = vim.schedule_wrap(function()
-    context.job_complete()
+  context.on_exit = vim.schedule_wrap(function()
+    job_complete(context)
   end)
 
   -- from https://github.com/nvim-lua/plenary.nvim/blob/master/lua/plenary/scandir.lua
-  local function read_dir(current_dir)
+  local function read_dir(current_dir, ctx)
     local on_fs_scandir = function(err, fd)
       if err then
         log.error(current_dir, ": ", err)
@@ -85,19 +136,24 @@ local function async_scan(context, path)
           if name == nil then
             break
           end
-          local entry = current_dir .. os_sep .. name
-          local success, _ = pcall(file_items.create_item, context, entry, typ)
-          if not success then
+          local entry = utils.path_join(current_dir, name)
+          local success, item = pcall(file_items.create_item, ctx, entry, typ)
+          if success then
+            if ctx.recursive and item.type == "directory" then
+              ctx.directories_to_scan = ctx.directories_to_scan + 1
+              table.insert(ctx.paths_to_load, item.path)
+            end
+          else
             log.error("error creating item for ", path)
           end
         end
-        on_directory_loaded(context, current_dir)
-        directories_scanned = directories_scanned+1
-        if directories_scanned == #context.paths_to_load then
-          on_exit()
+        on_directory_loaded(ctx, current_dir)
+        ctx.directories_scanned = ctx.directories_scanned + 1
+        if ctx.directories_scanned == #ctx.paths_to_load then
+          ctx.on_exit()
         end
 
-        --local next_path = dir_complete(context, current_dir)
+        --local next_path = dir_complete(ctx, current_dir)
         --if next_path then
         --  local success, error = pcall(read_dir, next_path)
         --  if not success then
@@ -117,8 +173,8 @@ local function async_scan(context, path)
   --if not success then
   --  log.error(first, ": ", err)
   --end
-  for i = 1, #context.paths_to_load do
-    read_dir(context.paths_to_load[i])
+  for i = 1, context.directories_to_scan do
+    read_dir(context.paths_to_load[i], context)
   end
 end
 
@@ -131,19 +187,24 @@ local function sync_scan(context, path_to_scan)
   local success2, stats = pcall(vim.loop.fs_readdir, dir)
   if success2 and stats then
     for _, stat in ipairs(stats) do
-      local path = path_to_scan .. utils.path_separator .. stat.name
-      success, _ = pcall(file_items.create_item, context, path, stat.type)
-      if not success then
+      local path = utils.path_join(path_to_scan, stat.name)
+      local success3, item = pcall(file_items.create_item, context, path, stat.type)
+      if success3 then
+        if context.recursive and stat.type == "directory" then
+          table.insert(context.paths_to_load, path)
+        end
+      else
         log.error("error creating item for ", path)
       end
     end
   end
+  vim.loop.fs_closedir(dir)
 
   local next_path = dir_complete(context, path_to_scan)
   if next_path then
     sync_scan(context, next_path)
   else
-    context.job_complete()
+    job_complete(context)
   end
 end
 
@@ -155,7 +216,7 @@ M.get_items_async = function(state, parent_id, path_to_reveal, callback)
   M.get_items(state, parent_id, path_to_reveal, callback, true)
 end
 
-M.get_items = function(state, parent_id, path_to_reveal, callback, async)
+M.get_items = function(state, parent_id, path_to_reveal, callback, async, recursive)
   if state.async_directory_scan == "always" then
     async = true
   elseif state.async_directory_scan == "never" then
@@ -167,37 +228,21 @@ M.get_items = function(state, parent_id, path_to_reveal, callback, async)
   if not parent_id then
     M.stop_watchers(state)
   end
-  local context = file_items.create_context(state)
+  local context = file_items.create_context()
+  context.state = state
+  context.parent_id = parent_id
   context.path_to_reveal = path_to_reveal
+  context.recursive = recursive
+  context.callback = callback
 
   -- Create root folder
   local root = file_items.create_item(context, parent_id or state.path, "directory")
   root.name = vim.fn.fnamemodify(root.path, ":~")
   root.loaded = true
   root.search_pattern = state.search_pattern
+  context.root = root
   context.folders[root.path] = root
   state.default_expanded_nodes = state.force_open_folders or { state.path }
-
-  context.job_complete = function()
-    local f = state.filtered_items or {}
-    if f.hide_gitignored then
-      local git_ignored = git.mark_ignored(state, context.all_items)
-      if parent_id then
-        vim.list_extend(state.git_ignored, git_ignored)
-      else
-        state.git_ignored = git_ignored
-      end
-    end
-
-    file_items.deep_sort(root.children)
-    if parent_id then
-      -- lazy loading a child folder
-      renderer.show_nodes(root.children, state, parent_id, callback)
-    else
-      -- full render of the tree
-      renderer.show_nodes({ root }, state, nil, callback)
-    end
-  end
 
   if state.search_pattern then
     -- Use the external command because the plenary search is slow
@@ -209,6 +254,7 @@ M.get_items = function(state, parent_id, path_to_reveal, callback, async)
       term = state.search_pattern,
       find_args = state.find_args,
       find_by_full_path_words = state.find_by_full_path_words,
+      fuzzy_finder_mode = state.fuzzy_finder_mode,
       on_insert = function(err, path)
         if err then
           log.debug(err)
@@ -216,7 +262,9 @@ M.get_items = function(state, parent_id, path_to_reveal, callback, async)
           file_items.create_item(context, path)
         end
       end,
-      on_exit = vim.schedule_wrap(context.job_complete),
+      on_exit = vim.schedule_wrap(function()
+        job_complete(context)
+      end),
     })
   else
     -- In the case of a refresh or navigating up, we need to make sure that all
@@ -252,6 +300,22 @@ M.get_items = function(state, parent_id, path_to_reveal, callback, async)
         context.paths_to_load = utils.unique(context.paths_to_load)
       end
     end
+
+    local filtered_items = state.filtered_items or {}
+    context.is_a_never_show_file = function(fname)
+      if fname then
+        local _, name = utils.split_path(fname)
+        if name then
+          if filtered_items.never_show and filtered_items.never_show[name] then
+            return true
+          end
+          if utils.is_filtered_by_pattern(filtered_items.never_show_by_pattern, fname, name) then
+            return true
+          end
+        end
+      end
+      return false
+    end
     if async then
       async_scan(context, path)
     else
@@ -267,6 +331,7 @@ M.stop_watchers = function(state)
     local loaded_folders = renderer.select_nodes(state.tree, function(node)
       return node.type == "directory" and node.loaded
     end)
+    fs_watch.unwatch_git_index(state.path)
     for _, folder in ipairs(loaded_folders) do
       log.trace("Unwatching folder ", folder.path)
       if folder.is_link then

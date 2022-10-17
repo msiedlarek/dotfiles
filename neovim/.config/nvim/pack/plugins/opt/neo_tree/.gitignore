@@ -41,3 +41,7 @@ luac.out
 
 # Vim tag files
 tags
+
+# Others
+.testcache
+luacov.*.out

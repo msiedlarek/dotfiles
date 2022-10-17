@@ -115,6 +115,27 @@ M.get_state = function(source_name, tabnr, winid)
   end
 end
 
+---Returns the state for the current buffer, assuming it is a neo-tree buffer.
+---@param winid number|nil The window id to use, if nil, the current window is used.
+---@return table|nil The state for the current buffer, or nil if it is not a
+---neo-tree buffer.
+M.get_state_for_window = function(winid)
+  local winid = winid or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local _, source_name = pcall(vim.api.nvim_buf_get_var, bufnr, "neo_tree_source")
+  local _, position = pcall(vim.api.nvim_buf_get_var, bufnr, "neo_tree_position")
+  if not source_name or not position then
+    return nil
+  end
+
+  local tabnr = vim.api.nvim_get_current_tabpage()
+  if position == "current" then
+    return M.get_state(source_name, tabnr, winid)
+  else
+    return M.get_state(source_name, tabnr, nil)
+  end
+end
+
 M.get_path_to_reveal = function(include_terminals)
   local win_id = vim.api.nvim_get_current_win()
   local cfg = vim.api.nvim_win_get_config(win_id)
@@ -267,10 +288,30 @@ M.git_status_changed = function(source_name, args)
   end)
 end
 
-M.get_cwd = function(state)
+local get_params_for_cwd = function(state)
   local tabnr = state.tabnr
   -- the id is either the tabnr for sidebars or the winid for splits
   local winid = state.id == tabnr and -1 or state.id
+
+  if state.cwd_target then
+    local target = state.cwd_target.sidebar
+    if state.current_position == "current" then
+      target = state.cwd_target.current
+    end
+    if target == "window" then
+      return winid, tabnr
+    elseif target == "global" then
+      return -1, -1
+    else -- default to tab
+      return -1, tabnr
+    end
+  else
+    return winid, tabnr
+  end
+end
+
+M.get_cwd = function(state)
+  local winid, tabnr = get_params_for_cwd(state)
   local success, cwd = pcall(vim.fn.getcwd, winid, tabnr)
   if success then
     return cwd
@@ -289,16 +330,15 @@ M.set_cwd = function(state)
     return
   end
 
-  local tabnr = state.tabnr
-  -- the id is either the tabnr for sidebars or the winid for splits
-  local winid = state.id == tabnr and -1 or state.id
+  local winid, tabnr = get_params_for_cwd(state)
   local _, cwd = pcall(vim.fn.getcwd, winid, tabnr)
-
   if state.path ~= cwd then
     if winid > 0 then
       vim.cmd("lcd " .. state.path)
-    else
+    elseif tabnr > 0 then
       vim.cmd("tcd " .. state.path)
+    else
+      vim.cmd("cd " .. state.path)
     end
   end
 end
@@ -357,8 +397,9 @@ M.float = function(source_name)
 end
 
 ---Focus the window, opening it if it is not already open.
----@param path_to_reveal string Node to focus after the items are loaded.
----@param callback function Callback to call after the items are loaded.
+---@param source_name string Source name.
+---@param path_to_reveal string|nil Node to focus after the items are loaded.
+---@param callback function|nil Callback to call after the items are loaded.
 M.focus = function(source_name, path_to_reveal, callback)
   local state = M.get_state(source_name)
   state.current_position = nil
@@ -391,6 +432,7 @@ end
 ---@param callback function Callback to call after the items are loaded.
 ---@param async boolean Whether to load the items asynchronously, may not be respected by all sources.
 M.navigate = function(state_or_source_name, path, path_to_reveal, callback, async)
+  require("neo-tree").ensure_config()
   local state, source_name
   if type(state_or_source_name) == "string" then
     state = M.get_state(state_or_source_name)
@@ -402,7 +444,11 @@ M.navigate = function(state_or_source_name, path, path_to_reveal, callback, asyn
     log.error("navigate: state_or_source_name must be a string or a table")
   end
   log.trace("navigate", source_name, path, path_to_reveal)
-  require("neo-tree.sources." .. source_name).navigate(state, path, path_to_reveal, callback, async)
+  local mod = get_source_data(source_name).module
+  if not mod then
+    mod = require("neo-tree.sources." .. source_name)
+  end
+  mod.navigate(state, path, path_to_reveal, callback, async)
 end
 
 ---Redraws the tree without scanning the filesystem again. Use this after
@@ -416,13 +462,14 @@ end
 
 ---Refreshes the tree by scanning the filesystem again.
 M.refresh = function(source_name, callback)
+  if type(callback) ~= "function" then
+    callback = nil
+  end
   local current_tabnr = vim.api.nvim_get_current_tabpage()
   log.trace(source_name, "refresh")
-  M._for_each_state(source_name, function(state)
+  for i = 1, #all_states, 1 do
+    local state = all_states[i]
     if state.tabnr == current_tabnr and state.path and renderer.window_exists(state) then
-      if type(callback) ~= "function" then
-        callback = nil
-      end
       local success, err = pcall(M.navigate, state, state.path, nil, callback)
       if not success then
         log.error(err)
@@ -430,7 +477,7 @@ M.refresh = function(source_name, callback)
     else
       state.dirty = true
     end
-  end)
+  end
 end
 
 M.reveal_current_file = function(source_name, callback, force_cwd)
@@ -534,13 +581,17 @@ M.validate_source = function(source_name, module)
 end
 
 ---Configures the plugin, should be called before the plugin is used.
----@param config table Configuration table containing any keys that the user
---wants to change from the defaults. May be empty to accept default values.
-M.setup = function(source_name, config, global_config)
+---@param source_name string Name of the source.
+---@param config table Configuration table containing merged configuration for the source.
+---@param global_config table Global configuration table, shared between all sources.
+---@param module table Module containing the source's code.
+M.setup = function(source_name, config, global_config, module)
   log.debug(source_name, " setup ", config)
   M.unsubscribe_all(source_name)
   M.set_default_config(source_name, config)
-  local module = require("neo-tree.sources." .. source_name)
+  if module == nil then
+    module = require("neo-tree.sources." .. source_name)
+  end
   local success, err = pcall(M.validate_source, source_name, module)
   if success then
     success, err = pcall(module.setup, config, global_config)

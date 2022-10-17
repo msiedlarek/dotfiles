@@ -22,10 +22,29 @@ local function sort_items_case_insensitive(a, b)
   end
 end
 
+local function sort_function_is_valid(func)
+  if func == nil then
+    return false
+  end
+
+  local a = { type = "dir", path = "foo" }
+  local b = { type = "dir", path = "baz" }
+
+  local success, result = pcall(func, a, b)
+  if success and type(result) == "boolean" then
+    return true
+  end
+
+  log.error("sort function isn't valid ", result)
+  return false
+end
+
 local function deep_sort(tbl, sort_func)
   if sort_func == nil then
     local config = require("neo-tree").config
-    if config.sort_case_insensitive then
+    if sort_function_is_valid(config.sort_function) then
+      sort_func = config.sort_function
+    elseif config.sort_case_insensitive then
       sort_func = sort_items_case_insensitive
     else
       sort_func = sort_items
@@ -93,18 +112,23 @@ function create_item(context, path, _type)
     if f.never_show[name] then
       item.filtered_by = item.filtered_by or {}
       item.filtered_by.never_show = true
+    else
+      if utils.is_filtered_by_pattern(f.never_show_by_pattern, path, name) then
+        item.filtered_by = item.filtered_by or {}
+        item.filtered_by.never_show = true
+      end
+    end
+    if f.always_show[name] then
+      item.filtered_by = item.filtered_by or {}
+      item.filtered_by.always_show = true
     end
     if f.hide_by_name[name] then
       item.filtered_by = item.filtered_by or {}
       item.filtered_by.name = true
     end
-    if f.hide_by_pattern then
-      for _, p in ipairs(f.hide_by_pattern) do
-        if string.find(name, p) then
-          item.filtered_by = item.filtered_by or {}
-          item.filtered_by.pattern = true
-        end
-      end
+    if utils.is_filtered_by_pattern(f.hide_by_pattern, path, name) then
+      item.filtered_by = item.filtered_by or {}
+      item.filtered_by.pattern = true
     end
     if f.hide_dotfiles and string.sub(name, 1, 1) == "." then
       item.filtered_by = item.filtered_by or {}
@@ -179,14 +203,18 @@ function set_parents(context, item)
   end
 end
 
+---Create context to be used in other file-items functions.
+---@param state table|nil The state of the file-items.
+---@return table
 local create_context = function(state)
-  local context = {
-    state = state,
-    folders = {},
-    nesting = {},
-    item_exists = {},
-    all_items = {},
-  }
+  local context = {}
+  -- Make the context a weak table so that it can be garbage collected
+  --setmetatable(context, { __mode = 'v' })
+  context.state = state
+  context.folders = {}
+  context.nesting = {}
+  context.item_exists = {}
+  context.all_items = {}
   return context
 end
 

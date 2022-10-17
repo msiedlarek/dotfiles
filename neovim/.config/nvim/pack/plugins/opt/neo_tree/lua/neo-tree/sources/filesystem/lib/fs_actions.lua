@@ -12,7 +12,7 @@ local utils = require("neo-tree.utils")
 local inputs = require("neo-tree.ui.inputs")
 local events = require("neo-tree.events")
 local log = require("neo-tree.log")
-local Path = require("plenary.path")
+local Path = require("plenary").path
 
 local M = {}
 
@@ -66,7 +66,9 @@ local function rename_buffer(old_path, new_path)
                 log.trace("Force saving renamed buffer with changes")
               else
                 vim.cmd("echohl WarningMsg")
-                vim.cmd([[echo "Skipping force save. You'll need to save it with `:w!` when you are ready to force writing with the new name."]])
+                vim.cmd(
+                  [[echo "Skipping force save. You'll need to save it with `:w!` when you are ready to force writing with the new name."]]
+                )
                 vim.cmd("echohl NONE")
               end
             end)
@@ -95,15 +97,30 @@ local function create_all_parents(path)
   create_all_as_folders(parent_path)
 end
 
-local get_unused_name
-function get_unused_name(destination, name_chosen_callback, first_message)
+-- Gets a non-existing filename from the user and executes the callback with it.
+local function get_unused_name(
+  destination,
+  using_root_directory,
+  name_chosen_callback,
+  first_message
+)
   if loop.fs_stat(destination) then
-    local parent_path, name = utils.split_path(destination)
+    local parent_path, name
+    if not using_root_directory then
+      parent_path, name = utils.split_path(destination)
+    elseif #using_root_directory > 0 then
+      parent_path = destination:sub(1, #using_root_directory)
+      name = destination:sub(#using_root_directory + 2)
+    else
+      parent_path = nil
+      name = destination
+    end
+
     local message = first_message or name .. " already exists. Please enter a new name: "
     inputs.input(message, name, function(new_name)
       if new_name and string.len(new_name) > 0 then
-        local new_path = parent_path .. utils.path_separator .. new_name
-        get_unused_name(new_path, name_chosen_callback)
+        local new_path = parent_path and parent_path .. utils.path_separator .. new_name or new_name
+        get_unused_name(new_path, using_root_directory, name_chosen_callback)
       end
     end)
   else
@@ -112,10 +129,17 @@ function get_unused_name(destination, name_chosen_callback, first_message)
 end
 
 -- Move Node
-M.move_node = function(source, destination, callback)
-  log.trace("Moving node: ", source, " to ", destination)
+M.move_node = function(source, destination, callback, using_root_directory)
+  log.trace(
+    "Moving node: ",
+    source,
+    " to ",
+    destination,
+    ", using root directory: ",
+    using_root_directory
+  )
   local _, name = utils.split_path(source)
-  get_unused_name(destination or source, function(dest)
+  get_unused_name(destination or source, using_root_directory, function(dest)
     create_all_parents(dest)
     loop.fs_rename(source, dest, function(err)
       if err then
@@ -138,27 +162,73 @@ M.move_node = function(source, destination, callback)
   end, 'Move "' .. name .. '" to:')
 end
 
+---Plenary path.copy() when used to copy a recursive structure, can return a nested
+-- table with for each file a Path instance and the success result.
+---@param copy_result table The output of Path.copy()
+---@param flat_result table Return value containing the flattened results
+local function flatten_path_copy_result(flat_result, copy_result)
+  if not copy_result then
+    return
+  end
+  for k, v in pairs(copy_result) do
+    if type(v) == "table" then
+      flatten_path_copy_result(flat_result, v)
+    else
+      table.insert(flat_result, { destination = k.filename, success = v })
+    end
+  end
+end
+
+-- Check if all files were copied successfully, using the flattened copy result
+local function check_path_copy_result(flat_result)
+  if not flat_result then
+    return
+  end
+  for _, file_result in ipairs(flat_result) do
+    if not file_result.success then
+      return false
+    end
+  end
+  return true
+end
+
 -- Copy Node
-M.copy_node = function(source, _destination, callback)
+M.copy_node = function(source, _destination, callback, using_root_directory)
   local _, name = utils.split_path(source)
-  get_unused_name(_destination or source, function(destination)
-    local path = Path:new(source)
-    local success, result = pcall(path.copy, path, {
+  get_unused_name(_destination or source, using_root_directory, function(destination)
+    local source_path = Path:new(source)
+    if source_path:is_file() then
+      -- When the source is a file, then Path.copy() currently doesn't create
+      -- the potential non-existing parent directories of the destination.
+      create_all_parents(destination)
+    end
+    local success, result = pcall(source_path.copy, source_path, {
       destination = destination,
       recursive = true,
       parents = true,
     })
-
     if not success then
-      log.error("Could not copy the files from", source, "to", destination, ":", result)
+      log.error("Could not copy the file(s) from", source, "to", destination, ":", result)
       return
     end
-      vim.schedule(function()
-        events.fire_event(events.FILE_ADDED, destination)
-        if callback then
-          callback(source, destination)
-        end
-      end)
+
+    -- It can happen that the Path.copy() function returns successfully but
+    -- the copy action still failed. In this case the copy() result contains
+    -- a nested table of Path instances for each file copied, and the success
+    -- result.
+    local flat_result = {}
+    flatten_path_copy_result(flat_result, result)
+    if not check_path_copy_result(flat_result) then
+      log.error("Could not copy the file(s) from", source, "to", destination, ":", flat_result)
+      return
+    end
+
+    vim.schedule(function()
+      events.fire_event(events.FILE_ADDED, destination)
+      if callback then
+        callback(source, destination)
+      end
+    end)
   end, 'Copy "' .. name .. '" to:')
 end
 
@@ -178,7 +248,7 @@ M.create_directory = function(in_directory, callback, using_root_directory)
     using_root_directory = false
   end
 
-  inputs.input('Enter name for new directory:', base, function(destination)
+  inputs.input("Enter name for new directory:", base, function(destination)
     if not destination or destination == base then
       return
     end
@@ -204,7 +274,6 @@ M.create_directory = function(in_directory, callback, using_root_directory)
       end
     end)
   end)
-
 end
 
 --- Create Node
@@ -223,44 +292,48 @@ M.create_node = function(in_directory, callback, using_root_directory)
     using_root_directory = false
   end
 
-  inputs.input('Enter name for new file or directory (dirs end with a "/"):', base, function(destination)
-    if not destination or destination == base then
-      return
-    end
-    local is_dir = vim.endswith(destination, "/")
-
-    if using_root_directory then
-      destination = utils.path_join(using_root_directory, destination)
-    else
-      destination = vim.fn.fnamemodify(destination, ":p")
-    end
-
-    if loop.fs_stat(destination) then
-      log.warn("File already exists")
-      return
-    end
-
-    create_all_parents(destination)
-    if is_dir then
-      loop.fs_mkdir(destination, 493)
-    else
-      local open_mode = loop.constants.O_CREAT + loop.constants.O_WRONLY + loop.constants.O_TRUNC
-      local fd = loop.fs_open(destination, "w", open_mode)
-      if not fd then
-        api.nvim_err_writeln("Could not create file " .. destination)
+  inputs.input(
+    'Enter name for new file or directory (dirs end with a "/"):',
+    base,
+    function(destination)
+      if not destination or destination == base then
         return
       end
-      loop.fs_chmod(destination, 420)
-      loop.fs_close(fd)
-    end
+      local is_dir = vim.endswith(destination, "/")
 
-    vim.schedule(function()
-      events.fire_event(events.FILE_ADDED, destination)
-      if callback then
-        callback(destination)
+      if using_root_directory then
+        destination = utils.path_join(using_root_directory, destination)
+      else
+        destination = vim.fn.fnamemodify(destination, ":p")
       end
-    end)
-  end)
+
+      if loop.fs_stat(destination) then
+        log.warn("File already exists")
+        return
+      end
+
+      create_all_parents(destination)
+      if is_dir then
+        loop.fs_mkdir(destination, 493)
+      else
+        local open_mode = loop.constants.O_CREAT + loop.constants.O_WRONLY + loop.constants.O_TRUNC
+        local fd = loop.fs_open(destination, "w", open_mode)
+        if not fd then
+          api.nvim_err_writeln("Could not create file " .. destination)
+          return
+        end
+        loop.fs_chmod(destination, 420)
+        loop.fs_close(fd)
+      end
+
+      vim.schedule(function()
+        events.fire_event(events.FILE_ADDED, destination)
+        if callback then
+          callback(destination)
+        end
+      end)
+    end
+  )
 end
 
 -- Delete Node
@@ -342,7 +415,7 @@ M.delete_node = function(path, callback, noconfirm)
       -- first try using native system commands, which are recursive
       local success = false
       if utils.is_windows then
-        local result = vim.fn.system({"cmd.exe", "/c", "rmdir", "/s", "/q", path})
+        local result = vim.fn.system({ "cmd.exe", "/c", "rmdir", "/s", "/q", path })
         local error = vim.v.shell_error
         if error ~= 0 then
           log.debug("Could not delete directory '", path, "' with rmdir: ", result)
@@ -351,7 +424,7 @@ M.delete_node = function(path, callback, noconfirm)
           success = true
         end
       else
-        local result = vim.fn.system({"rm", "-Rf", path})
+        local result = vim.fn.system({ "rm", "-Rf", path })
         local error = vim.v.shell_error
         if error ~= 0 then
           log.debug("Could not delete directory '", path, "' with rm: ", result)
@@ -445,7 +518,6 @@ M.rename_node = function(path, callback)
         log.warn("Could not rename the files")
         return
       else
-        log.info("Renamed " .. name .. " successfully")
         complete()
       end
     end)

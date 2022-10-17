@@ -13,11 +13,12 @@ local log = require("neo-tree.log")
 
 local M = { resize_timer_interval = 50 }
 local ESC_KEY = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
+local default_popup_size = { width = 60, height = "80%" }
 local floating_windows = {}
 local draw, create_window, create_tree
 
 local resize_monitor_timer = nil
-local start_resize_monitor = function ()
+local start_resize_monitor = function()
   local interval = M.resize_timer_interval or -1
   if interval < 0 then
     return
@@ -37,7 +38,7 @@ local start_resize_monitor = function ()
     local success, err = pcall(manager._for_each_state, nil, function(state)
       if state.win_width and M.window_exists(state) then
         windows_exist = true
-        local current_size = vim.api.nvim_win_get_width(state.winid)
+        local current_size = utils.get_inner_win_width(state.winid)
         if current_size ~= state.win_width then
           log.trace("Window size changed, redrawing tree")
           state.win_width = current_size
@@ -69,7 +70,6 @@ local start_resize_monitor = function ()
   vim.defer_fn(check_window_size, interval)
 end
 
-
 M.close = function(state)
   local window_existed = false
   if state and state.winid then
@@ -88,7 +88,27 @@ M.close = function(state)
           end
           vim.api.nvim_win_set_buf(state.winid, new_buf)
         else
-          vim.api.nvim_win_close(state.winid, true)
+          local win_list = vim.api.nvim_tabpage_list_wins(0)
+          if #win_list > 1 then
+            local args = {
+              position = state.current_position,
+              source = state.name,
+              winid = state.winid,
+              tabnr = state.tabnr,
+            }
+            events.fire_event(events.NEO_TREE_WINDOW_BEFORE_CLOSE, args)
+            -- focus the prior used window if we are closing the currently focused window
+            local current_winid = vim.api.nvim_get_current_win()
+            if current_winid == state.winid then
+              local pwin = require("neo-tree").get_prior_window()
+              if type(pwin) == "number" and pwin > 0 then
+                pcall(vim.api.nvim_set_current_win, pwin)
+              end
+            end
+            -- if the window was a float, changing the current win would have closed it already
+            pcall(vim.api.nvim_win_close, state.winid, true)
+            events.fire_event(events.NEO_TREE_WINDOW_AFTER_CLOSE, args)
+          end
         end
       end
     end
@@ -130,14 +150,22 @@ M.close_all_floating_windows = function()
   end
 end
 
+M.get_nui_popup = function(winid)
+  for _, win in ipairs(floating_windows) do
+    if win.winid == winid then
+      return win
+    end
+  end
+end
+
 local remove_filtered = function(source_items, filtered_items)
   local visible = {}
   local hidden = {}
   for _, child in ipairs(source_items) do
     local fby = child.filtered_by
-    if type(fby) == "table" and not child.is_reveal_target then
+    if type(fby) == "table" and not child.is_reveal_target and not fby.show_anyway then
       if not fby.never_show then
-        if filtered_items.visible or child.is_nested then
+        if filtered_items.visible or child.is_nested or fby.always_show then
           table.insert(visible, child)
         else
           table.insert(hidden, child)
@@ -170,6 +198,12 @@ create_nodes = function(source_items, state, level)
     source_items = visible
   end
 
+  local show_indent_marker_for_message
+  local msg = state.renderers.message or {}
+  if msg[1] and msg[1][1] == "indent" then
+    show_indent_marker_for_message = msg[1].with_markers
+  end
+
   for i, item in ipairs(source_items) do
     local is_last_child = i == #source_items
 
@@ -181,6 +215,7 @@ create_nodes = function(source_items, state, level)
       filtered_by = item.filtered_by,
       extra = item.extra,
       is_nested = item.is_nested,
+      skip_node = item.skip_node,
       -- TODO: The below properties are not universal and should not be here.
       -- Maybe they should be moved to the "extra" field?
       is_link = item.is_link,
@@ -196,7 +231,7 @@ create_nodes = function(source_items, state, level)
     if level == 0 then
       estimated_node_length = estimated_node_length + 16
     end
-    state.longest_node = math.max(state.longest_node, estimated_node_length )
+    state.longest_node = math.max(state.longest_node, estimated_node_length)
 
     local node_children = nil
     if item.children ~= nil then
@@ -214,21 +249,28 @@ create_nodes = function(source_items, state, level)
     if source_items == hidden then
       local nodeData = {
         id = hidden[#hidden].id .. "_hidden_message",
-        name = "(forced to show " .. #hidden .. " hidden items)",
+        name = "(forced to show "
+          .. #hidden
+          .. " hidden "
+          .. (#hidden > 1 and "items" or "item")
+          .. ")",
         type = "message",
         level = level,
-        is_last_child = false,
+        is_last_child = show_indent_marker_for_message,
       }
       local node = NuiTree.Node(nodeData)
       table.insert(nodes, node)
     elseif filtered_items.show_hidden_count or (#visible == 0 and level <= 1) then
       local nodeData = {
         id = hidden[#hidden].id .. "_hidden_message",
-        name = "(" .. #hidden .. " hidden items)",
+        name = "(" .. #hidden .. " hidden " .. (#hidden > 1 and "items" or "item") .. ")",
         type = "message",
         level = level,
-        is_last_child = false,
+        is_last_child = show_indent_marker_for_message,
       }
+      if #nodes > 0 then
+        nodes[#nodes].is_last_child = not show_indent_marker_for_message
+      end
       local node = NuiTree.Node(nodeData)
       table.insert(nodes, node)
     end
@@ -276,6 +318,9 @@ M.render_component = function(component, item, state, remaining_width)
 end
 
 local prepare_node = function(item, state)
+  if item.skip_node then
+    return nil
+  end
   local line = NuiLine()
 
   local renderer = state.renderers[item.type]
@@ -311,7 +356,7 @@ end
 M.focus_node = function(state, id, do_not_focus_window, relative_movement, bottom_scroll_padding)
   if not id and not relative_movement then
     log.debug("focus_node called with no id and no relative movement")
-    return nil
+    return false
   end
   relative_movement = relative_movement or 0
   bottom_scroll_padding = bottom_scroll_padding or 0
@@ -338,7 +383,15 @@ M.focus_node = function(state, id, do_not_focus_window, relative_movement, botto
     return false
   end
 
-  if linenr and M.window_exists(state) then
+  if M.window_exists(state) then
+    if not linenr then
+      M.expand_to_node(state.tree, node)
+      node, linenr = tree:get_node(id)
+      if not linenr then
+        log.debug("focus_node cannot get linenr for node with id ", id)
+        return false
+      end
+    end
     local focus_window = not do_not_focus_window
     if focus_window then
       vim.api.nvim_set_current_win(state.winid)
@@ -452,6 +505,19 @@ M.collapse_all_nodes = function(tree)
   if root then
     root:expand()
   end
+end
+
+M.expand_to_node = function(tree, node)
+  if type(node) == "string" then
+    node = tree:get_node(node)
+  end
+  local parentId = node:get_parent_id()
+  while parentId do
+    local parent = tree:get_node(parentId)
+    parent:expand()
+    parentId = parent:get_parent_id()
+  end
+  tree:render()
 end
 
 ---Functions to save and restore the focused node.
@@ -571,6 +637,7 @@ end
 
 create_tree = function(state)
   state.tree = NuiTree({
+    ns_id = highlights.ns_id,
     winid = state.winid,
     get_node_id = function(node)
       return node.id
@@ -581,7 +648,7 @@ create_tree = function(state)
   })
 end
 
-local get_selected_nodes = function (state)
+local get_selected_nodes = function(state)
   if state.winid ~= vim.api.nvim_get_current_win() then
     return nil
   end
@@ -644,7 +711,7 @@ local set_window_mappings = function(state)
           if type(vfunc) == "function" then
             keymap.set(state.bufnr, "v", cmd, function()
               vim.api.nvim_feedkeys(ESC_KEY, "i", true)
-              vim.schedule(function ()
+              vim.schedule(function()
                 local selected_nodes = get_selected_nodes(state)
                 if utils.truthy(selected_nodes) then
                   state.config = config
@@ -668,8 +735,15 @@ create_window = function(state)
   state.current_position = state.current_position or default_position
 
   local bufname = string.format("neo-tree %s [%s]", state.name, state.id)
+  local size_opt, default_size
+  if state.current_position == "top" or state.current_position == "bottom" then
+    size_opt, default_size = "window.height", "15"
+  else
+    size_opt, default_size = "window.width", "40"
+  end
   local win_options = {
-    size = utils.resolve_config_option(state, "window.width", "40"),
+    ns_id = highlights.ns_id,
+    size = utils.resolve_config_option(state, size_opt, default_size),
     position = state.current_position,
     relative = "editor",
     buf_options = {
@@ -679,9 +753,20 @@ create_window = function(state)
       filetype = "neo-tree",
       undolevels = -1,
     },
+    win_options = {
+      colorcolumn = "",
+      signcolumn = "no",
+    },
   }
 
   local win
+  local event_args = {
+    position = state.current_position,
+    source = state.name,
+    tabnr = state.tabnr,
+  }
+  events.fire_event(events.NEO_TREE_WINDOW_BEFORE_OPEN, event_args)
+
   if state.current_position == "float" then
     state.force_float = nil
     -- First get the default options for floating windows.
@@ -689,17 +774,17 @@ create_window = function(state)
     win_options = popups.popup_options("Neo-tree " .. sourceTitle, 40, win_options)
     win_options.win_options = nil
     win_options.zindex = 40
-    local size = { width = 60, height = "80%" }
 
     -- Then override with source specific options.
     local b = win_options.border
-    win_options.size = utils.resolve_config_option(state, "window.popup.size", size)
+    win_options.size = utils.resolve_config_option(state, "window.popup.size", default_popup_size)
     win_options.position = utils.resolve_config_option(state, "window.popup.position", "50%")
     win_options.border = utils.resolve_config_option(state, "window.popup.border", b)
 
     win = NuiPopup(win_options)
     win:mount()
     win.source_name = state.name
+    win.original_options = state.window
     table.insert(floating_windows, win)
 
     if require("neo-tree").config.close_floats_on_escape_key then
@@ -742,6 +827,8 @@ create_window = function(state)
     state.bufnr = win.bufnr
     vim.api.nvim_buf_set_name(state.bufnr, bufname)
   end
+  event_args.winid = state.winid
+  events.fire_event(events.NEO_TREE_WINDOW_AFTER_OPEN, event_args)
 
   if type(state.bufnr) == "number" then
     vim.api.nvim_buf_set_var(state.bufnr, "neo_tree_source", state.name)
@@ -772,6 +859,17 @@ create_window = function(state)
 
   set_window_mappings(state)
   return win
+end
+
+M.update_floating_window_layouts = function()
+  for _, win in ipairs(floating_windows) do
+    local opt = {
+      relative = "win",
+    }
+    opt.size = utils.resolve_config_option(win.original_options, "popup.size", default_popup_size)
+    opt.position = utils.resolve_config_option(win.original_options, "popup.position", "50%")
+    win:update_layout(opt)
+  end
 end
 
 ---Determines is the givin winid is valid and the window still exists.
@@ -838,8 +936,10 @@ draw = function(nodes, state, parent_id)
       expanded_nodes = M.get_expanded_nodes(state.tree)
     end
   end
-  for _, id in ipairs(state.default_expanded_nodes) do
-    table.insert(expanded_nodes, id)
+  if state.default_expanded_nodes then
+    for _, id in ipairs(state.default_expanded_nodes) do
+      table.insert(expanded_nodes, id)
+    end
   end
 
   -- Create the tree if it doesn't exist.
@@ -864,15 +964,17 @@ draw = function(nodes, state, parent_id)
   end
 
   -- This is to ensure that containers are always the right size
-  state.win_width = vim.api.nvim_win_get_width(state.winid)
+  state.win_width = utils.get_inner_win_width(state.winid)
   start_resize_monitor()
 
   state.tree:render()
 
+  -- draw winbar / statusbar
+  require("neo-tree.ui.selector").set_source_selector(state)
+
   -- Restore the cursor position/focused node in the tree based on the state
   -- when it was last closed
   M.position.restore(state)
-
 end
 
 local function group_empty_dirs(node)
@@ -917,12 +1019,31 @@ M.show_nodes = function(sourceItems, state, parentId, callback)
     state.longest_node = 0
   end
 
+  local config = require("neo-tree").config
+  if config.hide_root_node then
+    if not parentId then
+      sourceItems[1].skip_node = true
+    end
+    if not config.retain_hidden_root_indent then
+      level = level - 1
+    end
+  end
+
+  if config.add_blank_line_at_top and not parentId then
+    table.insert(sourceItems, 1, {
+      type = "message",
+      name = "",
+      path = "",
+      id = "blank_line_at_top",
+    })
+  end
+
   if state.group_empty_dirs then
     if parent then
       -- this is a lazy load of a single sub folder
       group_empty_dirs(sourceItems)
       if #sourceItems == 1 and sourceItems[1].type == "directory" then
-        -- This folder needs to be grouped. 
+        -- This folder needs to be grouped.
         -- The goal is to just update the existing node in place.
         -- To avoid digging into private internals of Nui, we will just export the entire level and replace
         -- the one node. This keeps it in the right order, because nui doesn't have methods to replace something
@@ -963,7 +1084,7 @@ M.show_nodes = function(sourceItems, state, parentId, callback)
     draw(nodes, state, parentId)
   else
     -- this was a force grouping of a lazy loaded folder
-    state.win_width = vim.api.nvim_win_get_width(state.winid)
+    state.win_width = utils.get_inner_win_width(state.winid)
     state.tree:render()
   end
 

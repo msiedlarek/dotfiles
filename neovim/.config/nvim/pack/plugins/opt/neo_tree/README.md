@@ -82,7 +82,7 @@ use {
       {
         -- only needed if you want to use the commands with "_with_window_picker" suffix
         's1n7ax/nvim-window-picker',
-        tag = "1.*",
+        tag = "v1.*",
         config = function()
           require'window-picker'.setup({
             autoselect_one = true,
@@ -123,6 +123,15 @@ use {
         popup_border_style = "rounded",
         enable_git_status = true,
         enable_diagnostics = true,
+        sort_case_insensitive = false, -- used when sorting files and directories in the tree
+        sort_function = nil , -- use a custom function for sorting files and directories in the tree 
+        -- sort_function = function (a,b)
+        --       if a.type == b.type then
+        --           return a.path > b.path
+        --       else
+        --           return a.type > b.type
+        --       end
+        --   end , -- this sorts files and directories descendantly
         default_component_configs = {
           container = {
             enable_character_fade = true
@@ -189,13 +198,20 @@ use {
             },
             ["<2-LeftMouse>"] = "open",
             ["<cr>"] = "open",
+            ["<esc>"] = "revert_preview",
+            ["P"] = { "toggle_preview", config = { use_float = true } },
             ["S"] = "open_split",
             ["s"] = "open_vsplit",
             -- ["S"] = "split_with_window_picker",
             -- ["s"] = "vsplit_with_window_picker",
             ["t"] = "open_tabnew",
+            -- ["<cr>"] = "open_drop",
+            -- ["t"] = "open_tab_drop",
             ["w"] = "open_with_window_picker",
+            --["P"] = "toggle_preview", -- enter preview mode, which shows the current node without focusing
             ["C"] = "close_node",
+            ["z"] = "close_all_nodes",
+            --["Z"] = "expand_all_nodes",
             ["a"] = { 
               "add",
               -- some commands may take optional config options, see `:h neo-tree-mappings` for details
@@ -203,17 +219,25 @@ use {
                 show_path = "none" -- "none", "relative", "absolute"
               }
             },
-            ["A"] = "add_directory", -- also accepts the config.show_path option.
+            ["A"] = "add_directory", -- also accepts the optional config.show_path option like "add".
             ["d"] = "delete",
             ["r"] = "rename",
             ["y"] = "copy_to_clipboard",
             ["x"] = "cut_to_clipboard",
             ["p"] = "paste_from_clipboard",
-            ["c"] = "copy", -- takes text input for destination
-            ["m"] = "move", -- takes text input for destination
+            ["c"] = "copy", -- takes text input for destination, also accepts the optional config.show_path option like "add":
+            -- ["c"] = {
+            --  "copy",
+            --  config = {
+            --    show_path = "none" -- "none", "relative", "absolute"
+            --  }
+            --}
+            ["m"] = "move", -- takes text input for destination, also accepts the optional config.show_path option like "add".
             ["q"] = "close_window",
             ["R"] = "refresh",
             ["?"] = "show_help",
+            ["<"] = "prev_source",
+            [">"] = "next_source",
           }
         },
         nesting_rules = {},
@@ -227,11 +251,18 @@ use {
               --"node_modules"
             },
             hide_by_pattern = { -- uses glob style patterns
-              --"*.meta"
+              --"*.meta",
+              --"*/src/*/tsconfig.json",
             },
-            never_show = { -- remains hidden even if visible is toggled to true
+            always_show = { -- remains visible even if other settings would normally hide it
+              --".gitignored",
+            },
+            never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
               --".DS_Store",
               --"thumbs.db"
+            },
+            never_show_by_pattern = { -- uses glob style patterns
+              --".null-ls_*",
             },
           },
           follow_current_file = false, -- This will find and focus the file in the active buffer every
@@ -250,6 +281,7 @@ use {
               ["."] = "set_root",
               ["H"] = "toggle_hidden",
               ["/"] = "fuzzy_finder",
+              ["D"] = "fuzzy_finder_directory",
               ["f"] = "filter_on_submit",
               ["<c-x>"] = "clear_filter",
               ["[g"] = "prev_git_modified",
@@ -373,6 +405,8 @@ Where to show it, can be one of:
 |--------|-------------|
 | left    | Open as left hand sidebar. DEFAULT |
 | right   | Open as right hand sidebar. |
+| top     | Open as top window. |
+| botom   | Open as bottom window. |
 | float   | Open as floating window. |
 | current | Open within the current window, like netrw or vinegar would. |
 
@@ -456,7 +490,7 @@ See `:h neo-tree-file-nesting` for more details about file nesting.
 ```
 
 If `"filesystem.window.position"` is set to `"current"`, or if you have specified
-`filesystem.netrw_hijack_behavior = "open_current"`, then any command
+`filesystem.hijack_netrw_behavior = "open_current"`, then any command
 that would open a directory will open neo-tree in the specified window.
 
 
@@ -488,7 +522,6 @@ the same list you would see from `:ls`. To show with the `buffers` list, use:
 :Neotree buffers
 ```
 
-
 ### git_status
 This view take the results of the `git status` command and display them in a
 tree. It includes commands for adding, unstaging, reverting, and committing.
@@ -504,6 +537,24 @@ possible to unstage / revert a file that is already committed.
 ```
 :Neotree float git_status git_base=main
 ```
+
+### Source Selector
+![Neo-tree source selector](https://github.com/nvim-neo-tree/resources/raw/main/images/Neo-tree-source-selector.png)
+
+You can enable a clickable source selector in either the winbar (requires neovim 0.8+) or the statusline.
+To do so, set one of these options to `true`:
+
+```lua
+    requires("neo-tree").setup({
+        source_selector = {
+            winbar = false,
+            statusline = false
+        }
+    })
+```
+
+There are many configuration options to change the style of these tabs. 
+See [lua/neo-tree/defaults.lua](lua/neo-tree/defaults.lua) for details.
 
 
 ## Configuration and Customization

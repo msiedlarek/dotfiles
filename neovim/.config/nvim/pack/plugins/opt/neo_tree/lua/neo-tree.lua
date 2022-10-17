@@ -28,10 +28,9 @@ local check_source = function(source_name)
 end
 
 local get_position = function(source_name)
-  local pos = utils.get_value(M, "config." .. source_name .. ".window.position", "left")
+  local pos = utils.get_value(M, "config." .. source_name .. ".window.position", "left", false)
   return pos
 end
-
 
 M.ensure_config = function()
   if not M.config then
@@ -46,7 +45,7 @@ M.close_all_except = function(source_name)
   local target_pos = get_position(source_name)
   for _, name in ipairs(sources) do
     if name ~= source_name then
-      local pos = utils.get_value(M, "config." .. name .. ".window.position", "left")
+      local pos = utils.get_value(M, "config." .. name .. ".window.position", "left", false)
       if pos == target_pos then
         manager.close(name)
       end
@@ -243,7 +242,6 @@ M.setup = function(config, is_auto_config)
   if not is_auto_config and netrw.get_hijack_netrw_behavior() ~= "disabled" then
     vim.cmd("silent! autocmd! FileExplorer *")
   end
-
 end
 
 M.show_logs = function()

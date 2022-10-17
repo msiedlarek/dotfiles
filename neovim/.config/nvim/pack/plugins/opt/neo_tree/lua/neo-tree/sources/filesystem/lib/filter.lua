@@ -47,6 +47,16 @@ M.show_filter = function(state, search_as_you_type, fuzzy_finder_mode)
     })
   end
 
+  local select_first_file = function()
+    local is_file = function(node)
+      return node.type == "file"
+    end
+    local files = renderer.select_nodes(state.tree, is_file, 1)
+    if #files > 0 then
+      renderer.focus_node(state, files[1]:get_id(), true)
+    end
+  end
+
   local has_pre_search_folders = utils.truthy(state.open_folders_before_search)
   if not has_pre_search_folders then
     log.trace("No search or pre-search folders, recording pre-search folders now")
@@ -109,9 +119,14 @@ M.show_filter = function(state, search_as_you_type, fuzzy_finder_mode)
       else
         log.trace("Setting search in on_change to: " .. value)
         state.search_pattern = value
+        state.fuzzy_finder_mode = fuzzy_finder_mode
+        local callback = select_first_file
+        if fuzzy_finder_mode == "directory" then
+          callback = nil
+        end
+
         local len = #value
         local delay = 500
-
         if len > 3 then
           delay = 100
         elseif len > 2 then
@@ -119,22 +134,10 @@ M.show_filter = function(state, search_as_you_type, fuzzy_finder_mode)
         elseif len > 1 then
           delay = 400
         end
-        utils.debounce(
-          "filesystem_filter",
-          function()
-            local is_file = function(node)
-              return node.type == "file"
-            end
-            fs._navigate_internal(state, nil, nil, function ()
-              local files = renderer.select_nodes(state.tree, is_file, 1)
-              if #files > 0 then
-                renderer.focus_node(state, files[1]:get_id(), true)
-              end
-            end)
-          end,
-          delay,
-          utils.debounce_strategy.CALL_LAST_ONLY
-        )
+
+        utils.debounce("filesystem_filter", function()
+          fs._navigate_internal(state, nil, nil, callback)
+        end, delay, utils.debounce_strategy.CALL_LAST_ONLY)
       end
     end,
   })
@@ -155,11 +158,13 @@ M.show_filter = function(state, search_as_you_type, fuzzy_finder_mode)
     restore_height()
   end, { noremap = true })
 
+  input:map("i", "<C-w>", "<C-S-w>", { noremap = true })
+
   input:on({ event.BufLeave, event.BufDelete }, function()
     vim.cmd("stopinsert")
     input:unmount()
     -- If this was closed due to submit, that function will handle the reset_search
-    vim.defer_fn(function ()
+    vim.defer_fn(function()
       if fuzzy_finder_mode and utils.truthy(state.search_pattern) then
         fs.reset_search(state, true)
       end

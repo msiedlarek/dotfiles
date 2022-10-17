@@ -18,6 +18,13 @@ local log = require("neo-tree.log")
 
 local M = {}
 
+local make_two_char = function(symbol)
+  if vim.fn.strchars(symbol) == 1 then
+    return symbol .. " "
+  else
+    return symbol
+  end
+end
 -- only works in the buffers component, but it's here so we don't have to defined
 -- multple renderers.
 M.bufnr = function(config, node, state)
@@ -89,18 +96,26 @@ M.diagnostics = function(config, node, state)
     defined = vim.fn.sign_getdefined("LspDiagnosticsSign" .. old_severity)
   end
   defined = defined and defined[1]
+
+  -- check for overrides in the component config
+  local severity_lower = severity:lower()
+  if config.symbols and config.symbols[severity_lower] then
+    defined = defined or { texthl = "Diagnostic" .. severity }
+    defined.text = config.symbols[severity_lower]
+  end
+  if config.highlights and config.highlights[severity_lower] then
+    defined = defined or { text = severity:sub(1, 1) .. " " }
+    defined.texthl = config.highlights[severity_lower]
+  end
+
   if defined and defined.text and defined.texthl then
-    -- for some reason it always comes padded with a space
-    if type(defined.text) == "string" and defined.text:sub(#defined.text) == " " then
-      defined.text = defined.text:sub(1, -2)
-    end
     return {
-      text = " " .. defined.text,
+      text = make_two_char(defined.text),
       highlight = defined.texthl,
     }
   else
     return {
-      text = " " .. severity:sub(1, 1),
+      text = severity:sub(1, 1) .. " ",
       highlight = "Diagnostic" .. severity,
     }
   end
@@ -125,6 +140,9 @@ M.git_status = function(config, node, state)
   local change_highlt = highlights.FILE_NAME
   local status_symbol = symbols.staged
   local status_highlt = highlights.GIT_STAGED
+  if node.type == "directory" and git_status:len() == 1 then
+    status_symbol = nil
+  end
 
   if git_status:sub(1, 1) == " " then
     status_symbol = symbols.unstaged
@@ -184,56 +202,58 @@ M.git_status = function(config, node, state)
     local components = {}
     if type(change_symbol) == "string" and #change_symbol > 0 then
       table.insert(components, {
-        text = " " .. change_symbol,
+        text = make_two_char(change_symbol),
         highlight = change_highlt,
       })
     end
     if type(status_symbol) == "string" and #status_symbol > 0 then
       table.insert(components, {
-        text = " " .. status_symbol,
+        text = make_two_char(status_symbol),
         highlight = status_highlt,
       })
     end
     return components
   else
     return {
-      text = " [" .. git_status .. "]",
+      text = "[" .. git_status .. "]",
       highlight = config.highlight or change_highlt,
     }
   end
 end
 
 M.filtered_by = function(config, node, state)
+  local result = {}
   if type(node.filtered_by) == "table" then
     local fby = node.filtered_by
     if fby.name then
-      return {
-        text = " (hide by name)",
+      result = {
+        text = "(hide by name) ",
         highlight = highlights.HIDDEN_BY_NAME,
       }
     elseif fby.pattern then
-      return {
-        text = " (hide by pattern)",
+      result = {
+        text = "(hide by pattern) ",
         highlight = highlights.HIDDEN_BY_NAME,
       }
     elseif fby.gitignored then
-      return {
-        text = " (gitignored)",
+      result = {
+        text = "(gitignored) ",
         highlight = highlights.GIT_IGNORED,
       }
     elseif fby.dotfiles then
-      return {
-        text = " (dotfile)",
+      result = {
+        text = "(dotfile) ",
         highlight = highlights.DOTFILE,
       }
     elseif fby.hidden then
-      return {
-        text = " (hidden)",
+      result = {
+        text = "(hidden) ",
         highlight = highlights.WINDOWS_HIDDEN,
       }
     end
+    fby = nil
   end
-  return {}
+  return result
 end
 
 M.icon = function(config, node, state)
@@ -267,9 +287,10 @@ end
 
 M.modified = function(config, node, state)
   local modified_buffers = state.modified_buffers or {}
+
   if modified_buffers[node.path] then
     return {
-      text = " " .. (config.symbol or "[+]"),
+      text = (make_two_char(config.symbol) or "[+] "),
       highlight = config.highlight or highlights.MODIFIED,
     }
   else
@@ -292,12 +313,20 @@ M.name = function(config, node, state)
   else
     local filtered_by = M.filtered_by(config, node, state)
     highlight = filtered_by.highlight or highlight
-    if config.use_git_status_colors == nil or config.use_git_status_colors then
+    if config.use_git_status_colors then
       local git_status = state.components.git_status({}, node, state)
       if git_status and git_status.highlight then
         highlight = git_status.highlight
       end
     end
+  end
+
+  if type(config.right_padding) == "number" then
+    if config.right_padding > 0 then
+      text = text .. string.rep(" ", config.right_padding)
+    end
+  else
+    text = text .. " "
   end
 
   return {

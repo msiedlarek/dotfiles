@@ -9,6 +9,7 @@ local events = require("neo-tree.events")
 local log = require("neo-tree.log")
 local manager = require("neo-tree.sources.manager")
 local git = require("neo-tree.git")
+local glob = require("neo-tree.sources.filesystem.lib.globtopattern")
 
 local M = { name = "filesystem" }
 
@@ -183,6 +184,7 @@ end
 
 M.reset_search = function(state, refresh, open_current_node)
   log.trace("reset_search")
+  state.fuzzy_finder_mode = nil
   if refresh == nil then
     refresh = true
   end
@@ -199,6 +201,7 @@ M.reset_search = function(state, refresh, open_current_node)
       local path = node:get_id()
       renderer.position.set(state, path)
       if node.type == "directory" then
+        path = utils.remove_trailing_slash(path)
         log.trace("opening directory from search: ", path)
         M.navigate(state, nil, path, function()
           pcall(renderer.focus_node, state, path, false)
@@ -253,24 +256,22 @@ end
 --wants to change from the defaults. May be empty to accept default values.
 M.setup = function(config, global_config)
   config.filtered_items = config.filtered_items or {}
+  config.enable_git_status = global_config.enable_git_status
 
-  local hide_by_name = config.filtered_items.hide_by_name
-  if hide_by_name then
-    config.filtered_items.hide_by_name = utils.list_to_dict(hide_by_name)
-  end
-
-  local hide_by_pattern = config.filtered_items.hide_by_pattern
-  if hide_by_pattern then
-    local glob = require("neo-tree.sources.filesystem.lib.globtopattern")
-    for i, pattern in ipairs(hide_by_pattern) do
-      hide_by_pattern[i] = glob.globtopattern(pattern)
-      log.trace("hide_by_pattern: ", pattern, " -> ", hide_by_pattern[i])
+  for _, key in ipairs({ "hide_by_pattern", "never_show_by_pattern" }) do
+    local list = config.filtered_items[key]
+    if type(list) == "table" then
+      for i, pattern in ipairs(list) do
+        list[i] = glob.globtopattern(pattern)
+      end
     end
   end
 
-  local never_show = config.filtered_items.never_show
-  if never_show then
-    config.filtered_items.never_show = utils.list_to_dict(never_show)
+  for _, key in ipairs({ "hide_by_name", "always_show", "never_show" }) do
+    local list = config.filtered_items[key]
+    if type(list) == "table" then
+      config.filtered_items[key] = utils.list_to_dict(list)
+    end
   end
 
   --Configure events for before_render
@@ -327,7 +328,7 @@ M.setup = function(config, global_config)
           local afile = arg.afile or ""
           if utils.is_real_file(afile) then
             log.trace("refreshing due to vim_buffer_changed event: ", afile)
-            manager.refresh(M.name)
+            manager.refresh("filesystem")
           else
             log.trace("Ignoring vim_buffer_changed event for non-file: ", afile)
           end
@@ -371,11 +372,10 @@ M.setup = function(config, global_config)
       end,
     })
   end
-
 end
 
 ---Expands or collapses the current node.
-M.toggle_directory = function(state, node, path_to_reveal)
+M.toggle_directory = function(state, node, path_to_reveal, skip_redraw, recursive)
   local tree = state.tree
   if not node then
     node = tree:get_node()
@@ -388,7 +388,7 @@ M.toggle_directory = function(state, node, path_to_reveal)
     local id = node:get_id()
     state.explicitly_opened_directories[id] = true
     renderer.position.set(state, nil)
-    fs_scan.get_items(state, id, path_to_reveal)
+    fs_scan.get_items(state, id, path_to_reveal, nil, false, recursive)
   elseif node:has_children() then
     local updated = false
     if node:is_expanded() then
@@ -398,7 +398,7 @@ M.toggle_directory = function(state, node, path_to_reveal)
       updated = node:expand()
       state.explicitly_opened_directories[node:get_id()] = true
     end
-    if updated then
+    if updated and not skip_redraw then
       renderer.redraw(state)
     end
     if path_to_reveal then

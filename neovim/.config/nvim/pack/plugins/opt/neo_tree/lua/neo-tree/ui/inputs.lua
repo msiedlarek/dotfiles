@@ -7,7 +7,7 @@ local M = {}
 
 local should_use_popup_input = function()
   local nt = require("neo-tree")
-  return utils.get_value(nt.config, "use_popups_for_input", true)
+  return utils.get_value(nt.config, "use_popups_for_input", true, false)
 end
 
 M.show_input = function(input, callback)
@@ -17,6 +17,8 @@ M.show_input = function(input, callback)
     vim.cmd("stopinsert")
     input:unmount()
   end, { noremap = true })
+
+  input:map("i", "<C-w>", "<C-S-w>", { noremap = true })
 
   local event = require("nui.utils.autocmd").event
   input:on({ event.BufLeave, event.BufDelete }, function()

@@ -13,7 +13,8 @@ M.get_open_buffers = function(state)
     return
   end
   state.loading = true
-  local context = file_items.create_context(state)
+  local context = file_items.create_context()
+  context.state = state
   -- Create root folder
   local root = file_items.create_item(context, state.path, "directory")
   root.name = vim.fn.fnamemodify(root.path, ":~")
@@ -28,8 +29,9 @@ M.get_open_buffers = function(state)
     if vim.startswith(path, "term://") then
       local name = path:match("term://(.*)//.*")
       local abs_path = vim.fn.fnamemodify(name, ":p")
+      local has_title, title = pcall(vim.api.nvim_buf_get_var, b, "term_title")
       local item = {
-        name = name,
+        name = has_title and title or name,
         ext = "terminal",
         path = abs_path,
         id = path,
@@ -38,7 +40,7 @@ M.get_open_buffers = function(state)
         extra = {
           bufnr = b,
           is_listed = true,
-        }
+        },
       }
       if utils.is_subpath(state.path, abs_path) then
         table.insert(terminals, item)

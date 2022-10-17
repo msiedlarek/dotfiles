@@ -43,6 +43,28 @@ M.debounce_action = {
   COMPLETE_ASYNC_JOB = 2,
 }
 
+local defer_function
+-- Part of debounce. Moved out of the function to eliminate memory leaks.
+defer_function = function(id, frequency_in_ms, strategy, action)
+  tracked_functions[id].in_debounce_period = true
+  vim.defer_fn(function()
+    local current_data = tracked_functions[id]
+    if not current_data then
+      return
+    end
+    if current_data.async_in_progress then
+      defer_function(id, frequency_in_ms, strategy, action)
+      return
+    end
+    local _fn = current_data.fn
+    current_data.fn = nil
+    current_data.in_debounce_period = false
+    if _fn ~= nil then
+      M.debounce(id, _fn, frequency_in_ms, strategy, action)
+    end
+  end, frequency_in_ms)
+end
+
 ---Call fn, but not more than once every x milliseconds.
 ---@param id string Identifier for the debounce group, such as the function name.
 ---@param fn function Function to be executed.
@@ -50,27 +72,6 @@ M.debounce_action = {
 ---@param strategy number The debounce_strategy to use, determines which calls to fn are not dropped.
 M.debounce = function(id, fn, frequency_in_ms, strategy, action)
   local fn_data = tracked_functions[id]
-
-  local defer_function
-  defer_function = function()
-    fn_data.in_debounce_period = true
-    vim.defer_fn(function()
-      local current_data = tracked_functions[id]
-      if not current_data then
-        return
-      end
-      if fn_data.async_in_progress then
-        defer_function()
-        return
-      end
-      local _fn = current_data.fn
-      current_data.fn = nil
-      current_data.in_debounce_period = false
-      if _fn ~= nil then
-        M.debounce(id, _fn, current_data.frequency_in_ms, strategy, action)
-      end
-    end, frequency_in_ms)
-  end
 
   if fn_data == nil then
     if action == M.debounce_action.COMPLETE_ASYNC_JOB then
@@ -86,7 +87,7 @@ M.debounce = function(id, fn, frequency_in_ms, strategy, action)
     }
     tracked_functions[id] = fn_data
     if strategy == M.debounce_strategy.CALL_LAST_ONLY then
-      defer_function()
+      defer_function(id, frequency_in_ms, strategy, action)
       return
     end
   else
@@ -96,7 +97,7 @@ M.debounce = function(id, fn, frequency_in_ms, strategy, action)
       fn_data.async_in_progress = false
       return
     elseif fn_data.async_in_progress then
-      defer_function()
+      defer_function(id, frequency_in_ms, strategy, action)
       return
     end
   end
@@ -127,7 +128,7 @@ M.debounce = function(id, fn, frequency_in_ms, strategy, action)
 
   if strategy == M.debounce_strategy.CALL_LAST_ONLY then
     if fn_data.async_in_progress then
-      defer_function()
+      defer_function(id, frequency_in_ms, strategy, action)
     else
       -- We are done with this debounce
       tracked_functions[id] = nil
@@ -138,7 +139,7 @@ M.debounce = function(id, fn, frequency_in_ms, strategy, action)
     -- and when this deferred executes, nothing will happen.
     -- If there are several calls, only the last one in will run.
     strategy = M.debounce_strategy.CALL_LAST_ONLY
-    defer_function()
+    defer_function(id, frequency_in_ms, strategy, action)
   end
 end
 
@@ -242,13 +243,25 @@ M.get_keys = function(tbl, sorted)
   return keys
 end
 
+---Gets the usable columns in a window, subtracting sign, fold, and line number columns.
+---@param winid integer The window id to get the columns of.
+---@return number
+M.get_inner_win_width = function(winid)
+  local info = vim.fn.getwininfo(winid)
+  if info and info[1] then
+    return info[1].width - info[1].textoff
+  else
+    log.error("Could not get window info for window", winid)
+  end
+end
+
 ---Handles null coalescing into a table at any depth.
 ---@param sourceObject table The table to get a vlue from.
 ---@param valuePath string The path to the value to get.
 ---@param defaultValue any The default value to return if the value is nil.
 ---@param strict_type_check boolean Whether to require the type of the value is
 ---the same as the default value.
----@return table table The value at the path or the default value.
+---@return table|nil table The value at the path or the default value.
 M.get_value = function(sourceObject, valuePath, defaultValue, strict_type_check)
   if sourceObject == nil then
     return defaultValue
@@ -307,6 +320,28 @@ M.group_by = function(array, key)
     table.insert(group, item)
   end
   return result
+end
+
+---Determines if a file should be filtered by a given list of glob patterns.
+---@param pattern_list table The list of glob patterns to filter by.
+---@param path string The full path to the file.
+---@param name string|nil The name of the file.
+---@return boolean
+M.is_filtered_by_pattern = function(pattern_list, path, name)
+  if pattern_list == nil then
+    return false
+  end
+  if name == nil then
+    _, name = M.split_path(path)
+  end
+  for _, p in ipairs(pattern_list) do
+    local separator_pattern = M.is_windows and "\\" or "/"
+    local filename = string.find(p, separator_pattern) and path or name
+    if string.find(filename, p) then
+      return true
+    end
+  end
+  return false
 end
 
 M.is_floating = function(win_id)
@@ -375,13 +410,55 @@ M.map = function(tbl, fn)
   return t
 end
 
+M.get_appropriate_window = function(state)
+  -- Avoid triggering autocommands when switching windows
+  local eventignore = vim.o.eventignore
+  vim.o.eventignore = "all"
+
+  local current_window = vim.api.nvim_get_current_win()
+
+  -- use last window if possible
+  local suitable_window_found = false
+  local nt = require("neo-tree")
+  if nt.config.open_files_in_last_window then
+    local prior_window = nt.get_prior_window()
+    if prior_window > 0 then
+      local success = pcall(vim.api.nvim_set_current_win, prior_window)
+      if success then
+        suitable_window_found = true
+      end
+    end
+  end
+  -- find a suitable window to open the file in
+  if not suitable_window_found then
+    if state.current_position == "right" then
+      vim.cmd("wincmd t")
+    else
+      vim.cmd("wincmd w")
+    end
+  end
+  local attempts = 0
+  while attempts < 5 and vim.bo.filetype == "neo-tree" do
+    attempts = attempts + 1
+    vim.cmd("wincmd w")
+  end
+
+  local winid = vim.api.nvim_get_current_win()
+  local is_neo_tree_window = vim.bo.filetype == "neo-tree"
+  vim.api.nvim_set_current_win(current_window)
+
+  vim.o.eventignore = eventignore
+
+  return winid, is_neo_tree_window
+end
+
 ---Open file in the appropriate window.
 ---@param state table The state of the source
 ---@param path string The file to open
 ---@param open_cmd string The vimcommand to use to open the file
 M.open_file = function(state, path, open_cmd)
   open_cmd = open_cmd or "edit"
-  if open_cmd == "edit" then
+  if open_cmd == "edit" or open_cmd == "e" then
     -- If the file is already open, switch to it.
     local bufnr = M.find_buffer_by_name(path)
     if bufnr > 0 then
@@ -406,36 +483,12 @@ M.open_file = function(state, path, open_cmd)
     if state.current_position == "current" then
       result, err = pcall(vim.cmd, open_cmd .. " " .. escaped_path)
     else
-      -- use last window if possible
-      local suitable_window_found = false
-      local nt = require("neo-tree")
-      if nt.config.open_files_in_last_window then
-        local prior_window = nt.get_prior_window()
-        if prior_window > 0 then
-          local success = pcall(vim.api.nvim_set_current_win, prior_window)
-          if success then
-            suitable_window_found = true
-          end
-        end
-      end
-      -- find a suitable window to open the file in
-      if not suitable_window_found then
-        if state.current_position == "right" then
-          vim.cmd("wincmd t")
-        else
-          vim.cmd("wincmd w")
-        end
-      end
-      local attempts = 0
-      while attempts < 4 and vim.bo.filetype == "neo-tree" do
-        attempts = attempts + 1
-        vim.cmd("wincmd w")
-      end
+      local winid, is_neo_tree_window = M.get_appropriate_window(state)
+      vim.api.nvim_set_current_win(winid)
       -- TODO: make this configurable, see issue #43
-      if vim.bo.filetype == "neo-tree" then
+      if is_neo_tree_window then
         -- Neo-tree must be the only window, restore it's status as a sidebar
-        local winid = vim.api.nvim_get_current_win()
-        local width = M.get_value(state, "window.width", 40)
+        local width = M.get_value(state, "window.width", 40, false)
         result, err = pcall(vim.cmd, "vsplit " .. escaped_path)
         vim.api.nvim_win_set_width(winid, width)
       else
@@ -515,6 +568,18 @@ if M.is_windows == true then
   M.path_separator = "\\"
 end
 
+---Remove the path separator from the end of a path in a cross-platform way.
+---@param path string The path to remove the separator from.
+---@return string string The path without any trailing separator.
+---@return number count The number of separators removed.
+M.remove_trailing_slash = function(path)
+  if M.is_windows then
+    return path:gsub("\\$", "")
+  else
+    return path:gsub("/$", "")
+  end
+end
+
 ---Sorts a list of paths in the order they would appear in a tree.
 ---@param paths table The list of paths to sort.
 ---@return table table The sorted list of paths.
@@ -555,7 +620,7 @@ M.sort_by_tree_display = function(paths)
   local original_paths = M.list_to_dict(paths)
 
   -- sort folders before files
-  local sort_by_name = function (a, b)
+  local sort_by_name = function(a, b)
     local a_isdir = #a.children > 0
     local b_isdir = #b.children > 0
     if a_isdir and not b_isdir then
@@ -601,7 +666,8 @@ end
 
 ---Split a path into a parentPath and a name.
 ---@param path string The path to split.
----@return table table parentPath, name
+---@return string|nil parentPath
+---@return string|nil name
 M.split_path = function(path)
   if not path then
     return nil, nil
@@ -616,7 +682,7 @@ M.split_path = function(path)
     if #parts == 1 then
       parentPath = parentPath .. M.path_separator
     elseif parentPath == "" then
-      parentPath = nil
+      return nil, name
     end
   else
     parentPath = M.path_separator .. parentPath

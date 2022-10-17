@@ -8,15 +8,6 @@ local highlights = require("neo-tree.ui.highlights")
 local manager = require("neo-tree.sources.manager")
 local netrw = require("neo-tree.setup.netrw")
 
--- If you add a new source, you need to add it to the sources table.
--- Each source should have a defaults module that contains the default values
--- for the source config, and a setup function that takes that config.
-local sources = {
-  "filesystem",
-  "buffers",
-  "git_status",
-}
-
 local M = {}
 
 local normalize_mappings = function(config)
@@ -39,6 +30,11 @@ local define_events = function()
     return
   end
 
+  events.define_event(events.FS_EVENT, {
+    debounce_frequency = 100,
+    debounce_strategy = utils.debounce_strategy.CALL_LAST_ONLY,
+  })
+
   local v = vim.version()
   local diag_autocmd = "DiagnosticChanged"
   if v.major < 1 and v.minor < 6 then
@@ -49,35 +45,38 @@ local define_events = function()
     return args
   end)
 
-  events.define_autocmd_event(
-    events.VIM_BUFFER_CHANGED,
-    { "BufWritePost", "BufFilePost" },
-    200
-  )
+  events.define_autocmd_event(events.VIM_BUFFER_CHANGED, { "BufWritePost", "BufFilePost" }, 200)
 
-  events.define_autocmd_event(events.VIM_BUFFER_MODIFIED_SET, { "BufModifiedSet" }, 0, function(args)
-    if utils.is_real_file(args.afile) then
-      -- we could use args.afile to update the sigle file that changed, but it seems like we miss
-      -- buffers when `:wa` is used.
-      args.modified_buffers = utils.get_modified_buffers()
-      return args
-    else
-      return false
+  events.define_autocmd_event(
+    events.VIM_BUFFER_MODIFIED_SET,
+    { "BufModifiedSet" },
+    0,
+    function(args)
+      if utils.is_real_file(args.afile) then
+        -- we could use args.afile to update the sigle file that changed, but it seems like we miss
+        -- buffers when `:wa` is used.
+        args.modified_buffers = utils.get_modified_buffers()
+        return args
+      else
+        return false
+      end
     end
-  end)
+  )
 
   events.define_autocmd_event(events.VIM_BUFFER_ADDED, { "BufAdd" }, 200)
   events.define_autocmd_event(events.VIM_BUFFER_DELETED, { "BufDelete" }, 200)
   events.define_autocmd_event(events.VIM_BUFFER_ENTER, { "BufEnter", "BufWinEnter" }, 0)
 
   events.define_autocmd_event(events.VIM_TERMINAL_ENTER, { "TermEnter" }, 0)
-  events.define_autocmd_event(events.VIM_WIN_ENTER, { "WinEnter" }, 0)
+  events.define_autocmd_event(events.VIM_WIN_ENTER, { "WinEnter" }, 0, nil, true)
   events.define_autocmd_event(events.VIM_DIR_CHANGED, { "DirChanged" }, 200, nil, true)
   events.define_autocmd_event(events.VIM_TAB_CLOSED, { "TabClosed" })
   events.define_autocmd_event(events.VIM_LEAVE, { "VimLeavePre" })
+  events.define_autocmd_event(events.VIM_RESIZED, { "VimResized" }, 100)
   events.define_autocmd_event(events.VIM_WIN_CLOSED, { "WinClosed" })
   events.define_autocmd_event(events.VIM_COLORSCHEME, { "ColorScheme" }, 0)
-  events.define_autocmd_event(events.GIT_EVENT, { "User FugitiveChanged" }, 100 )
+  events.define_autocmd_event(events.VIM_CURSOR_MOVED, { "CursorMoved" }, 100)
+  events.define_autocmd_event(events.GIT_EVENT, { "User FugitiveChanged" }, 100)
   events.define_event(events.GIT_STATUS_CHANGED, { debounce_frequency = 0 })
   events_setup = true
 
@@ -85,7 +84,14 @@ local define_events = function()
     event = events.VIM_LEAVE,
     handler = function()
       events.clear_all_events()
-    end
+    end,
+  })
+
+  events.subscribe({
+    event = events.VIM_RESIZED,
+    handler = function()
+      require("neo-tree.ui.renderer").update_floating_window_layouts()
+    end,
   })
 end
 
@@ -93,12 +99,24 @@ local last_buffer_enter_filetype = nil
 M.buffer_enter_event = function()
   -- if it is a neo-tree window, just set local options
   if vim.bo.filetype == "neo-tree" then
+    if last_buffer_enter_filetype == "neo-tree" then
+      -- we've switched to another neo-tree window
+      events.fire_event(events.NEO_TREE_BUFFER_LEAVE)
+    end
     vim.cmd([[
     setlocal cursorline
     setlocal nowrap
-    setlocal winhighlight=Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,SignColumn:NeoTreeSignColumn,CursorLine:NeoTreeCursorLine,FloatBorder:NeoTreeFloatBorder,StatusLine:NeoTreeStatusLine,StatusLineNC:NeoTreeStatusLineNC,VertSplit:NeoTreeVertSplit,WinSeparator:NeoTreeWinSeparator,EndOfBuffer:NeoTreeEndOfBuffer
     setlocal nolist nospell nonumber norelativenumber
     ]])
+
+    local winhighlight =
+      "Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,SignColumn:NeoTreeSignColumn,CursorLine:NeoTreeCursorLine,FloatBorder:NeoTreeFloatBorder,StatusLine:NeoTreeStatusLine,StatusLineNC:NeoTreeStatusLineNC,VertSplit:NeoTreeVertSplit,EndOfBuffer:NeoTreeEndOfBuffer"
+    if vim.version().minor >= 7 then
+      vim.cmd("setlocal winhighlight=" .. winhighlight .. ",WinSeparator:NeoTreeWinSeparator")
+    else
+      vim.cmd("setlocal winhighlight=" .. winhighlight)
+    end
+
     events.fire_event(events.NEO_TREE_BUFFER_ENTER)
     last_buffer_enter_filetype = vim.bo.filetype
     return
@@ -139,7 +157,11 @@ M.buffer_enter_event = function()
   end
   local prior_type = vim.api.nvim_buf_get_option(prior_buf, "filetype")
   if prior_type == "neo-tree" then
-    local position = vim.api.nvim_buf_get_var(prior_buf, "neo_tree_position")
+    local success, position = pcall(vim.api.nvim_buf_get_var, prior_buf, "neo_tree_position")
+    if not success then
+      -- just bail out now, the rest of these lookups will probably fail too.
+      return
+    end
     if position == "current" then
       -- nothing to do here, files are supposed to open in same window
       return
@@ -396,35 +418,73 @@ M.merge_config = function(user_config, is_auto_config)
 
   highlights.setup()
 
+  -- used to either limit the sources that or loaded, or add extra external sources
+  local all_sources = {}
+  local all_source_names = {}
+  for _, source in ipairs(user_config.sources or default_config.sources) do
+    local parts = utils.split(source, ".")
+    local name = parts[#parts]
+    local is_internal_ns, is_external_ns = false, false
+    local module
+
+    if #parts == 1 then
+      -- might be a module name in the internal namespace
+      is_internal_ns, module = pcall(require, "neo-tree.sources." .. source)
+    end
+    if is_internal_ns then
+      name = module.name or name
+      all_sources[name] = "neo-tree.sources." .. name
+    else
+      -- fully qualified module name
+      -- or just a root level module name
+      is_external_ns, module = pcall(require, source)
+      if is_external_ns then
+        name = module.name or name
+        all_sources[name] = source
+      else
+        log.error("Source module not found", source)
+        name = nil
+      end
+    end
+    if name then
+      default_config[name] = module.default_config or default_config[name]
+      table.insert(all_source_names, name)
+    end
+  end
+  log.debug("Sources to load: ", vim.inspect(all_sources))
+  require("neo-tree.command.parser").setup(all_source_names)
+
   -- setup the default values for all sources
   normalize_mappings(default_config)
+  normalize_mappings(user_config)
   merge_renderers(default_config, nil, user_config)
-  for _, source_name in ipairs(sources) do
+
+  for source_name, mod_root in pairs(all_sources) do
+    local module = require(mod_root)
+    default_config[source_name] = default_config[source_name]
+      or {
+        renderers = {},
+        components = {},
+      }
     local source_default_config = default_config[source_name]
-    local mod_root = "neo-tree.sources." .. source_name
-    source_default_config.components = require(mod_root .. ".components")
-    source_default_config.commands = require(mod_root .. ".commands")
+    source_default_config.components = module.components or require(mod_root .. ".components")
+    source_default_config.commands = module.commands or require(mod_root .. ".commands")
     source_default_config.name = source_name
 
+    if user_config.use_default_mappings == false then
+      default_config.window.mappings = {}
+      source_default_config.window.mappings = {}
+    end
     -- Make sure all the mappings are normalized so they will merge properly.
     normalize_mappings(source_default_config)
     normalize_mappings(user_config[source_name])
-
-    local use_default_mappings = default_config.use_default_mappings
-    if type(user_config.use_default_mappings) ~= "nil" then
-      use_default_mappings = user_config.use_default_mappings
-    end
-    if use_default_mappings then
-      -- merge the global config with the source specific config
-      source_default_config.window = vim.tbl_deep_extend(
-        "force",
-        default_config.window or {},
-        source_default_config.window or {},
-        user_config.window or {}
-      )
-    else
-      source_default_config.window = user_config.window
-    end
+    -- merge the global config with the source specific config
+    source_default_config.window = vim.tbl_deep_extend(
+      "force",
+      default_config.window or {},
+      source_default_config.window or {},
+      user_config.window or {}
+    )
 
     merge_renderers(default_config, source_default_config, user_config)
 
@@ -454,11 +514,12 @@ M.merge_config = function(user_config, is_auto_config)
 
   file_nesting.setup(M.config.nesting_rules)
 
-  for _, source_name in ipairs(sources) do
+  for source_name, mod_root in pairs(all_sources) do
     for name, rndr in pairs(M.config[source_name].renderers) do
       M.config[source_name].renderers[name] = merge_global_components_config(rndr, M.config)
     end
-    manager.setup(source_name, M.config[source_name], M.config)
+    local module = require(mod_root)
+    manager.setup(source_name, M.config[source_name], M.config, module)
     manager.redraw(source_name)
   end
 
