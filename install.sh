@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-readonly COMMON_PACKAGES=(
+readonly PACKAGES=(
     bash
     git
     neovim
@@ -13,28 +13,15 @@ readonly COMMON_PACKAGES=(
     zsh
 )
 
-readonly LINUX_PACKAGES=(
-    gtk
-    i3
-    termite
-    x
-    xdg
-)
-
 readonly DOTFILES=$(dirname $0)
 readonly STOW="stow --verbose=2 --dir=${DOTFILES} --target=${HOME}"
 
 main() {
     local additional_stow_args="$@"
 
-    local packages=(${COMMON_PACKAGES[*]})
-    if [[ "$(uname)" == "Linux" ]]; then
-        packages+=(${LINUX_PACKAGES[*]})
-    fi
+    $STOW $additional_stow_args ${PACKAGES[*]}
 
-    $STOW $additional_stow_args ${packages[*]}
-
-    for package in ${packages[*]}; do
+    for package in ${PACKAGES[*]}; do
         local install_script="${DOTFILES}/${package}/install.sh"
         if [[ -x $install_script ]]; then
             echo $install_script
