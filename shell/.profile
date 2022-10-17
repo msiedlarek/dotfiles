@@ -20,6 +20,7 @@ if [ -x /usr/bin/xdpyinfo ]; then
     fi
 fi
 
-export PATH="/usr/local/bin:${PATH}"
+export PATH="/opt/local/bin:/usr/local/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 export PATH="${HOME}/.cargo/bin:${PATH}"
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
