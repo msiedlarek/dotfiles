@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/lewis6991/impatient.nvim.git
 	branch = main
-	commit = 2337df7d778e17a58d8709f651653b9039946d8d
-	parent = df8db76ac23f223765c8a1cee1cacf813e55e048
+	commit = b842e16ecc1a700f62adb9802f8355b99b52a5a6
+	parent = 5fb87806ccd5f1c823b10e5bdd1384ab90de13fd
 	method = merge
 	cmdver = 0.4.5
