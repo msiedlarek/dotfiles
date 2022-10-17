@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/antoinemadec/FixCursorHold.nvim.git
+	branch = 1bfb32e7ba1344925ad815cb0d7f901dbc0ff7c1
+	commit = 1bfb32e7ba1344925ad815cb0d7f901dbc0ff7c1
+	parent = 1bca101668617e02aebf369e7abb8eec46e0f6dc
+	method = merge
+	cmdver = 0.4.5
