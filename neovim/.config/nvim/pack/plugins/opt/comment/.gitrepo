@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/numToStr/Comment.nvim.git
-	branch = 79b356d00586ab9e6ffd1fbf732bf4f076c95d20
+	branch = master
 	commit = 79b356d00586ab9e6ffd1fbf732bf4f076c95d20
 	parent = 2bc988d9a0d7b81c577fffbbc58671f35e550d95
 	method = merge
