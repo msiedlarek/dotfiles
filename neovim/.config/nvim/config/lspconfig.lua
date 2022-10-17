@@ -23,7 +23,7 @@ local default_config = {
     ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
     ['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border }),
   },
-  capabilities = cmp_nvim_lsp.update_capabilities(vim.lsp.protocol.make_client_capabilities()),
+  capabilities = cmp_nvim_lsp.default_capabilities(),
 }
 
 local default_servers = {
