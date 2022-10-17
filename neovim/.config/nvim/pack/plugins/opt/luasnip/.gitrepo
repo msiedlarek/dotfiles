@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/L3MON4D3/LuaSnip.git
+	branch = cc0086390c6cd2eaebae1834b115c891649ec95f
+	commit = cc0086390c6cd2eaebae1834b115c891649ec95f
+	parent = 850e2f3dc2bf39f96470648c3eeda3074b23c95a
+	method = merge
+	cmdver = 0.4.5
