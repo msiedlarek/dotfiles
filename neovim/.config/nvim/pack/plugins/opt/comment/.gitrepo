@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/numToStr/Comment.nvim.git
+	branch = 79b356d00586ab9e6ffd1fbf732bf4f076c95d20
+	commit = 79b356d00586ab9e6ffd1fbf732bf4f076c95d20
+	parent = 2bc988d9a0d7b81c577fffbbc58671f35e550d95
+	method = merge
+	cmdver = 0.4.5
