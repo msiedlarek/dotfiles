@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/tpope/vim-sleuth.git
 	branch = master
-	commit = 1d25e8e5dc4062e38cab1a461934ee5e9d59e5a8
-	parent = 427f461965e53884aeeeab3f9c2b3f1d1fdc68fb
+	commit = 8332f123a63c739c870c96907d987cc3ff719d24
+	parent = 80114cc83fd19c72a52f29a4a8265b84190bdbae
 	method = merge
 	cmdver = 0.4.5
