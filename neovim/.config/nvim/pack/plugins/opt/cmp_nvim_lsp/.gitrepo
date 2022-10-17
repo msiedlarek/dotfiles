@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/hrsh7th/cmp-nvim-lsp.git
-	branch = e6b5feb2e6560b61f31c756fb9231a0d7b10c73d
+	branch = main
 	commit = e6b5feb2e6560b61f31c756fb9231a0d7b10c73d
 	parent = 5a6efa737ea9d574e6e80504ac6bf6c5242dbfb4
 	method = merge
