@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/NLKNguyen/papercolor-theme.git
+	branch = beb86c7630e19314f5990acef81f9823bbb5bf3c
+	commit = beb86c7630e19314f5990acef81f9823bbb5bf3c
+	parent = 4760264127c83f9172a4fb00bd461af0d3e10cc5
+	method = merge
+	cmdver = 0.4.5
