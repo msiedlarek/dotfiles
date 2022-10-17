@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/averms/black-nvim.git
+	branch = 43caa1ffea0fd75d37a609cd18c32ccdc0f470f2
+	commit = 43caa1ffea0fd75d37a609cd18c32ccdc0f470f2
+	parent = 698ce7905ad9e74bae7783b82426545d08d78c31
+	method = merge
+	cmdver = 0.4.5
