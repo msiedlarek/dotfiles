@@ -19,24 +19,7 @@ local utils = require("command_center.utils")
 
 local constants = require("command_center.constants")
 local component = constants.component
-local max_length = constants.max_length
-
--- Initial opts to defualt values
-local user_opts = {
-  components = {
-    M.component.DESCRIPTION,
-    M.component.KEYBINDINGS,
-    M.component.COMMAND,
-  },
-  separator = " ",
-  auto_replace_desc_with_cmd = true,
-}
-
--- Override default opts by user
-local function setup(opts)
-  opts = opts or {}
-  utils.merge_tables(user_opts, opts)
-end
+local max_length = constants.max_len
 
 -- Custom theme for command center
 function themes.command_center(opts)
@@ -79,11 +62,38 @@ function themes.command_center(opts)
   return vim.tbl_deep_extend("force", theme_opts, opts)
 end
 
+-- Initial opts to defualt values
+local user_opts = {
+  components = {
+    M.component.DESC,
+    M.component.KEYS,
+    M.component.CMD,
+    M.component.CAT,
+  },
+
+  sort_by = {
+    M.component.DESC,
+    M.component.KEYS,
+    M.component.CMD,
+    M.component.CAT,
+  },
+
+  separator = " ",
+  auto_replace_desc_with_cmd = true,
+  prompt_title = "Command Center",
+  theme = themes.command_center,
+}
+
+-- Override default opts by user
+local function setup(opts)
+  user_opts = vim.tbl_extend("force", user_opts, opts or {})
+end
 
 
-local function run(opts)
-  opts = opts or {}
-  utils.merge_tables(opts, user_opts)
+local function run(filter)
+  filter = filter or {}
+  local filtered_items, cnt = utils.filter_items(M._items, filter)
+  local opts = vim.deepcopy(user_opts)
 
   -- Only display what the user specifies
   -- And in the right order
@@ -94,26 +104,17 @@ local function run(opts)
     for _, v in ipairs(opts.components) do
 
       -- When user chooses to replace desc with cmd ...
-      if opts.auto_replace_desc_with_cmd and v == component.DESCRIPTION then
-
-        -- if entry.value[v] == "" then
-        --   -- ... and desc is empty, replace desc with cmd
-        --   table.insert(display, entry.value[component.COMMAND_STR])
-        -- else
-        --   -- .. and desc is not empty, use desc
-        --   table.insert(display, entry.value[v])
-        -- end
-        --
-        table.insert(display, entry.value[component.REPLACE_DESC_WITH_CMD])
-        table.insert(component_info, { width = max_length[component.REPLACE_DESC_WITH_CMD] })
+      if v == component.DESC and opts.auto_replace_desc_with_cmd then
+        table.insert(display, entry.value[component.REPLACED_DESC])
+        table.insert(component_info, { width = max_length[component.REPLACED_DESC] })
       else
         table.insert(display, entry.value[v])
-        table.insert(component_info, { width = max_length[v] } )
+        table.insert(component_info, { width = max_length[v] })
       end
     end
 
     local displayer = entry_display.create({
-      separator = user_opts.separator,
+      separator = opts.separator,
       items = component_info,
     })
 
@@ -121,22 +122,22 @@ local function run(opts)
   end
 
   -- Insert the calculated length constants
-  opts.max_width = utils.get_max_width(user_opts, max_length)
-  opts.num_items = #M.items
-  opts = themes.command_center(opts)
+  opts.max_width = utils.get_max_width(opts, max_length)
+  opts.num_items = cnt
+  -- opts = themes.command_center(opts)
+  opts = opts.theme(opts)
 
   -- opts = opts or {}
-  pickers.new(opts, {
-    prompt_title = "Command Center",
+  local telescope_obj = pickers.new(opts, {
+    prompt_title = opts.prompt_title,
 
     finder = finders.new_table({
-      results = M.items,
+      results = filtered_items,
       entry_maker = function(entry)
 
-        -- Concatenate components for ordinal
-        -- For better sorting
+        -- Concatenate components specified in `sort_by` for better sorting
         local ordinal = ""
-        for _, v in ipairs(opts.components) do
+        for _, v in ipairs(opts.sort_by) do
           ordinal = ordinal .. entry[v]
         end
 
@@ -155,8 +156,10 @@ local function run(opts)
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
 
+        if not selection then return false end
+
         -- Handle keys as if they were typed
-        local cmd = selection.value[component.COMMAND]
+        local cmd = selection.value[component.CMD]
         if type(cmd) == "function" then
           cmd()
         else
@@ -167,13 +170,38 @@ local function run(opts)
       return true
     end,
 
-  }):find()
+  })
+
+  -- MARK: Save all current settings
+  -- vim.deepcopy() can't copy getfenv(),
+  -- Use force extend instead, as inpsired by hydra.nvim
+  local env = vim.tbl_deep_extend('force', getfenv(), {
+    vim = { o = {}, go = {}, bo = {}, wo = {} }
+  }) --[[@as table]]
+  local o   = env.vim.o
+  local go  = env.vim.go
+  local bo  = env.vim.bo
+  local wo  = env.vim.wo
+
+
+  -- MARK: Start telescope
+  vim.schedule(function()
+    vim.bo.modifiable = true
+    vim.cmd("startinsert")
+  end)
+
+  telescope_obj:find()
+
+  -- MAKR: Restore all settings
+  env.vim.o = o
+  env.vim.go = go
+  env.vim.bo = bo
+  env.vim.wo = wo
 end
 
 return telescope.register_extension({
   setup = setup,
   exports = {
-    command_center = run
+    command_center = run,
   },
 })
-

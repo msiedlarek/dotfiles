@@ -1,107 +1,136 @@
 local M = {}
 
 local utils = require("command_center.utils")
-
 local constants = require("command_center.constants")
 local component = constants.component
-local max_length = constants.max_length
-local add_mode = constants.mode
+local max_len = constants.max_len
 
--- Actual comamnd_center.items are stored here
-M.items = {}
-M._duplicate_detector = {}
+---Process commands
+---@param items table? commands to be processed
+---@param opts table? additional options
+---@param add_callback function? funciton to be excuted if item's `mode` contains `ADD`
+---@param set_callback function? function to be executed if item's `mode` contains `SET`
+local function process_commands(items, opts, set_callback, add_callback)
 
+  -- Early exit from items is not an non-empty list
+  if not utils.is_nonempty_list(items) then return end
+  opts = utils.convert_opts(opts)
 
-M.add = function(passed_items, mode)
+  for _, item in ipairs(items) do
 
-  -- Early return from the function if passed in an empty table
-  if not passed_items then return end
+    item = utils.convert_item(item, opts)
+    if not item then goto continue end
 
-  -- Add and register keybindings by defualt
-  mode = mode or constants.mode.ADD_AND_REGISTER
-
-  for _, value in ipairs(passed_items) do
-
-    if value.command then
-      utils.warn_once("`command` is deprecated in favor of `cmd`. See README.md for detail.")
+    -- Register/unregister the keybindings
+    if item.mode == constants.mode.SET or item.mode == constants.mode.ADD_SET then
+      if type(set_callback) == "function" then
+        set_callback(item.id, item)
+      end
     end
 
-    -- Ignore entries that do not have comands
-    if not value.cmd and not value.command then goto continue end
-
-    -- Map command to cmd
-    value.cmd = value.cmd or ("<cmd>" .. value.command .. "<CR>")
-    value.cmd_str = type(value.cmd) == "function" and constants.lua_func_str or value.cmd
-
-    -- Override mode if specified
-    value.mode = value.mode or mode
-
-    -- Making sure description is not nil
-    value.replace_desc_with_cmd = value.description or value.cmd_str
-    value.description = value.description or ""
-
-    -- Properly format keybindings for further process
-    value.keybindings = utils.format_keybindings(value.keybindings)
-
-    -- Get the string representation of the keybindings for display
-    value.keybinding_str = utils.get_keybindings_string(value.keybindings)
-
-    -- Ignore duplicate entries
-    local key = value.cmd_str .. value.description ..
-      value.keybinding_str .. value.mode
-
-    if M._duplicate_detector[key] then goto continue end
-    M._duplicate_detector[key] = true
-
-    -- Register the keybindings (only if mode is not ADD_ONLY)
-    if value.mode ~= add_mode.ADD_ONLY then
-      utils.register_keybindings(value.keybindings, value.cmd)
+    -- Add/remove the item
+    if item.mode == constants.mode.ADD or item.mode == constants.mode.ADD_SET then
+      if type(add_callback) == "function" then
+        add_callback(item.id, item)
+      end
     end
-
-    -- If REGISTER_ONLY, then we are done!
-    if value.mode == add_mode.REGISTER_ONLY then goto continue end
-
-    -- Update maximum command length
-    max_length[component.COMMAND_STR] =
-      math.max(max_length[component.COMMAND_STR], #value.cmd_str)
-
-    -- Update maximum description length
-    max_length[component.DESCRIPTION] =
-      math.max(max_length[component.DESCRIPTION], #value.description)
-
-    -- And Update maximum keybinding length
-    max_length[component.KEYBINDINGS_STR] =
-      math.max(max_length[component.KEYBINDINGS_STR], #value.keybinding_str)
-
-    -- This is used when user wants to replace desc with cmd
-    max_length[component.REPLACE_DESC_WITH_CMD] =
-      math.max(max_length[component.REPLACE_DESC_WITH_CMD], #value.replace_desc_with_cmd)
-
-    -- Add the entry to M.items
-    table.insert(M.items, {
-      value.cmd,
-      value.description,
-      value.keybindings,
-      value.cmd_str,
-      value.keybinding_str,
-      value.replace_desc_with_cmd,
-    })
-
-    -- We need signal Telescop to cache again
-    M.cached = false
 
     -- Label for end of an iteration
     ::continue::
   end
 end
 
--- Add some constants to M
+--Actual comamnd_center.items are stored here
+M._items = {}
+
+---Add commands into command_center if `mode` contains `ADD`;
+---Set the keybindings in the command if `mode` constains `SET`
+---@param items table? the list of commands to be removed; do nothing if nil or empty
+---@param opts table? additional options
+function M.add(items, opts)
+
+  local set_callback = function(id, item)
+    if M._items[id] then return end
+    utils.set_converted_keys(item.keys)
+  end
+
+  local add_callback = function(id, item)
+    if M._items[id] then return end
+
+    -- Update max length
+    for _, comp in pairs(constants.component) do
+      if type(item[comp]) == "string" then
+        max_len[comp] = math.max(max_len[comp], #item[comp])
+      end
+    end
+
+    -- Add the entry to M.items as a list
+    M._items[id] = item
+  end
+
+  process_commands(items, opts, set_callback, add_callback)
+end
+
+---Does the exact opposite as `command_center.add()`:
+---* Remove the commands from `command_center` if `mode` contains `ADD`
+---* Delete the keymaps if `mode` contains `SET`
+---@param items table the list of commands to be removed; do nothing if nil or empty
+---@param opts table? additional options; share the same format as the opts for `add()`
+function M.remove(items, opts)
+
+  local set_callback = function(id, item)
+    if not M._items[id] then return end
+    -- utils.delete_keybindings(item.keys, item.cmd)
+    utils.del_converted_keys(item.keys)
+  end
+
+  local add_callback = function(id, _)
+    if not M._items[id] then return end
+    M._items[id] = nil
+  end
+
+  process_commands(items, opts, set_callback, add_callback)
+end
+
+-- MARK: Add some constants to M
 -- to ease the customization of command center
-M.mode = constants.mode
-M.component = {
-  COMMAND = constants.component.COMMAND_STR,
-  DESCRIPTION = constants.component.DESCRIPTION,
-  KEYBINDINGS = constants.component.KEYBINDINGS_STR
+
+M.converter = require("command_center.converter")
+
+M.mode = {
+
+  -- @deprecated use `ADD` instead
+  ADD_ONLY = constants.mode.ADD,
+
+  -- @deprecated use `SET` instead
+  REGISTER_ONLY = constants.mode.SET,
+
+  -- @deprecated use bitwise operator `ADD | SET` instead
+  ADD_AND_REGISTER = constants.mode.ADD_SET,
+
+  ADD = constants.mode.ADD,
+  SET = constants.mode.SET,
+  ADD_SET = constants.mode.ADD_SET
 }
+
+M.component = {
+  -- @deprecated use `CMD` instead
+  COMMAND = constants.component.CMD_STR,
+
+  -- @deprecated use `DESC` instead
+  DESCRIPTION = constants.component.DESC,
+
+  -- @deprecated use `KEYS` instead
+  KEYBINDINGS = constants.component.KEYS_STR,
+
+  -- @deprecated use `KEYS` instead
+  CATEGORY = constants.component.CAT,
+
+  CMD = constants.component.CMD_STR,
+  DESC = constants.component.DESC,
+  KEYS = constants.component.KEYS_STR,
+  CAT = constants.component.CAT,
+}
+
 
 return M

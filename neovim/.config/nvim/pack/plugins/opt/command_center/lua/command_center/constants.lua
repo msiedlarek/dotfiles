@@ -1,27 +1,35 @@
 -- Mimic enum in C
-local constants = {}
+local M = {}
 
-constants.component = {
-  COMMAND = 1,
-  DESCRIPTION = 2,
-  KEYBINDINGS = 3,
+M.component = {
+  -- public
+  CMD = "cmd",
+  DESC = "desc",
+  KEYS = "keys",
+  CAT = "cat",
 
   -- Private
-  COMMAND_STR = 4,
-  KEYBINDINGS_STR = 5,
-  REPLACE_DESC_WITH_CMD = 6,
+  CMD_STR = "cmd_str",
+  KEYS_STR = "keys_str",
+  REPLACED_DESC = "replaced_desc",
+  ID = "id",
 }
 
-constants.mode = {
-  ADD_ONLY = 1,
-  REGISTER_ONLY = 2,
-  ADD_AND_REGISTER = 3,
+M.mode = {
+  ADD = 1,
+  SET = 2,
+  -- ADD_AND_REGISTER = 3,
 }
 
--- Default (minimum) length for each argyment type
--- In the order of constants.component + if_replace_desc_with_cmd
-constants.max_length = { nil, 8, nil,  8, 8, 8}
+-- Set the minimal length for each component to 8
+local MINI_LEN = 8
+M.max_len = {}
+for _, component in pairs(M.component) do
+  M.max_len[component] = MINI_LEN
+end
 
-constants.lua_func_str = "Lua Function"
+M.anon_lua_func_name = "<anonymous> lua function"
 
-return constants
+M.keymap_modes = { "n", "i", "c", "x", "v", "t" }
+
+return M
