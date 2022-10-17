@@ -59,6 +59,19 @@ function utils.parse_number_input(v)
   return parsed
 end
 
+---@param prefix? string
+---@return (fun(): string) get_next_id
+local function get_id_generator(prefix)
+  prefix = prefix or ""
+  local id = 0
+  return function()
+    id = id + 1
+    return prefix .. id
+  end
+end
+
+_.get_next_id = get_id_generator("nui_")
+
 ---@private
 ---@param bufnr number
 ---@param linenr number line number (1-indexed)
@@ -75,23 +88,37 @@ function _.char_to_byte_range(bufnr, linenr, char_start, char_end)
   return { byte_start, byte_end }
 end
 
+---@type integer
 local fallback_namespace_id = vim.api.nvim_create_namespace("nui.nvim")
 
 ---@private
----@param ns_id number
----@return number
+---@param ns_id integer
+---@return integer
 function _.ensure_namespace_id(ns_id)
   return ns_id == -1 and fallback_namespace_id or ns_id
 end
 
 ---@private
----@param ns_id? number
----@return number ns_id namespace id
+---@param ns_id? integer|string
+---@return integer ns_id namespace id
 function _.normalize_namespace_id(ns_id)
   if utils.is_type("string", ns_id) then
+    ---@cast ns_id string
     return vim.api.nvim_create_namespace(ns_id)
   end
+  ---@cast ns_id integer
   return ns_id or fallback_namespace_id
+end
+
+---@private
+---@param bufnr integer
+---@param ns_id integer
+---@param linenr_start? integer (1-indexed)
+---@param linenr_end? integer (1-indexed,inclusive)
+function _.clear_namespace(bufnr, ns_id, linenr_start, linenr_end)
+  linenr_start = linenr_start or 1
+  linenr_end = linenr_end and linenr_end + 1 or 0
+  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, linenr_start - 1, linenr_end - 1)
 end
 
 ---@private
@@ -141,6 +168,39 @@ function _.truncate_text(text, max_length)
   return text
 end
 
+---@param text NuiText
+---@param max_width number
+function _.truncate_nui_text(text, max_width)
+  text:set(_.truncate_text(text:content(), max_width))
+end
+
+---@param line NuiLine
+---@param max_width number
+function _.truncate_nui_line(line, max_width)
+  local width = line:width()
+  local last_part_idx = #line._texts
+
+  while width > max_width do
+    local extra_width = width - max_width
+    local last_part = line._texts[last_part_idx]
+
+    if last_part:width() <= extra_width then
+      width = width - last_part:width()
+      line._texts[last_part_idx] = nil
+      last_part_idx = last_part_idx - 1
+
+      -- need to add truncate indicator in previous part
+      if last_part:width() == extra_width then
+        last_part = line._texts[last_part_idx]
+        last_part:set(_.truncate_text(last_part:content() .. " ", last_part:width()))
+      end
+    else
+      last_part:set(_.truncate_text(last_part:content(), last_part:width() - extra_width))
+      width = width - extra_width
+    end
+  end
+end
+
 ---@param align "'left'" | "'center'" | "'right'"
 ---@param total_width number
 ---@param text_width number
@@ -180,21 +240,20 @@ function _.render_lines(lines, bufnr, ns_id, linenr_start, linenr_end)
 end
 
 function _.normalize_layout_options(options)
-  options.relative = utils.defaults(options.relative, "win")
   if utils.is_type("string", options.relative) then
     options.relative = {
       type = options.relative,
     }
   end
 
-  if not utils.is_type("table", options.position) then
+  if options.position and not utils.is_type("table", options.position) then
     options.position = {
       row = options.position,
       col = options.position,
     }
   end
 
-  if not utils.is_type("table", options.size) then
+  if options.size and not utils.is_type("table", options.size) then
     options.size = {
       width = options.size,
       height = options.size,
@@ -202,6 +261,28 @@ function _.normalize_layout_options(options)
   end
 
   return options
+end
+
+---@param winhighlight string
+---@return table<string, string> highlight_map
+function _.parse_winhighlight(winhighlight)
+  local highlight = {}
+  local parts = vim.split(winhighlight, ",", { plain = true, trimempty = true })
+  for _, part in ipairs(parts) do
+    local key, value = part:match("(.+):(.+)")
+    highlight[key] = value
+  end
+  return highlight
+end
+
+---@param highlight_map table<string, string>
+---@return string winhighlight
+function _.serialize_winhighlight(highlight_map)
+  local parts = vim.tbl_map(function(key)
+    return key .. ":" .. highlight_map[key]
+  end, vim.tbl_keys(highlight_map))
+  table.sort(parts)
+  return table.concat(parts, ",")
 end
 
 return utils

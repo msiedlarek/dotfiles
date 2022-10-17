@@ -6,10 +6,10 @@ ignore = {
   "213/_.*",
 }
 include_files = { "*.luacheckrc", "lua/**/*.lua", "tests/**/*.lua" }
-read_globals = { "vim" }
+globals = { "vim" }
 std = "luajit"
 
-files["lua/tests/**/*.lua"] = {
+files["tests/helpers/**/*.lua"] = {
   read_globals = { "assert", "describe" },
 }
 

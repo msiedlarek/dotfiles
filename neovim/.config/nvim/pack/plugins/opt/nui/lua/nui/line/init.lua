@@ -1,34 +1,32 @@
+local Object = require("nui.object")
 local NuiText = require("nui.text")
 local defaults = require("nui.utils").defaults
 local is_type = require("nui.utils").is_type
 
----@param class NuiLine
+---@class NuiLine
+---@field _texts NuiText[]
+local Line = Object("NuiLine")
+
 ---@param texts? table[] NuiText objects
----@return NuiLine
-local function init(class, texts)
-  ---@type NuiLine
-  local self = setmetatable({}, { __index = class })
-
+function Line:init(texts)
   self._texts = defaults(texts, {})
-
-  return self
 end
 
----@class NuiLine
-local Line = setmetatable({
-  super = nil,
-}, {
-  __call = init,
-  __name = "NuiLine",
-})
-
----@param text string|table text content or NuiText object
+---@param content string|NuiText|NuiLine
 ---@param highlight? string|table data for highlight
----@return table NuiText
-function Line:append(text, highlight)
-  local nui_text = is_type("string", text) and NuiText(text, highlight) or text
-  table.insert(self._texts, nui_text)
-  return nui_text
+---@return NuiText|NuiLine
+function Line:append(content, highlight)
+  local block = is_type("string", content) and NuiText(content, highlight) or content
+  if block._texts then
+    ---@cast block NuiLine
+    for _, text in ipairs(block._texts) do
+      table.insert(self._texts, text)
+    end
+  else
+    ---@cast block NuiText
+    table.insert(self._texts, block)
+  end
+  return block
 end
 
 ---@return string
@@ -36,6 +34,15 @@ function Line:content()
   return table.concat(vim.tbl_map(function(text)
     return text:content()
   end, self._texts))
+end
+
+---@return number
+function Line:width()
+  local width = 0
+  for _, text in ipairs(self._texts) do
+    width = width + text:width()
+  end
+  return width
 end
 
 ---@param bufnr number buffer number

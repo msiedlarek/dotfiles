@@ -1,8 +1,13 @@
+local Object = require("nui.object")
 local Line = require("nui.line")
 local Text = require("nui.text")
 local _ = require("nui.utils")._
 local defaults = require("nui.utils").defaults
 local is_type = require("nui.utils").is_type
+
+local u = {
+  clear_namespace = _.clear_namespace,
+}
 
 local has_nvim_0_5_1 = vim.fn.has("nvim-0.5.1") == 1
 
@@ -18,10 +23,6 @@ local index_name = {
 }
 
 local function to_border_map(border)
-  if not is_type("list", border) then
-    error("invalid data")
-  end
-
   -- fillup all 8 characters
   local count = vim.tbl_count(border)
   if count < 8 then
@@ -45,14 +46,10 @@ local function to_border_map(border)
 end
 
 local function to_border_list(named_border)
-  if not is_type("map", named_border) then
-    error("invalid data")
-  end
-
   local border = {}
 
   for index, name in ipairs(index_name) do
-    if is_type(named_border[name], "nil") then
+    if is_type("nil", named_border[name]) then
       error(string.format("missing named border: %s", name))
     end
 
@@ -88,9 +85,9 @@ local function normalize_border_char(internal)
 
   for position, item in pairs(internal.char) do
     if is_type("string", item) then
-      internal.char[position] = Text(item, internal.highlight)
+      internal.char[position] = Text(item)
     elseif not item.content then
-      internal.char[position] = Text(item[1], item[2] or internal.highlight)
+      internal.char[position] = Text(item[1], item[2])
     end
   end
 
@@ -98,18 +95,32 @@ local function normalize_border_char(internal)
 end
 
 ---@param internal nui_popup_border_internal
-local function normalize_highlight(internal)
+---@param popup_winhighlight? string
+local function calculate_winhighlight(internal, popup_winhighlight)
+  if internal.type == "simple" then
+    return
+  end
+
+  local winhl = popup_winhighlight
+
   -- @deprecated
-  if internal.highlight and string.match(internal.highlight, ":") then
-    internal.winhighlight = internal.highlight
+  if internal.highlight then
+    if not string.match(internal.highlight, ":") then
+      local highlight = internal.highlight
+      internal.highlight = nil
+      return "Normal:" .. highlight
+    end
+
+    winhl = internal.highlight
     internal.highlight = nil
   end
 
-  if not internal.highlight and internal.winhighlight then
-    internal.highlight = string.match(internal.winhighlight, "FloatBorder:([^,]+)")
+  if winhl and winhl:match("FloatBorder:") then
+    local highlight = string.match(winhl, "FloatBorder:([^,]+)")
+    return "Normal:" .. highlight
   end
 
-  return internal.highlight or "FloatBorder"
+  return "Normal:WinSeparator"
 end
 
 ---@return nui_popup_border_internal_padding|nil
@@ -222,51 +233,64 @@ local styles = {
   solid = to_border_map({ "▛", "▀", "▜", "▐", "▟", "▄", "▙", "▌" }),
 }
 
+---@param internal nui_popup_border_internal
+---@return nui_popup_border_internal_size
+local function calculate_size_delta(internal)
+  ---@type nui_popup_border_internal_size
+  local delta = {
+    width = 0,
+    height = 0,
+  }
+
+  local char = internal.char
+  if is_type("map", char) then
+    if char.top ~= "" then
+      delta.height = delta.height + 1
+    end
+
+    if char.bottom ~= "" then
+      delta.height = delta.height + 1
+    end
+
+    if char.left ~= "" then
+      delta.width = delta.width + 1
+    end
+
+    if char.right ~= "" then
+      delta.width = delta.width + 1
+    end
+  end
+
+  local padding = internal.padding
+  if padding then
+    if padding.top then
+      delta.height = delta.height + padding.top
+    end
+
+    if padding.bottom then
+      delta.height = delta.height + padding.bottom
+    end
+
+    if padding.left then
+      delta.width = delta.width + padding.left
+    end
+
+    if padding.right then
+      delta.width = delta.width + padding.right
+    end
+  end
+
+  return delta
+end
+
 ---@param border NuiPopupBorder
 ---@return nui_popup_border_internal_size
 local function calculate_size(border)
   ---@type nui_popup_border_internal_size
   local size = vim.deepcopy(border.popup._.size)
 
-  local char = border._.char
-
-  if is_type("map", char) then
-    if char.top ~= "" then
-      size.height = size.height + 1
-    end
-
-    if char.bottom ~= "" then
-      size.height = size.height + 1
-    end
-
-    if char.left ~= "" then
-      size.width = size.width + 1
-    end
-
-    if char.right ~= "" then
-      size.width = size.width + 1
-    end
-  end
-
-  local padding = border._.padding
-
-  if padding then
-    if padding.top then
-      size.height = size.height + padding.top
-    end
-
-    if padding.bottom then
-      size.height = size.height + padding.bottom
-    end
-
-    if padding.left then
-      size.width = size.width + padding.left
-    end
-
-    if padding.right then
-      size.width = size.width + padding.right
-    end
-  end
+  size.width = size.width + border._.size_delta.width
+  size.height = size.height + border._.size_delta.height
 
   return size
 end
@@ -329,12 +353,27 @@ local function adjust_popup_win_config(border)
   popup.win_config.col = popup_position.col
 end
 
----@param class NuiPopupBorder
----@param popup NuiPopup
-local function init(class, popup, options)
-  ---@type NuiPopupBorder
-  local self = setmetatable({}, { __index = class })
+--luacheck: push no max line length
 
+---@alias nui_t_text_align "'left'" | "'center'" | "'right'"
+---@alias nui_popup_border_internal_padding { top: number, right: number, bottom: number, left: number }
+---@alias nui_popup_border_internal_position { row: number, col: number }
+---@alias nui_popup_border_internal_size { width: number, height: number }
+---@alias nui_popup_border_internal_text { top?: string, top_align?: nui_t_text_align, bottom?: string, bottom_align?: nui_t_text_align }
+---@alias nui_popup_border_internal { type: "'simple'"|"'complex'", style: table, char: any, padding?: nui_popup_border_internal_padding, position: nui_popup_border_internal_position, size: nui_popup_border_internal_size, size_delta: nui_popup_border_internal_size, text: nui_popup_border_internal_text, lines?: table[], winhighlight?: string }
+
+--luacheck: pop
+
+---@class NuiPopupBorder
+---@field bufnr integer
+---@field private _ nui_popup_border_internal
+---@field private popup NuiPopup
+---@field win_config nui_popup_win_config
+---@field winid number
+local Border = Object("NuiPopupBorder")
+
+---@param popup NuiPopup
+function Border:init(popup, options)
   self.popup = popup
 
   self._ = {
@@ -344,7 +383,6 @@ local function init(class, popup, options)
     highlight = options.highlight,
     padding = parse_padding(options.padding),
     text = options.text,
-    winhighlight = self.popup._.win_options.winhighlight,
   }
 
   local internal = self._
@@ -375,9 +413,11 @@ local function init(class, popup, options)
     internal.type = "complex"
   end
 
-  internal.highlight = normalize_highlight(internal)
+  internal.winhighlight = calculate_winhighlight(internal, self.popup._.win_options.winhighlight)
 
   internal.char = normalize_border_char(internal)
+
+  internal.size_delta = calculate_size_delta(internal)
 
   if internal.type == "simple" then
     return self
@@ -389,50 +429,6 @@ local function init(class, popup, options)
     focusable = false,
     zindex = self.popup.win_config.zindex - 1,
   }
-
-  local position = popup._.position
-  self.win_config.relative = position.relative
-  self.win_config.win = position.relative == "win" and position.win or nil
-  self.win_config.bufpos = position.bufpos
-
-  internal.size = calculate_size(self)
-  self.win_config.width = internal.size.width
-  self.win_config.height = internal.size.height
-
-  internal.position = calculate_position(self)
-  self.win_config.row = internal.position.row
-  self.win_config.col = internal.position.col
-
-  internal.lines = calculate_buf_lines(internal)
-
-  return self
-end
-
---luacheck: push no max line length
-
----@alias nui_t_text_align "'left'" | "'center'" | "'right'"
----@alias nui_popup_border_internal_padding { top: number, right: number, bottom: number, left: number }
----@alias nui_popup_border_internal_position { row: number, col: number }
----@alias nui_popup_border_internal_size { width: number, height: number }
----@alias nui_popup_border_internal_text { top?: string, top_align?: nui_t_text_align, bottom?: string, bottom_align?: nui_t_text_align }
----@alias nui_popup_border_internal { type: "'simple'"|"'complex'", style: table, char: any, padding?: nui_popup_border_internal_padding, position: nui_popup_border_internal_position, size: nui_popup_border_internal_size, text: nui_popup_border_internal_text, lines?: table[], winhighlight?: string }
-
---luacheck: pop
-
----@class NuiPopupBorder
----@field bufnr number
----@field private _ nui_popup_border_internal
----@field private popup NuiPopup
----@field winid number
-local Border = setmetatable({
-  super = nil,
-}, {
-  __call = init,
-  __name = "NuiPopupBorder",
-})
-
-function Border:init(popup, options)
-  return init(self, popup, options)
 end
 
 function Border:_open_window()
@@ -440,7 +436,9 @@ function Border:_open_window()
     return
   end
 
+  self.win_config.noautocmd = true
   self.winid = vim.api.nvim_open_win(self.bufnr, false, self.win_config)
+  self.win_config.noautocmd = nil
   assert(self.winid, "failed to create border window")
 
   if self._.winhighlight then
@@ -501,6 +499,8 @@ function Border:unmount()
   end
 
   if self.bufnr then
+    u.clear_namespace(self.bufnr, self.popup.ns_id)
+
     if vim.api.nvim_buf_is_valid(self.bufnr) then
       vim.api.nvim_buf_delete(self.bufnr, { force = true })
     end
@@ -510,33 +510,7 @@ function Border:unmount()
   self:_close_window()
 end
 
-function Border:resize()
-  local internal = self._
-
-  if internal.type ~= "complex" then
-    return
-  end
-
-  internal.size = calculate_size(self)
-  self.win_config.width = internal.size.width
-  self.win_config.height = internal.size.height
-
-  internal.lines = calculate_buf_lines(internal)
-
-  if self.winid then
-    vim.api.nvim_win_set_config(self.winid, self.win_config)
-  end
-
-  if self.bufnr then
-    if internal.lines then
-      _.render_lines(internal.lines, self.bufnr, self.popup.ns_id, 1, #internal.lines)
-    end
-  end
-
-  vim.api.nvim_command("redraw")
-end
-
-function Border:reposition()
+function Border:_relayout()
   local internal = self._
 
   if internal.type ~= "complex" then
@@ -548,12 +522,24 @@ function Border:reposition()
   self.win_config.win = position.relative == "win" and position.win or nil
   self.win_config.bufpos = position.bufpos
 
+  internal.size = calculate_size(self)
+  self.win_config.width = internal.size.width
+  self.win_config.height = internal.size.height
+
   internal.position = calculate_position(self)
   self.win_config.row = internal.position.row
   self.win_config.col = internal.position.col
 
+  internal.lines = calculate_buf_lines(internal)
+
   if self.winid then
     vim.api.nvim_win_set_config(self.winid, self.win_config)
+  end
+
+  if self.bufnr then
+    if internal.lines then
+      _.render_lines(internal.lines, self.bufnr, self.popup.ns_id, 1, #internal.lines)
+    end
   end
 
   adjust_popup_win_config(self)
@@ -582,6 +568,23 @@ function Border:set_text(edge, text, align)
   line:render(self.bufnr, self.popup.ns_id, linenr)
 end
 
+---@param highlight string highlight group
+function Border:set_highlight(highlight)
+  local internal = self._
+
+  local winhighlight_data = _.parse_winhighlight(self.popup._.win_options.winhighlight)
+  winhighlight_data["FloatBorder"] = highlight
+  self.popup._.win_options.winhighlight = _.serialize_winhighlight(winhighlight_data)
+  if self.popup.winid then
+    vim.api.nvim_win_set_option(self.popup.winid, "winhighlight", self.popup._.win_options.winhighlight)
+  end
+
+  internal.winhighlight = calculate_winhighlight(internal, self.popup._.win_options.winhighlight)
+  if self.winid then
+    vim.api.nvim_win_set_option(self.winid, "winhighlight", internal.winhighlight)
+  end
+end
+
 function Border:get()
   local internal = self._
 
@@ -593,7 +596,9 @@ function Border:get()
     return internal.char
   end
 
-  return to_border_list(internal.char)
+  if is_type("map", internal.char) then
+    return to_border_list(internal.char)
+  end
 end
 
 ---@alias NuiPopupBorder.constructor fun(popup: NuiPopup, options: table): NuiPopupBorder

@@ -1,7 +1,7 @@
 pcall(require, "luacov")
 
 local Text = require("nui.text")
-local h = require("tests.nui")
+local h = require("tests.helpers")
 local spy = require("luassert.spy")
 
 local eq, tbl_omit = h.eq, h.tbl_omit
@@ -14,47 +14,79 @@ describe("nui.text", function()
   end)
 
   it("can clone nui.text object", function()
-    local content = "42"
     local hl_group = "NuiTextTest"
 
-    local t1 = Text(content, hl_group)
+    local t1 = Text("42", hl_group)
 
+    t1.extmark.id = 42
     local t2 = Text(t1)
-    eq(t1:content(), t2:content())
-    eq(t1.extmark, t2.extmark)
+    eq(t2:content(), t1:content())
+    eq(t2.extmark, tbl_omit(t1.extmark, { "id" }))
 
     t2.extmark.id = 42
     local t3 = Text(t2)
-    eq(t2:content(), t3:content())
-    eq(tbl_omit(t2.extmark, { "id" }), t3.extmark)
+    eq(t3:content(), t2:content())
+    eq(t3.extmark, tbl_omit(t2.extmark, { "id" }))
+  end)
+
+  it("can clone nui.text object overriding extmark", function()
+    local hl_group = "NuiTextTest"
+    local hl_group_override = "NuiTextTestOverride"
+
+    local t1 = Text("42", hl_group)
+
+    t1.extmark.id = 42
+    local t2 = Text(t1, hl_group_override)
+    eq(t2:content(), t1:content())
+    eq(t2.extmark, { hl_group = hl_group_override })
+
+    local t3 = Text(t2, { id = 42, hl_group = hl_group })
+    eq(t3:content(), t2:content())
+    eq(t3.extmark, { hl_group = hl_group })
   end)
 
   describe("method :set", function()
     it("works", function()
-      local content = "42"
       local hl_group = "NuiTextTest"
-      local text = Text(content, hl_group)
+      local hl_group_override = "NuiTextTestOverride"
 
-      eq(text:content(), content)
+      local text = Text("42", hl_group)
+
+      eq(text:content(), "42")
       eq(text:length(), 2)
       eq(text.extmark, {
         hl_group = hl_group,
       })
+
+      text.extmark.id = 42
 
       text:set("3")
       eq(text:content(), "3")
       eq(text:length(), 1)
       eq(text.extmark, {
         hl_group = hl_group,
+        id = 42,
       })
 
-      text:set("3", {
-        hl_group = hl_group,
+      text:set("9", hl_group_override)
+      eq(text:content(), "9")
+      eq(text.extmark, {
+        hl_group = hl_group_override,
+        id = 42,
       })
-      eq(text:content(), "3")
+
+      text:set("11", { hl_group = hl_group })
+      eq(text:content(), "11")
       eq(text.extmark, {
         hl_group = hl_group,
+        id = 42,
       })
+
+      text.extmark.id = nil
+
+      text:set("42", { id = 42, hl_group = hl_group })
+      eq(text:content(), "42")
+      eq(text.extmark, { hl_group = hl_group })
     end)
   end)
 
@@ -111,6 +143,10 @@ describe("nui.text", function()
       initial_lines = { "  1", multibyte_char .. " 2", "  3" }
     end)
 
+    after_each(function()
+      vim.api.nvim_buf_delete(bufnr, { force = true })
+    end)
+
     local function reset_lines(lines)
       initial_lines = lines or initial_lines
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, initial_lines)
@@ -127,20 +163,12 @@ describe("nui.text", function()
         ns_id = vim.api.nvim_create_namespace(ns)
       end)
 
-      local function assert_highlight()
-        local extmarks = h.get_line_extmarks(bufnr, ns_id, linenr)
-
-        eq(#extmarks, 1)
-        eq(extmarks[1][3], byte_start)
-        h.assert_extmark(extmarks[1], linenr, text:content(), hl_group)
-      end
-
       it("is applied with :render", function()
         reset_lines()
         linenr, byte_start = 1, 0
         text = Text("a", hl_group)
         text:render(bufnr, ns_id, linenr, byte_start)
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, text:content(), hl_group)
       end)
 
       it("is applied with :render_char", function()
@@ -148,7 +176,7 @@ describe("nui.text", function()
         linenr, byte_start = 1, 0
         text = Text(multibyte_char, hl_group)
         text:render_char(bufnr, ns_id, linenr, byte_start)
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, text:content(), hl_group)
       end)
 
       it("can highlight existing buffer text", function()
@@ -156,7 +184,7 @@ describe("nui.text", function()
         linenr, byte_start = 2, 0
         text = Text(initial_lines[linenr], hl_group)
         text:highlight(bufnr, ns_id, linenr, byte_start)
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, text:content(), hl_group)
       end)
 
       it("does not create multiple extmarks", function()
@@ -165,11 +193,11 @@ describe("nui.text", function()
         text = Text(initial_lines[linenr], hl_group)
 
         text:highlight(bufnr, ns_id, linenr, byte_start)
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, text:content(), hl_group)
         text:highlight(bufnr, ns_id, linenr, byte_start)
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, text:content(), hl_group)
         text:highlight(bufnr, ns_id, linenr, byte_start)
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, text:content(), hl_group)
       end)
     end)
 

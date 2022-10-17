@@ -8,12 +8,12 @@ NuiTree can render tree-like structured content on the buffer.
 local NuiTree = require("nui.tree")
 
 local tree = NuiTree({
-  winid = winid,
+  bufnr = bufnr,
   nodes = {
     NuiTree.Node({ text = "a" }),
     NuiTree.Node({ text = "b" }, {
       NuiTree.Node({ text = "b-1" }),
-      NuiTree.Node({ text = "b-2" }),
+      NuiTree.Node({ text = { "b-2", "b-3" } }),
     }),
   },
 })
@@ -23,11 +23,11 @@ tree:render()
 
 ## Options
 
-### `winid`
+### `bufnr`
 
 **Type:** `number`
 
-Id of the window where the tree will be rendered.
+Id of the buffer where the tree will be rendered.
 
 ---
 
@@ -79,11 +79,13 @@ end,
 
 **Type:** `function`
 
-_Signature:_ `prepare_node(node, parent_node?) -> string | NuiLine`
+_Signature:_ `prepare_node(node, parent_node?) -> nil | string | string[] | NuiLine | NuiLine[]`
 
 If provided, this function is used for preparing each node line.
 
-The return value should be a `NuiLine` object or `string`.
+The return value should be a `NuiLine` object or `string` or a list containing either of them.
+
+If return value is `nil`, that node will not be rendered.
 
 **Example**
 
@@ -124,29 +126,11 @@ buf_options = {
 },
 ```
 
----
-
-### `win_options`
-
-**Type:** `table`
-
-Contains all window related options (check `:h options | /local to window`).
-
-**Examples**
-
-```lua
-win_options = {
-  foldcolumn = "0",
-  foldmethod = "manual",
-  wrap = false,
-},
-```
-
 ## Methods
 
 ### `tree:get_node`
 
-_Signature:_ `tree:get_node(node_id_or_linenr?) -> NuiTreeNode | nil, number | nil`
+_Signature:_ `tree:get_node(node_id_or_linenr?) -> NuiTreeNode | nil, number | nil, number | nil`
 
 **Parameters**
 
@@ -160,7 +144,7 @@ If `node_id_or_linenr` is `number`, the node on that _linenr_ is returned.
 
 If `node_id` is `nil`, the current node under cursor is returned.
 
-Returns the `node` if found and the `linenr` if it is rendered.
+Returns the `node` if found, and the start and end `linenr` if it is rendered.
 
 ### `tree:get_nodes`
 
@@ -217,9 +201,13 @@ otherwise nodes are set at tree root.
 
 ### `tree:render`
 
-_Signature:_ `tree:render()`
+_Signature:_ `tree:render(linenr_start?)`
 
 Renders the tree on buffer.
+
+| Name           | Type             | Description                   |
+| -------------- | ---------------- | ----------------------------- |
+| `linenr_start` | `number` / `nil` | start line number (1-indexed) |
 
 ## NuiTree.Node
 

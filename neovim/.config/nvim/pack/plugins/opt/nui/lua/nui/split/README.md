@@ -17,14 +17,40 @@ You can manipulate the assocciated buffer and window using the
 
 ## Options
 
+### `ns_id`
+
+**Type:** `number` or `string`
+
+Namespace id (`number`) or name (`string`).
+
 ### `relative`
 
-| Value               | Description                 |
-| ------------------- | --------------------------- |
-| `"editor"`          | split current editor screen |
-| `"win"` (_default_) | split current window        |
+**Type:** `string` or `table`
 
-This option also affects how `size` is calculated.
+This option affects how `size` is calculated.
+
+**Examples**
+
+Split current editor screen:
+
+```lua
+relative = "editor"
+```
+
+Split current window (_default_):
+
+```lua
+relative = "win"
+```
+
+Split window with specific id:
+
+```lua
+relative = {
+  type = "win",
+  winid = 42,
+}
+```
 
 ### `position`
 
@@ -35,6 +61,18 @@ This option also affects how `size` is calculated.
 `size` can be `number` or `percentage string`.
 
 For `percentage string`, size is calculated according to the option `relative`.
+
+### `enter`
+
+**Type:** `boolean`
+
+If `false`, the split is not entered immediately after mount.
+
+**Examples**
+
+```lua
+enter = false
+```
 
 ### `buf_options`
 

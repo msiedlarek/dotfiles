@@ -2,7 +2,7 @@ pcall(require, "luacov")
 
 local Line = require("nui.line")
 local Text = require("nui.text")
-local h = require("tests.nui")
+local h = require("tests.helpers")
 
 local eq = h.eq
 
@@ -31,7 +31,18 @@ describe("nui.line", function()
       eq(type(ret_text.content), "function")
     end)
 
-    it("stores and returns nui.text with same reference", function()
+    it("returns nui.line for nui.line parameter", function()
+      local line = Line()
+
+      local content_line = Line({ Text("One"), Text("Two") })
+
+      local ret_content_line = line:append(content_line)
+
+      eq(content_line == ret_content_line, true)
+      eq(type(ret_content_line.append), "function")
+    end)
+
+    it("stores and returns block with same reference", function()
       local line = Line()
 
       local text_one = line:append("One")
@@ -44,6 +55,15 @@ describe("nui.line", function()
       eq(text_two == ret_text_two, true)
       eq(line._texts[2] == text_two, true)
       eq(line._texts[2] == ret_text_two, true)
+
+      local text_three = Text("Three")
+      local text_four = Text("Four")
+      local content_line = Line({ text_three, text_four })
+      local ret_content_line = line:append(content_line)
+
+      eq(content_line == ret_content_line, true)
+      eq(line._texts[3] == content_line._texts[1], true)
+      eq(line._texts[4] == content_line._texts[2], true)
     end)
   end)
 
@@ -57,6 +77,16 @@ describe("nui.line", function()
     end)
   end)
 
+  describe("method :width", function()
+    it("returns whole text width", function()
+      local line = Line()
+      line:append("One")
+      line:append("Two")
+
+      eq(line:width(), 6)
+    end)
+  end)
+
   describe("method", function()
     local winid, bufnr
 
@@ -67,46 +97,52 @@ describe("nui.line", function()
       vim.api.nvim_win_set_buf(winid, bufnr)
     end)
 
+    after_each(function()
+      vim.api.nvim_buf_delete(bufnr, { force = true })
+    end)
+
     describe(":highlight", function()
-      local hl_group, ns, ns_id
+      local hl_group_one, hl_group_two, ns, ns_id
       local linenr
-      local t1, t2, t3
+      local t1, t2, t3, t4
       local line
 
       before_each(function()
-        hl_group = "NuiTextTest"
+        hl_group_one = "NuiTextTestOne"
+        hl_group_two = "NuiTextTestTwo"
         ns = "NuiTest"
         ns_id = vim.api.nvim_create_namespace(ns)
 
         linenr = 1
 
         t1 = Text("One")
-        t2 = Text("Two", hl_group)
-        t3 = Text("Three")
+        t2 = Text("Two", hl_group_one)
+        t3 = Text("Three", hl_group_two)
+        t4 = Text("Four")
 
-        line = Line({ t1, t2, t3 })
+        line = Line({ t1, t2, t3, t4 })
       end)
-
-      local function assert_highlight()
-        local extmarks = h.get_line_extmarks(bufnr, ns_id, linenr)
-
-        eq(#extmarks, 1)
-        eq(extmarks[1][3], t1:length())
-        h.assert_extmark(extmarks[1], linenr, t2:content(), hl_group)
-      end
 
       it("is applied with :render", function()
         line:render(bufnr, ns_id, linenr)
 
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, t2:content(), hl_group_one)
+        h.assert_highlight(bufnr, ns_id, linenr, t3:content(), hl_group_two)
       end)
 
       it("can highlight existing buffer line", function()
-        vim.api.nvim_buf_set_lines(bufnr, linenr - 1, -1, false, { t1:content() .. t2:content() .. t3:content() })
+        vim.api.nvim_buf_set_lines(
+          bufnr,
+          linenr - 1,
+          -1,
+          false,
+          { t1:content() .. t2:content() .. t3:content() .. t4:content() }
+        )
 
         line:highlight(bufnr, ns_id, linenr)
 
-        assert_highlight()
+        h.assert_highlight(bufnr, ns_id, linenr, t2:content(), hl_group_one)
+        h.assert_highlight(bufnr, ns_id, linenr, t3:content(), hl_group_two)
       end)
     end)
 
@@ -119,7 +155,7 @@ describe("nui.line", function()
         line:append("2")
         line:render(bufnr, -1, linenr)
 
-        eq(vim.api.nvim_buf_get_lines(bufnr, linenr - 1, linenr, false), {
+        h.assert_buf_lines(bufnr, {
           "42",
         })
       end)

@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/MunifTanjim/nui.nvim.git
 	branch = main
-	commit = abdbfab89f307151db83b1a5147cd390ef27ff99
-	parent = 467ef703ad2b21c204512337d395eda7784bb8b9
+	commit = c59bdcfde011b88bfb71b5c4351684cf67bf5f9f
+	parent = e0fc06379e28abef18126d5a4e4d6a8e26f7a094
 	method = merge
 	cmdver = 0.4.5

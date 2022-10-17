@@ -2,16 +2,70 @@ pcall(require, "luacov")
 
 local Split = require("nui.split")
 local event = require("nui.utils.autocmd").event
-local h = require("tests.nui")
+local h = require("tests.helpers")
 local spy = require("luassert.spy")
 
 local eq, feedkeys = h.eq, h.feedkeys
 
+local function percent(number, percentage)
+  return math.floor(number * percentage / 100)
+end
+
 describe("nui.split", function()
   local split
 
+  before_each(function()
+    vim.o.winwidth = 10
+  end)
+
   after_each(function()
     split:unmount()
+  end)
+
+  describe("o.enter", function()
+    it("if true, sets the split as current window", function()
+      split = Split({
+        enter = true,
+        size = 10,
+        position = "bottom",
+      })
+
+      local winid = vim.api.nvim_get_current_win()
+
+      split:mount()
+
+      h.eq(winid ~= split.winid, true)
+      h.eq(split.winid, vim.api.nvim_get_current_win())
+    end)
+
+    it("if false, does not set the split as current window", function()
+      split = Split({
+        enter = false,
+        size = 10,
+        position = "bottom",
+      })
+
+      local winid = vim.api.nvim_get_current_win()
+
+      split:mount()
+
+      h.eq(winid ~= split.winid, true)
+      h.eq(winid, vim.api.nvim_get_current_win())
+    end)
+
+    it("is true by default", function()
+      split = Split({
+        size = 10,
+        position = "bottom",
+      })
+
+      local winid = vim.api.nvim_get_current_win()
+
+      split:mount()
+
+      h.eq(winid ~= split.winid, true)
+      h.eq(split.winid, vim.api.nvim_get_current_win())
+    end)
   end)
 
   describe("o.size", function()
@@ -32,6 +86,32 @@ describe("nui.split", function()
       end)
     end
 
+    it("supports table (.width)", function()
+      local size = 10
+
+      split = Split({
+        size = { width = size },
+        position = "left",
+      })
+
+      split:mount()
+
+      eq(vim.api.nvim_win_get_width(split.winid), size)
+    end)
+
+    it("supports table (.height)", function()
+      local size = 10
+
+      split = Split({
+        size = { height = size },
+        position = "top",
+      })
+
+      split:mount()
+
+      eq(vim.api.nvim_win_get_height(split.winid), size)
+    end)
+
     it("is optional", function()
       split = Split({
         position = "bottom",
@@ -43,46 +123,82 @@ describe("nui.split", function()
     end)
   end)
 
-  it("supports o.relative=win", function()
-    local left_half_split = Split({
-      size = "50%",
-      position = "left",
-    })
+  describe("o.relative", function()
+    it("supports 'editor'", function()
+      local left_half_split = Split({
+        size = "50%",
+        position = "left",
+      })
 
-    left_half_split:mount()
+      left_half_split:mount()
 
-    split = Split({
-      size = 20,
-      position = "bottom",
-      relative = "win",
-    })
+      split = Split({
+        size = 20,
+        position = "bottom",
+        relative = "editor",
+      })
 
-    split:mount()
+      split:mount()
 
-    eq(vim.api.nvim_win_get_width(split.winid), vim.o.columns / 2)
+      eq(vim.api.nvim_win_get_width(split.winid), vim.o.columns)
 
-    left_half_split:unmount()
-  end)
+      left_half_split:unmount()
+    end)
 
-  it("supports o.relative=editor", function()
-    local left_half_split = Split({
-      size = "50%",
-      position = "left",
-    })
+    it("supports 'win'", function()
+      local left_half_split = Split({
+        size = "50%",
+        position = "left",
+      })
 
-    left_half_split:mount()
+      left_half_split:mount()
 
-    split = Split({
-      size = 20,
-      position = "bottom",
-      relative = "editor",
-    })
+      split = Split({
+        size = 20,
+        position = "bottom",
+        relative = "win",
+      })
 
-    split:mount()
+      split:mount()
 
-    eq(vim.api.nvim_win_get_width(split.winid), vim.o.columns)
+      eq(vim.api.nvim_win_get_width(split.winid), vim.o.columns / 2)
 
-    left_half_split:unmount()
+      left_half_split:unmount()
+    end)
+
+    it("supports specific window", function()
+      local winid = vim.api.nvim_get_current_win()
+
+      local left_half_split = Split({
+        enter = false,
+        size = "30%",
+        position = "left",
+      })
+
+      left_half_split:mount()
+
+      eq(winid, vim.api.nvim_get_current_win())
+
+      eq(vim.api.nvim_win_get_width(left_half_split.winid), vim.o.columns * 30 / 100)
+
+      split = Split({
+        enter = false,
+        size = 10,
+        position = "bottom",
+        relative = {
+          type = "win",
+          winid = left_half_split.winid,
+        },
+      })
+
+      split:mount()
+
+      eq(winid, vim.api.nvim_get_current_win())
+
+      eq(vim.api.nvim_win_get_width(split.winid), vim.o.columns * 30 / 100)
+
+      left_half_split:unmount()
+    end)
   end)
 
   describe("method :mount", function()
@@ -121,9 +237,29 @@ describe("nui.split", function()
 
       eq(#new_winids, 0)
     end)
+
+    it("sets buffer after creating window", function()
+      local ok, winid = false, nil
+
+      split = Split({
+        size = 20,
+        position = "bottom",
+      })
+
+      split:on(event.BufWinEnter, function()
+        ok, winid = true, split.winid
+      end)
+
+      split:mount()
+
+      eq(type(split.winid), "number")
+
+      eq(ok, true)
+      eq(winid, split.winid)
+    end)
   end)
 
-  describe("method :unmount", function()
+  h.describe_flipping_feature("lua_autocmd", "method :unmount", function()
     it("closes win if mounted", function()
       split = Split({
         size = 20,
@@ -164,9 +300,26 @@ describe("nui.split", function()
 
       eq(#closed_winids, 0)
     end)
+
+    it("is called when quitted", function()
+      split = Split({
+        size = 10,
+        position = "bottom",
+      })
+
+      local split_unmount = spy.on(split, "unmount")
+
+      split:mount()
+
+      vim.api.nvim_buf_call(split.bufnr, function()
+        vim.cmd([[quit]])
+      end)
+
+      assert.spy(split_unmount).was_called()
+    end)
   end)
 
-  describe("method :hide", function()
+  h.describe_flipping_feature("lua_autocmd", "method :hide", function()
     it("works", function()
       local winid = vim.api.nvim_get_current_win()
 
@@ -228,6 +381,23 @@ describe("nui.split", function()
       local curr_winids = vim.api.nvim_list_wins()
 
       eq(#prev_winids, #curr_winids)
+    end)
+
+    it("is called when window is closed", function()
+      split = Split({
+        size = 20,
+        position = "bottom",
+      })
+
+      local split_hide = spy.on(split, "hide")
+
+      split:mount()
+
+      vim.api.nvim_buf_call(split.bufnr, function()
+        vim.cmd([[:bdelete]])
+      end)
+
+      assert.spy(split_hide).was_called()
     end)
   end)
 
@@ -314,7 +484,155 @@ describe("nui.split", function()
     end)
   end)
 
+  describe("method :update_layout", function()
+    it("can change size", function()
+      split = Split({ positon = "bottom", size = 10 })
+
+      split:mount()
+
+      eq(vim.api.nvim_win_get_height(split.winid), 10)
+
+      split:update_layout({ size = 20 })
+
+      eq(vim.api.nvim_win_get_height(split.winid), 20)
+    end)
+
+    it("can change position", function()
+      local winid = vim.api.nvim_get_current_win()
+
+      split = Split({ position = "bottom", size = 10 })
+
+      split:mount()
+
+      eq(vim.fn.winlayout(), {
+        "col",
+        {
+          { "leaf", winid },
+          { "leaf", split.winid },
+        },
+      })
+
+      split:update_layout({ position = "right" })
+
+      eq(vim.fn.winlayout(), {
+        "row",
+        {
+          { "leaf", winid },
+          { "leaf", split.winid },
+        },
+      })
+    end)
+
+    it("can change position and size", function()
+      local winid = vim.api.nvim_get_current_win()
+
+      split = Split({ position = "top", size = 10 })
+
+      split:mount()
+
+      eq(vim.api.nvim_win_get_height(split.winid), 10)
+      eq(vim.fn.winlayout(), {
+        "col",
+        {
+          { "leaf", split.winid },
+          { "leaf", winid },
+        },
+      })
+
+      split:update_layout({ position = "left", size = 20 })
+
+      eq(vim.api.nvim_win_get_width(split.winid), 20)
+      eq(vim.fn.winlayout(), {
+        "row",
+        {
+          { "leaf", split.winid },
+          { "leaf", winid },
+        },
+      })
+    end)
+
+    it("can change relative", function()
+      local winid_one = vim.api.nvim_get_current_win()
+      local split_two = Split({ position = "right", size = 10 })
+      split_two:mount()
+
+      split = Split({ relative = "win", position = "top", size = 10 })
+
+      split:mount()
+
+      eq(vim.api.nvim_win_get_height(split.winid), 10)
+      eq(vim.fn.winlayout(), {
+        "row",
+        {
+          { "leaf", winid_one },
+          {
+            "col",
+            {
+              { "leaf", split.winid },
+              { "leaf", split_two.winid },
+            },
+          },
+        },
+      })
+
+      split:update_layout({ position = "bottom", relative = "editor", size = "50%" })
+
+      eq(vim.api.nvim_win_get_height(split.winid), percent(vim.o.lines, 50))
+      eq(vim.fn.winlayout(), {
+        "col",
+        {
+          {
+            "row",
+            {
+              { "leaf", winid_one },
+              { "leaf", split_two.winid },
+            },
+          },
+          { "leaf", split.winid },
+        },
+      })
+
+      split_two:unmount()
+    end)
+  end)
+
   h.describe_flipping_feature("lua_keymap", "method :map", function()
+    it("works before :mount", function()
+      local callback = spy.new(function() end)
+
+      split = Split({
+        size = 20,
+      })
+
+      split:map("n", "l", function()
+        callback()
+      end)
+
+      split:mount()
+
+      feedkeys("l", "x")
+
+      assert.spy(callback).called()
+    end)
+
+    it("works after :mount", function()
+      local callback = spy.new(function() end)
+
+      split = Split({
+        size = 20,
+      })
+
+      split:mount()
+
+      split:map("n", "l", function()
+        callback()
+      end)
+
+      feedkeys("l", "x")
+
+      assert.spy(callback).called()
+    end)
+
     it("supports lhs table", function()
       split = Split({
         size = 20,
@@ -408,21 +726,59 @@ describe("nui.split", function()
       })
     end)
 
-    it("throws if not mounted", function()
+    it("throws if .bufnr is nil", function()
       split = Split({
         size = 20,
       })
+
+      split.bufnr = nil
 
       local ok, result = pcall(function()
         split:map("n", "k", "o42<Esc>")
       end)
 
       eq(ok, false)
-      eq(type(result), "string")
+      eq(type(string.match(result, "buffer not found")), "string")
     end)
   end)
 
-  describe("method :unmap", function()
+  h.describe_flipping_feature("lua_keymap", "method :unmap", function()
+    it("works before :mount", function()
+      split = Split({
+        size = 20,
+      })
+
+      split:map("n", "l", "o42<esc>")
+
+      split:unmap("n", "l")
+
+      split:mount()
+
+      feedkeys("l", "x")
+
+      h.assert_buf_lines(split.bufnr, {
+        "",
+      })
+    end)
+
+    it("works after :mount", function()
+      split = Split({
+        size = 20,
+      })
+
+      split:mount()
+
+      split:map("n", "l", "o42<esc>")
+
+      split:unmap("n", "l")
+
+      feedkeys("l", "x")
+
+      h.assert_buf_lines(split.bufnr, {
+        "",
+      })
+    end)
+
     it("supports lhs string", function()
       split = Split({
         size = 20,
@@ -461,22 +817,43 @@ describe("nui.split", function()
       })
     end)
 
-    it("throws if not mounted", function()
+    it("throws if .bufnr is nil", function()
       split = Split({
         size = 20,
       })
+
+      split.bufnr = nil
 
       local ok, result = pcall(function()
         split:unmap("n", "l")
       end)
 
       eq(ok, false)
-      eq(type(result), "string")
+      eq(type(string.match(result, "buffer not found")), "string")
     end)
   end)
 
   h.describe_flipping_feature("lua_autocmd", "method :on", function()
-    it("works", function()
+    it("works before :mount", function()
+      local callback = spy.new(function() end)
+
+      split = Split({
+        size = 20,
+      })
+
+      split:on(event.InsertEnter, function()
+        callback()
+      end)
+
+      split:mount()
+
+      feedkeys("i", "x")
+      feedkeys("<esc>", "x")
+
+      assert.spy(callback).called()
+    end)
+
+    it("works after :mount", function()
       local callback = spy.new(function() end)
 
       split = Split({
@@ -495,22 +872,45 @@ describe("nui.split", function()
       assert.spy(callback).called()
     end)
 
-    it("throws if not mounted", function()
+    it("throws if .bufnr is nil", function()
       split = Split({
         size = 20,
       })
+
+      split.bufnr = nil
 
       local ok, result = pcall(function()
         split:on(event.InsertEnter, function() end)
       end)
 
       eq(ok, false)
-      eq(type(result), "string")
+      eq(type(string.match(result, "buffer not found")), "string")
     end)
   end)
 
   h.describe_flipping_feature("lua_autocmd", "method :off", function()
-    it("works", function()
+    it("works before :mount", function()
+      local callback = spy.new(function() end)
+
+      split = Split({
+        size = 20,
+      })
+
+      split:on(event.InsertEnter, function()
+        callback()
+      end)
+
+      split:off(event.InsertEnter)
+
+      split:mount()
+
+      feedkeys("i", "x")
+      feedkeys("<esc>", "x")
+
+      assert.spy(callback).not_called()
+    end)
+
+    it("works after :mount", function()
       local callback = spy.new(function() end)
 
       split = Split({
@@ -531,17 +931,19 @@ describe("nui.split", function()
       assert.spy(callback).not_called()
     end)
 
-    it("throws if not mounted", function()
+    it("throws if .bufnr is nil", function()
       split = Split({
         size = 20,
       })
+
+      split.bufnr = nil
 
       local ok, result = pcall(function()
         split:off()
       end)
 
       eq(ok, false)
-      eq(type(result), "string")
+      eq(type(string.match(result, "buffer not found")), "string")
     end)
   end)
 end)
