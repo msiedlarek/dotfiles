@@ -10,16 +10,6 @@ export VISUAL="$EDITOR"
 export PAGER="less -X"
 export MANPAGER="less -X"
 
-if [ -x /usr/bin/xdpyinfo ]; then
-    export QT_STYLE_OVERRIDE=GTK+
-    export DPI=$(/usr/bin/xdpyinfo | sed -nr 's/.*([0-9]+)x\1 dots.*/\1/p')
-    if [ $DPI -gt 100 ]; then
-        export QT_AUTO_SCREEN_SCALE_FACTOR=1
-        export GDK_SCALE=2
-        # export GDK_DPI_SCALE=0.5
-    fi
-fi
-
 export PATH="/opt/local/bin:/usr/local/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 export PATH="${HOME}/.cargo/bin:${PATH}"
