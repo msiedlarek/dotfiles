@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/nvim-lua/plenary.nvim.git
+	branch = 9069d14a120cadb4f6825f76821533f2babcab92
+	commit = 9069d14a120cadb4f6825f76821533f2babcab92
+	parent = 3c31fd99c671a5e8edc977a029a535b8c2efb81d
+	method = merge
+	cmdver = 0.4.5
