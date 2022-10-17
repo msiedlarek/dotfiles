@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/zsh-users/zsh-history-substring-search.git
-	branch = 4abed97b6e67eb5590b39bcd59080aa23192f25d
+	branch = master
 	commit = 4abed97b6e67eb5590b39bcd59080aa23192f25d
 	parent = 6dc6ba53347d07598dae344f73161481581a772d
 	method = merge
