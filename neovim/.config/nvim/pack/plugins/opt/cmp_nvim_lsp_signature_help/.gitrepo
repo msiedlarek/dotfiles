@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/hrsh7th/cmp-nvim-lsp-signature-help.git
 	branch = main
-	commit = 8014f6d120f72fe0a135025c4d41e3fe41fd411b
-	parent = 96e413ee6f46a3252af0b7c5d2340ad073d8fdb2
+	commit = d2768cb1b83de649d57d967085fe73c5e01f8fd7
+	parent = dcd2b0092d62e34e57dc624666b389e57f3a32f9
 	method = merge
 	cmdver = 0.4.5
