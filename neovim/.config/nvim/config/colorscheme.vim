@@ -1,4 +1,4 @@
-if $TERM == 'xterm-256color'
+if $TERM == 'xterm-256color' || $TERM == 'foot'
   " Enable 24-bit colors.
   set termguicolors
 endif
@@ -51,11 +51,14 @@ if &background == 'light'
   hi StatusLine ctermfg=LightGrey ctermbg=NONE cterm=NONE guifg=#eeeeee guibg=NONE gui=NONE
   hi StatusLineNC ctermfg=LightGrey ctermbg=White cterm=NONE guifg=#eeeeee guibg=NONE gui=NONE
 else
+  let g:jellybeans_overrides = {
+    \   'background': { 'guibg': '010101' },
+    \ }
   colorscheme jellybeans
 
   hi Pmenu guibg=NONE
   hi NonText guibg=NONE
-  hi VertSplit ctermfg=DarkGrey ctermbg=NONE guifg=#403c41 guibg=NONE
+  hi VertSplit ctermfg=DarkGrey ctermbg=NONE guifg=#010101 guibg=NONE
   hi Search ctermfg=Black ctermbg=Yellow cterm=NONE guifg=#151515 guibg=#fad07a gui=NONE
   hi FloatBorder ctermfg=White ctermbg=NONE guifg=#8197bf guibg=NONE
   hi SignColumn ctermfg=DarkGrey ctermbg=NONE guibg=#151515 guifg=#151515
@@ -70,7 +73,7 @@ else
   hi NeoTreeNormal guifg=#cccccc guibg=NONE
   hi NeoTreeNormalNC guifg=#cccccc guibg=NONE
   hi NeoTreeCursorLine guibg=#252525
-  hi NeoTreeWinSeparator guibg=#151515 guifg=#403c41
+  hi NeoTreeWinSeparator guibg=#010101 guifg=#010101
 
   hi DiagnosticError guifg=#dc5050
   hi DiagnosticWarn guifg=#fad07a
