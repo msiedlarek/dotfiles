@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/antoinemadec/FixCursorHold.nvim.git
 	branch = master
-	commit = 1bfb32e7ba1344925ad815cb0d7f901dbc0ff7c1
-	parent = 1bca101668617e02aebf369e7abb8eec46e0f6dc
+	commit = 70a9516a64668cbfe59f31b66d0a21678c5e9b12
+	parent = 766e49b6874df9d37c9caafb98d0057ad49c4541
 	method = merge
 	cmdver = 0.4.5
