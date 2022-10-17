@@ -163,7 +163,7 @@ command_center.add({
   },
   {
     description = 'Search (grep) workspace',
-    cmd = '<cmd>lua require("telescope").extensions.live_grep_raw.live_grep_raw()<cr>',
+    cmd = '<cmd>lua require("telescope").extensions.live_grep_args.live_grep_args()<cr>',
     keybindings = { { 'n', '<leader>r', opts } },
   },
   {
