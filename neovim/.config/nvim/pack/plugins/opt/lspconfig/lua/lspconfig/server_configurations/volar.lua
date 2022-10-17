@@ -2,14 +2,13 @@ local util = require 'lspconfig.util'
 
 local function get_typescript_server_path(root_dir)
   local project_root = util.find_node_modules_ancestor(root_dir)
-  return project_root and (util.path.join(project_root, 'node_modules', 'typescript', 'lib', 'tsserverlibrary.js'))
-    or ''
+  return project_root and (util.path.join(project_root, 'node_modules', 'typescript', 'lib')) or ''
 end
 
--- https://github.com/johnsoncodehk/volar/blob/master/packages/shared/src/types.ts
+-- https://github.com/johnsoncodehk/volar/blob/20d713b/packages/shared/src/types.ts
 local volar_init_options = {
   typescript = {
-    serverPath = '',
+    tsdk = '',
   },
   languageFeatures = {
     implementation = true,
@@ -63,15 +62,15 @@ return {
       if
         new_config.init_options
         and new_config.init_options.typescript
-        and new_config.init_options.typescript.serverPath == ''
+        and new_config.init_options.typescript.tsdk == ''
       then
-        new_config.init_options.typescript.serverPath = get_typescript_server_path(new_root_dir)
+        new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
       end
     end,
   },
   docs = {
     description = [[
-https://github.com/johnsoncodehk/volar/tree/master/packages/vue-language-server
+https://github.com/johnsoncodehk/volar/tree/20d713b/packages/vue-language-server
 
 Volar language server for Vue
 
@@ -81,9 +80,11 @@ Volar can be installed via npm:
 npm install -g @volar/vue-language-server
 ```
 
-Volar by default supports Vue 3 projects. Vue 2 projects need [additional configuration](https://github.com/johnsoncodehk/volar/blob/master/extensions/vscode-vue-language-features/README.md?plain=1#L28-L63).
+Volar by default supports Vue 3 projects. Vue 2 projects need
+[additional configuration](https://github.com/johnsoncodehk/volar/blob/master/extensions/vscode-vue-language-features/README.md?plain=1#L28-L63).
 
 **Take Over Mode**
+
 Volar can serve as a language server for both Vue and TypeScript via [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471).
 
 To enable Take Over Mode, override the default filetypes in `setup{}` as follows:
@@ -95,7 +96,9 @@ require'lspconfig'.volar.setup{
 ```
 
 **Overriding the default TypeScript Server used by Volar**
-The default config looks for TS in the local node_modules. The alternatives are:
+
+The default config looks for TS in the local `node_modules`. This can lead to issues
+e.g. when working on a [monorepo](https://monorepo.tools/). The alternatives are:
 
 - use a global TypeScript Server installation
 
@@ -104,26 +107,33 @@ require'lspconfig'.volar.setup{
   init_options = {
     typescript = {
       serverPath = '/path/to/.npm/lib/node_modules/typescript/lib/tsserverlib.js'
+      -- Alternative location if installed as root:
+      -- serverPath = '/usr/local/lib/node_modules/typescript/lib/tsserverlibrary.js'
     }
   }
 }
 ```
 
-- use a global TypeScript Server installation if a local server is not found
+- use a local server and fall back to a global TypeScript Server installation
 
 ```lua
 local util = require 'lspconfig.util'
-
 local function get_typescript_server_path(root_dir)
-  local project_root = util.find_node_modules_ancestor(root_dir)
 
-  local local_tsserverlib = project_root ~= nil and util.path.join(project_root, 'node_modules', 'typescript', 'lib', 'tsserverlibrary.js')
-  local global_tsserverlib = '/home/[yourusernamehere]/.npm/lib/node_modules/typescript/lib/tsserverlibrary.js'
-
-  if local_tsserverlib and util.path.exists(local_tsserverlib) then
-    return local_tsserverlib
+  local global_ts = '/home/[yourusernamehere]/.npm/lib/node_modules/typescript/lib/tsserverlibrary.js'
+  -- Alternative location if installed as root:
+  -- local global_ts = '/usr/local/lib/node_modules/typescript/lib/tsserverlibrary.js'
+  local found_ts = ''
+  local function check_dir(path)
+    found_ts =  util.path.join(path, 'node_modules', 'typescript', 'lib', 'tsserverlibrary.js')
+    if util.path.exists(found_ts) then
+      return path
+    end
+  end
+  if util.search_ancestors(root_dir, check_dir) then
+    return found_ts
   else
-    return global_tsserverlib
+    return global_ts
   end
 end
 
