@@ -2,9 +2,19 @@
 --
 -- SPDX-License-Identifier: MIT
 
-local prompt_parser = require("telescope-live-grep-raw.prompt_parser")
+local prompt_parser = require("telescope-live-grep-args.prompt_parser")
 
 local tests = {
+  {
+    "\"",
+    {},
+    {}
+  },
+  {
+    "\"\"",
+    {""},
+    {""}
+  },
   {
     "test1",     -- input value
     { "test1" }, -- expected with auto-quoting

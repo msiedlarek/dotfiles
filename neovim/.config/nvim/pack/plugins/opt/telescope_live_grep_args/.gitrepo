@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/nvim-telescope/telescope-live-grep-args.nvim.git
 	branch = master
-	commit = ff39553f3c48e06c027ae6b7b2335618e7a1ac1c
-	parent = 22a12cf89ce70f9c0857e6d81538501105d4c8d1
+	commit = 32b633b062d1168a2d18ad27994e5b4ef97f0a74
+	parent = bd3bb3307779eb05cfccfa84e5c947a3d6ef6bef
 	method = merge
 	cmdver = 0.4.5
