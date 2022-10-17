@@ -3,6 +3,10 @@ if vim.g.loaded_cmp then
 end
 vim.g.loaded_cmp = true
 
+if not vim.api.nvim_create_autocmd then
+  return print('[nvim-cmp] Your nvim does not has `nvim_create_autocmd` function. Please update to latest nvim.')
+end
+
 local api = require('cmp.utils.api')
 local types = require('cmp.types')
 local highlight = require('cmp.utils.highlight')
@@ -22,15 +26,15 @@ for kind in pairs(types.lsp.CompletionItemKind) do
 end
 
 autocmd.subscribe('ColorScheme', function()
-  highlight.inherit('CmpItemAbbrDefault', 'Pmenu', { bg = 'NONE', default = true })
-  highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', { bg = 'NONE', default = true })
-  highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', { bg = 'NONE', default = true })
-  highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Pmenu', { bg = 'NONE', default = true })
-  highlight.inherit('CmpItemKindDefault', 'Special', { bg = 'NONE', default = true })
-  highlight.inherit('CmpItemMenuDefault', 'Pmenu', { bg = 'NONE', default = true })
+  highlight.inherit('CmpItemAbbrDefault', 'Pmenu', { bg = 'NONE', default = false })
+  highlight.inherit('CmpItemAbbrDeprecatedDefault', 'Comment', { bg = 'NONE', default = false })
+  highlight.inherit('CmpItemAbbrMatchDefault', 'Pmenu', { bg = 'NONE', default = false })
+  highlight.inherit('CmpItemAbbrMatchFuzzyDefault', 'Pmenu', { bg = 'NONE', default = false })
+  highlight.inherit('CmpItemKindDefault', 'Special', { bg = 'NONE', default = false })
+  highlight.inherit('CmpItemMenuDefault', 'Pmenu', { bg = 'NONE', default = false })
   for name in pairs(types.lsp.CompletionItemKind) do
     if type(name) == 'string' then
-      vim.api.nvim_set_hl(0, ('CmpItemKind%sDefault'):format(name), { link = 'CmpItemKind', default = true })
+      vim.api.nvim_set_hl(0, ('CmpItemKind%sDefault'):format(name), { link = 'CmpItemKind', default = false })
     end
   end
 end)

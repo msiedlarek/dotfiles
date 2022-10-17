@@ -8,13 +8,11 @@ local keymap = require('cmp.utils.keymap')
 local misc = require('cmp.utils.misc')
 local api = require('cmp.utils.api')
 
-local SIDE_PADDING = 1
-
 local DEFAULT_HEIGHT = 10 -- @see https://github.com/vim/vim/blob/master/src/popupmenu.c#L45
 
 ---@class cmp.CustomEntriesView
 ---@field private entries_win cmp.Window
----@field private offset number
+---@field private offset integer
 ---@field private active boolean
 ---@field private entries cmp.Entry[]
 ---@field private column_width any
@@ -32,13 +30,13 @@ custom_entries_view.new = function()
   self.entries_win:option('cursorlineopt', 'line')
   self.entries_win:option('foldenable', false)
   self.entries_win:option('wrap', false)
-  self.entries_win:option('scrolloff', 0)
   -- This is done so that strdisplaywidth calculations for lines in the
   -- custom_entries_view window exactly match with what is really displayed,
   -- see comment in cmp.Entry.get_view. Setting tabstop to 1 makes all tabs be
   -- always rendered one column wide, which removes the unpredictability coming
   -- from variable width of the tab character.
   self.entries_win:buffer_option('tabstop', 1)
+  self.entries_win:buffer_option('filetype', 'cmp_menu')
   self.event = event.new()
   self.offset = -1
   self.active = false
@@ -65,7 +63,7 @@ custom_entries_view.new = function()
         local e = self.entries[i + 1]
         if e then
           local v = e:get_view(self.offset, buf)
-          local o = SIDE_PADDING
+          local o = config.get().window.completion.side_padding
           local a = 0
           for _, field in ipairs(fields) do
             if field == types.cmp.ItemField.Abbr then
@@ -126,7 +124,7 @@ custom_entries_view.open = function(self, offset, entries)
   local entries_buf = self.entries_win:get_buffer()
   local lines = {}
   local dedup = {}
-  local preselect = 0
+  local preselect_index = 0
   for _, e in ipairs(entries) do
     local view = e:get_view(offset, entries_buf)
     if view.dup == 1 or not dedup[e.completion_item.label] then
@@ -136,8 +134,8 @@ custom_entries_view.open = function(self, offset, entries)
       self.column_width.menu = math.max(self.column_width.menu, view.menu.width)
       table.insert(self.entries, e)
       table.insert(lines, ' ')
-      if preselect == 0 and e.completion_item.preselect then
-        preselect = #self.entries
+      if preselect_index == 0 and e.completion_item.preselect then
+        preselect_index = #self.entries
       end
     end
   end
@@ -188,19 +186,20 @@ custom_entries_view.open = function(self, offset, entries)
     for i = 1, math.floor(n / 2) do
       self.entries[i], self.entries[n - i + 1] = self.entries[n - i + 1], self.entries[i]
     end
-    if preselect ~= 0 then
-      preselect = #self.entries - preselect + 1
+    if preselect_index ~= 0 then
+      preselect_index = #self.entries - preselect_index + 1
     end
   end
 
   -- Apply window options (that might be changed) on the custom completion menu.
   self.entries_win:option('winblend', vim.o.pumblend)
   self.entries_win:option('winhighlight', completion.winhighlight)
+  self.entries_win:option('scrolloff', completion.scrolloff)
   self.entries_win:open({
     relative = 'editor',
     style = 'minimal',
     row = math.max(0, row),
-    col = math.max(0, col),
+    col = math.max(0, col + completion.col_offset),
     width = width,
     height = height,
     border = completion.border,
@@ -208,8 +207,8 @@ custom_entries_view.open = function(self, offset, entries)
   })
   -- always set cursor when starting. It will be adjusted on the call to _select
   vim.api.nvim_win_set_cursor(self.entries_win.win, { 1, 0 })
-  if preselect > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
-    self:_select(preselect, { behavior = types.cmp.SelectBehavior.Select })
+  if preselect_index > 0 and config.get().preselect == types.cmp.PreselectMode.Item then
+    self:_select(preselect_index, { behavior = types.cmp.SelectBehavior.Select })
   elseif not string.match(config.get().completion.completeopt, 'noselect') then
     if self:is_direction_top_down() then
       self:_select(1, { behavior = types.cmp.SelectBehavior.Select })
@@ -255,12 +254,12 @@ custom_entries_view.draw = function(self)
     if e then
       local view = e:get_view(self.offset, entries_buf)
       local text = {}
-      table.insert(text, string.rep(' ', SIDE_PADDING))
+      table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
       for _, field in ipairs(fields) do
         table.insert(text, view[field].text)
         table.insert(text, string.rep(' ', 1 + self.column_width[field] - view[field].width))
       end
-      table.insert(text, string.rep(' ', SIDE_PADDING))
+      table.insert(text, string.rep(' ', config.get().window.completion.side_padding))
       table.insert(texts, table.concat(text, ''))
     end
   end

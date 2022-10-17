@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/hrsh7th/nvim-cmp.git
 	branch = main
-	commit = a226b6a4ff72e5e809ed17734318233fb25c87f3
-	parent = 2aad9a09176e43ac9382a19bdfba82bb690c92b4
+	commit = e94d3489311f941788756953df23ca84f83eec95
+	parent = 47d956ff38630690cb1b64abd9f29089a30e163b
 	method = merge
 	cmdver = 0.4.5

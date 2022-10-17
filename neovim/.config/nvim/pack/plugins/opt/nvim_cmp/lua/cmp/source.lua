@@ -10,23 +10,23 @@ local pattern = require('cmp.utils.pattern')
 local char = require('cmp.utils.char')
 
 ---@class cmp.Source
----@field public id number
+---@field public id integer
 ---@field public name string
 ---@field public source any
 ---@field public cache cmp.Cache
----@field public revision number
+---@field public revision integer
 ---@field public incomplete boolean
 ---@field public is_triggered_by_symbol boolean
 ---@field public entries cmp.Entry[]
----@field public offset number
----@field public request_offset number
+---@field public offset integer
+---@field public request_offset integer
 ---@field public context cmp.Context
 ---@field public completion_context lsp.CompletionContext|nil
 ---@field public status cmp.SourceStatus
 ---@field public complete_dedup function
 local source = {}
 
----@alias cmp.SourceStatus "1" | "2" | "3"
+---@alias cmp.SourceStatus 1 | 2 | 3
 source.SourceStatus = {}
 source.SourceStatus.WAITING = 1
 source.SourceStatus.FETCHING = 2
@@ -101,21 +101,27 @@ source.get_entries = function(self, ctx)
     return self.entries
   end)()
 
+  local entry_filter = self:get_entry_filter()
+
   local inputs = {}
   local entries = {}
+  local matching_config = self:get_matching_config()
   for _, e in ipairs(target_entries) do
     local o = e:get_offset()
     if not inputs[o] then
       inputs[o] = string.sub(ctx.cursor_before_line, o)
     end
 
-    local match = e:match(inputs[o], self:get_matching_config())
+    local match = e:match(inputs[o], matching_config)
     e.score = match.score
     e.exact = false
     if e.score >= 1 then
       e.matches = match.matches
       e.exact = e:get_filter_text() == inputs[o] or e:get_word() == inputs[o]
-      table.insert(entries, e)
+
+      if entry_filter(e, ctx) then
+        table.insert(entries, e)
+      end
     end
   end
   self.cache:set({ 'get_entries', self.revision, ctx.cursor_before_line }, entries)
@@ -132,10 +138,10 @@ source.get_entries = function(self, ctx)
 end
 
 ---Get default insert range
----@return lsp.Range|nil
+---@return lsp.Range
 source.get_default_insert_range = function(self)
   if not self.context then
-    return nil
+    error('context is not initialized yet.')
   end
 
   return self.cache:ensure({ 'get_default_insert_range', self.revision }, function()
@@ -153,10 +159,10 @@ source.get_default_insert_range = function(self)
 end
 
 ---Get default replace range
----@return lsp.Range|nil
+---@return lsp.Range
 source.get_default_replace_range = function(self)
   if not self.context then
-    return nil
+    error('context is not initialized yet.')
   end
 
   return self.cache:ensure({ 'get_default_replace_range', self.revision }, function()
@@ -223,13 +229,25 @@ source.get_keyword_pattern = function(self)
 end
 
 ---Get keyword_length
----@return number
+---@return integer
 source.get_keyword_length = function(self)
   local c = self:get_source_config()
   if c.keyword_length then
     return c.keyword_length
   end
   return config.get().completion.keyword_length or 1
+end
+
+---Get filter
+--@return function
+source.get_entry_filter = function(self)
+  local c = self:get_source_config()
+  if c.entry_filter then
+    return c.entry_filter
+  end
+  return function(_, _)
+    return true
+  end
 end
 
 ---Invoke completion

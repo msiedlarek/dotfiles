@@ -14,7 +14,7 @@ config.cache = cache.new()
 ---@type cmp.ConfigSchema
 config.global = require('cmp.config.default')()
 
----@type table<number, cmp.ConfigSchema>
+---@type table<integer, cmp.ConfigSchema>
 config.buffers = {}
 
 ---@type table<string, cmp.ConfigSchema>
@@ -36,7 +36,7 @@ end
 
 ---Set configuration for buffer
 ---@param c cmp.ConfigSchema
----@param bufnr number|nil
+---@param bufnr integer
 config.set_buffer = function(c, bufnr)
   local revision = (config.buffers[bufnr] or {}).revision or 1
   config.buffers[bufnr] = c or {}
@@ -56,11 +56,13 @@ end
 
 ---Set configuration for cmdline
 ---@param c cmp.ConfigSchema
----@param cmdtype string
-config.set_cmdline = function(c, cmdtype)
-  local revision = (config.cmdline[cmdtype] or {}).revision or 1
-  config.cmdline[cmdtype] = c or {}
-  config.cmdline[cmdtype].revision = revision + 1
+---@param cmdtypes string|string[]
+config.set_cmdline = function(c, cmdtypes)
+  for _, cmdtype in ipairs(type(cmdtypes) == 'table' and cmdtypes or { cmdtypes }) do
+    local revision = (config.cmdline[cmdtype] or {}).revision or 1
+    config.cmdline[cmdtype] = c or {}
+    config.cmdline[cmdtype].revision = revision + 1
+  end
 end
 
 ---Set configuration as oneshot completion.
@@ -74,7 +76,9 @@ end
 ---@return cmp.ConfigSchema
 config.get = function()
   local global_config = config.global
-  if config.onetime.sources then
+
+  -- The config object already has `revision` key.
+  if #vim.tbl_keys(config.onetime) > 1 then
     local onetime_config = config.onetime
     return config.cache:ensure({
       'get',
@@ -150,9 +154,6 @@ end
 ---Return the current menu is native or not.
 config.is_native_menu = function()
   local c = config.get()
-  if c.experimental and c.experimental.native_menu then
-    return true
-  end
   if c.view and c.view.entries then
     return c.view.entries == 'native' or c.view.entries.name == 'native'
   end
@@ -164,6 +165,7 @@ end
 ---@return cmp.ConfigSchema
 config.normalize = function(c)
   -- make sure c is not 'nil'
+  ---@type any
   c = c == nil and {} or c
 
   -- Normalize mapping.
