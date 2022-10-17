@@ -2,10 +2,12 @@ current_theme.zsh
 secondary_theme.zsh
 theme_overlay.zsh
 *.txt
+.trunk/out
 test/out.parse
 test/res
 hold/*
 *.zwc
+._zi
 
 ### Vim
 # Swap
@@ -22,3 +24,4 @@ Session.vim
 *~
 # Auto-generated tag files
 tags
+.history
