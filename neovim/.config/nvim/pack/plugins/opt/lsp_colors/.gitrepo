@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/folke/lsp-colors.nvim.git
+	branch = 517fe3ab6b63f9907b093bc9443ef06b56f804f3
+	commit = 517fe3ab6b63f9907b093bc9443ef06b56f804f3
+	parent = 3c40155fec308fc7f17467278d172365bf627385
+	method = merge
+	cmdver = 0.4.5
