@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/nvim-telescope/telescope.nvim.git
 	branch = master
-	commit = 795a63ed293ba249a588e9e67aa1f2cec82028e8
-	parent = afee0ba41a8b4a6d40d113a16575f573d961a6af
+	commit = f174a0367b4fc7cb17710d867e25ea792311c418
+	parent = cf376b4cc2b598b9615e12809efa81c74f9072f2
 	method = merge
 	cmdver = 0.4.5
