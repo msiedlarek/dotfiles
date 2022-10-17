@@ -21,7 +21,7 @@ path.home = vim.loop.os_homedir()
 path.sep = (function()
   if jit then
     local os = string.lower(jit.os)
-    if os == "linux" or os == "osx" or os == "bsd" then
+    if os ~= "windows" then
       return "/"
     else
       return "\\"
@@ -78,7 +78,7 @@ end
 
 local is_absolute = function(filename, sep)
   if sep == "\\" then
-    return string.match(filename, "^[A-Z]:\\.*$")
+    return string.match(filename, "^[%a]:\\.*$") ~= nil
   end
   return string.sub(filename, 1, 1) == sep
 end
@@ -99,8 +99,17 @@ local function _normalize_path(filename, cwd)
   local has = string.find(filename, path.sep .. "..", 1, true) or string.find(filename, ".." .. path.sep, 1, true)
 
   if has then
-    local parts = _split_by_separator(filename)
+    local is_abs = is_absolute(filename, path.sep)
+    local split_without_disk_name = function(filename_local)
+      local parts = _split_by_separator(filename_local)
+      -- Remove disk name part on Windows
+      if path.sep == "\\" and is_abs then
+        table.remove(parts, 1)
+      end
+      return parts
+    end
 
+    local parts = split_without_disk_name(filename)
     local idx = 1
     local initial_up_count = 0
 
@@ -121,7 +130,7 @@ local function _normalize_path(filename, cwd)
     until idx > #parts
 
     local prefix = ""
-    if is_absolute(filename, path.sep) or #_split_by_separator(cwd) == initial_up_count then
+    if is_abs or #split_without_disk_name(cwd) == initial_up_count then
       prefix = path.root(filename)
     end
 
@@ -165,7 +174,24 @@ local check_self = function(self)
   return self
 end
 
-Path.__index = Path
+Path.__index = function(t, k)
+  local raw = rawget(Path, k)
+  if raw then
+    return raw
+  end
+
+  if k == "_cwd" then
+    local cwd = uv.fs_realpath "."
+    t._cwd = cwd
+    return cwd
+  end
+
+  if k == "_absolute" then
+    local absolute = uv.fs_realpath(t.filename)
+    t._absolute = absolute
+    return absolute
+  end
+end
 
 -- TODO: Could use this to not have to call new... not sure
 -- Path.__call = Path:new
@@ -178,7 +204,7 @@ Path.__div = function(self, other)
 end
 
 Path.__tostring = function(self)
-  return self.filename
+  return clean(self.filename)
 end
 
 -- TODO: See where we concat the table, and maybe we could make this work.
@@ -242,10 +268,6 @@ function Path:new(...)
     filename = path_string,
 
     _sep = sep,
-
-    -- Cached values
-    _absolute = uv.fs_realpath(path_string),
-    _cwd = uv.fs_realpath ".",
   }
 
   setmetatable(obj, Path)
@@ -349,7 +371,11 @@ function Path:normalize(cwd)
   -- Substitute home directory w/ "~"
   -- string.gsub is not useful here because usernames with dashes at the end
   -- will be seen as a regexp pattern rather than a raw string
-  local start, finish = string.find(self.filename, path.home, 1, true)
+  local home = path.home
+  if string.sub(path.home, -1) ~= path.sep then
+    home = home .. path.sep
+  end
+  local start, finish = string.find(self.filename, home, 1, true)
   if start == 1 then
     self.filename = "~" .. path.sep .. string.sub(self.filename, (finish + 1), -1)
   end

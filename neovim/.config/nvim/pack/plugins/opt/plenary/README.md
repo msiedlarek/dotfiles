@@ -12,8 +12,16 @@ At the moment, it is very much in pre-alpha :smile: Expect changes to the way so
 
 ## Installation
 
+Using [plug](https://github.com/junegunn/vim-plug):
+
 ```vim
 Plug 'nvim-lua/plenary.nvim'
+```
+
+Using [packer](https://github.com/wbthomason/packer.nvim):
+
+```
+use "nvim-lua/plenary.nvim"
 ```
 
 ## Modules
@@ -92,10 +100,57 @@ end
 - [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)
 - [vgit.nvim](https://github.com/tanvirtin/vgit.nvim)
 - [neogit](https://github.com/TimUntersberger/neogit)
+- [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim)
 
 ### plenary.async_lib
 
 Please use `plenary.async` instead. This was version 1 and is just here for compatibility reasons.
+
+### plenary.async.control.channel.oneshot
+
+Creates a oneshot channel. It can only send data one time.
+
+The sender is not async while the receiver is.
+
+Example:
+
+```lua
+local a = require'plenary.async'
+local tx, rx = a.control.channel.oneshot()
+
+a.run(function()
+    local ret = long_running_fn()
+    tx(ret)
+end)
+
+local ret = rx()
+```
+
+### plenary.async.control.channel.mpsc
+
+Creates a multiple producer single consumer channel.
+
+Example:
+
+```lua
+local a = require'plenary.async'
+local sender, receiver = a.control.channel.mpsc()
+
+a.run(function()
+  sender.send(10)
+  sender.send(20)
+end)
+
+a.run(function()
+  sender.send(30)
+  sender.send(40)
+end)
+
+for _ = 1, 4 do
+  local value = receiver.recv()
+  print('received:', value)
+end
+```
 
 ### plenary.job
 
@@ -324,3 +379,12 @@ This will enable debuggin for the plugin.
 ### plenary.neorocks
 
 DELETED: Please use packer.nvim or other lua-rocks wrapper instead. This no longer exists.
+
+### FAQ
+
+1. Error: Too many open files
+- \*nix systems have a setting to configure the maximum amount of open file
+  handles. It can occur that the default value is pretty low and that you end
+  up getting this error after opening a couple of files. You can see the
+  current limit with `ulimit -n` and set it with `ulimit -n 4096`. (macos might
+  work different)
