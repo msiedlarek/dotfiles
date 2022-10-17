@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/nanotech/jellybeans.vim.git
+	branch = ef83bf4dc8b3eacffc97bf5c96ab2581b415c9fa
+	commit = ef83bf4dc8b3eacffc97bf5c96ab2581b415c9fa
+	parent = 9405d4f2d053449db06ea53375898646036c1c6c
+	method = merge
+	cmdver = 0.4.5
