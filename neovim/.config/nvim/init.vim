@@ -170,7 +170,7 @@ if has('nvim')
   packadd! nui " required by: neo_tree
   packadd! plenary " required by: neo_tree, telescope
   packadd! telescope
-  packadd! telescope_rg
+  packadd! telescope_live_grep_args
   packadd! telescope_ui_select
 
   packadd! cmp_buffer
