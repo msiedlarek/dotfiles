@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/hrsh7th/cmp-buffer.git
 	branch = main
-	commit = 12463cfcd9b14052f9effccbf1d84caa7a2d57f0
-	parent = f10cf09286641ecc01e1282e745246cf154b4aa6
+	commit = 3022dbc9166796b644a841a02de8dd1cc1d311fa
+	parent = ea9622cc6ea255b8de719a15bdb3685ccfe0dad2
 	method = merge
 	cmdver = 0.4.5
