@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/hrsh7th/cmp-nvim-lsp-signature-help.git
+	branch = 8014f6d120f72fe0a135025c4d41e3fe41fd411b
+	commit = 8014f6d120f72fe0a135025c4d41e3fe41fd411b
+	parent = 96e413ee6f46a3252af0b7c5d2340ad073d8fdb2
+	method = merge
+	cmdver = 0.4.5
