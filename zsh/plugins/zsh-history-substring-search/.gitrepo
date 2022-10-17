@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/zsh-users/zsh-history-substring-search.git
+	branch = 4abed97b6e67eb5590b39bcd59080aa23192f25d
+	commit = 4abed97b6e67eb5590b39bcd59080aa23192f25d
+	parent = 6dc6ba53347d07598dae344f73161481581a772d
+	method = merge
+	cmdver = 0.4.5
