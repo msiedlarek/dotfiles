@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/hrsh7th/cmp-buffer.git
+	branch = 12463cfcd9b14052f9effccbf1d84caa7a2d57f0
+	commit = 12463cfcd9b14052f9effccbf1d84caa7a2d57f0
+	parent = f10cf09286641ecc01e1282e745246cf154b4aa6
+	method = merge
+	cmdver = 0.4.5
