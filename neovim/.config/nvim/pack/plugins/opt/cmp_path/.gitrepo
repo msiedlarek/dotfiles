@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/hrsh7th/cmp-path.git
 	branch = main
-	commit = 466b6b8270f7ba89abd59f402c73f63c7331ff6e
-	parent = a43f818aa04d6e1a8560d7eaf282e3d6b4c095e9
+	commit = 91ff86cd9c29299a64f968ebb45846c485725f23
+	parent = 6327bc317e99fff10cc394b42597e50e3669a9bd
 	method = merge
 	cmdver = 0.4.5
