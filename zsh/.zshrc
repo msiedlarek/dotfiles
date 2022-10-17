@@ -1,6 +1,6 @@
 ZSH_PLUGINS="${${(%):-%N}:A:h}/plugins"
 
-source "${ZSH_PLUGINS}/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+source "${ZSH_PLUGINS}/fast-syntax-highlighting/F-Sy-H.plugin.zsh"
 
 source "${ZSH_PLUGINS}/git-prompt/git-prompt.plugin.zsh"
 source "${ZSH_PLUGINS}/shrink-path.plugin.zsh"
