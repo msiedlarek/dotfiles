@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/nvim-neo-tree/neo-tree.nvim.git
-	branch = 71e3d71db729a3ae9d0abc870c6a193343b60a96
+	branch = v2.x
 	commit = 71e3d71db729a3ae9d0abc870c6a193343b60a96
 	parent = 340983962b6f3dfeeca683ea2c8fbf0225cf475e
 	method = merge
