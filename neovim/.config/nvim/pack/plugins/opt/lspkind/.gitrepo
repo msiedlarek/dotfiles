@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/onsails/lspkind.nvim.git
 	branch = master
-	commit = 57e5b5dfbe991151b07d272a06e365a77cc3d0e7
-	parent = e647e88023234c2bd40b410568f382a8d1087ca9
+	commit = c68b3a003483cf382428a43035079f78474cd11e
+	parent = cc6b87287c11b22b1c145a9462b536472aeadcd7
 	method = merge
 	cmdver = 0.4.5
