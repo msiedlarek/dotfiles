@@ -1,53 +1,97 @@
----LHS of toggle mappings in NORMAL + VISUAL mode
----@class Toggler
----@field line string Linewise comment keymap
----@field block string Blockwise comment keymap
+---@mod comment.config Configuration
+---@tag comment.config.defaults
+---@brief [[
+---Following is the default config for the |comment.usage.setup|. If you want to
+---override, just modify the option that you want, then it will be merged with the
+---default config.
+---
+--->
+---    {
+---        padding = true,
+---        sticky = true,
+---        ignore = nil,
+---        toggler = {
+---            line = 'gcc',
+---            block = 'gbc',
+---        },
+---        opleader = {
+---            line = 'gc',
+---            block = 'gb',
+---        },
+---        extra = {
+---            above = 'gcO',
+---            below = 'gco',
+---            eol = 'gcA',
+---        },
+---        mappings = {
+---            basic = true,
+---            extra = true,
+---        },
+---        pre_hook = nil,
+---        post_hook = nil,
+---    }
+---<
+---@brief ]]
 
----LHS of operator-pending mappings in NORMAL + VISUAL mode
+---Plugin's configuration
+---@class CommentConfig
+---Controls space between the comment
+---and the line (default: 'true')
+---@field padding boolean|fun():boolean
+---Whether cursor should stay at the
+---same position. Only works in NORMAL
+---mode mappings (default: 'true')
+---@field sticky boolean
+---Lua pattern used to ignore lines
+---during (un)comment (default: 'nil')
+---@field ignore string|fun():string
+---Enables |comment.keybindings|
+---NOTE: If given 'false', then the
+---plugin won't create any mappings
+---@field mappings Mappings|false
+---@field toggler Toggler See |comment.config.Toggler|
+---@field opleader Opleader See |comment.config.Opleader|
+---@field extra ExtraMapping See |comment.config.ExtraMapping|
+---Function to call before (un)comment.
+---It is called with a {ctx} argument
+---of type |comment.utils.CommentCtx|
+---(default: 'nil')
+---@field pre_hook fun(c: CommentCtx): string
+---Function to call after (un)comment.
+---It is called with a {ctx} argument
+---of type |comment.utils.CommentCtx|
+---(default: 'nil')
+---@field post_hook fun(c: CommentCtx)
+
+---Create default mappings
+---@class Mappings
+---Enables operator-pending mapping; `gcc`, `gbc`,
+---`gc{motion}` and `gb{motion}` (default: 'true')
+---@field basic boolean
+---Enable extra mapping; `gco`, `gcO` and `gcA`
+---(default: 'true')
+---@field extra boolean
+
+---LHS of toggle mappings in NORMAL
+---@class Toggler
+---@field line string Linewise comment (default: 'gcc')
+---@field block string Blockwise comment (default: 'gbc')
+
+---LHS of operator-mode mappings in NORMAL and VISUAL mode
 ---@class Opleader
----@field line string Linewise comment keymap
----@field block string Blockwise comment keymap
+---@field line string Linewise comment (default: 'gc')
+---@field block string Blockwise comment (default: 'gb')
 
 ---LHS of extra mappings
 ---@class ExtraMapping
----@field above string Mapping to add comment on the line above
----@field below string Mapping to add comment on the line below
----@field eol string Mapping to add comment at the end of line
+---@field below string Inserts comment below (default: 'gco')
+---@field above string Inserts comment above (default: 'gcO')
+---@field eol string Inserts comment at the end of line (default: 'gcA')
 
----Whether to create basic (operator-pending) and extended mappings
----@class Mappings
----Enable operator-pending mapping
----Includes `gcc`, `gbc`, `gc[count]{motion}` and `gb[count]{motion}`
----NOTE: These mappings can be changed individually by `opleader` and `toggler` config
----@field basic boolean
----Enable extra mapping
----Includes `gco`, `gcO`, `gcA`
----@field extra boolean
----Enable extended mapping
----Includes `g>`, `g<`, `g>[count]{motion}` and `g<[count]{motion}`
----@field extended boolean
-
----Plugin's config
----@class Config
----@field padding boolean Add a space b/w comment and the line
----Whether the cursor should stay at its position
----NOTE: This only affects NORMAL mode mappings and doesn't work with dot-repeat
----@field sticky boolean
----Lines to be ignored while comment/uncomment.
----Could be a regex string or a function that returns a regex string.
----Example: Use '^$' to ignore empty lines
----@field ignore string|fun():string
----@field mappings boolean|Mappings
----@field toggler Toggler
----@field opleader Opleader
----@field extra ExtraMapping
----@field pre_hook fun(ctx: Ctx):string Function to be called before comment/uncomment
----@field post_hook fun(ctx:Ctx) Function to be called after comment/uncomment
-
+---@private
 ---@class RootConfig
----@field config Config
----@field position number[] To be used to restore cursor position
----@field count number Helps with dot-repeat support for count prefix
+---@field config CommentConfig
+---@field position? integer[] To be used to restore cursor position
 local Config = {
     state = {},
     config = {
@@ -56,7 +100,6 @@ local Config = {
         mappings = {
             basic = true,
             extra = true,
-            extended = false,
         },
         toggler = {
             line = 'gcc',
@@ -74,9 +117,12 @@ local Config = {
     },
 }
 
----Update the config
----@param cfg Config
+---@private
+---Updates the default config
+---@param cfg? CommentConfig
 ---@return RootConfig
+---@see comment.usage.setup
+---@usage `require('Comment.config'):set({config})`
 function Config:set(cfg)
     if cfg then
         self.config = vim.tbl_deep_extend('force', self.config, cfg)
@@ -85,11 +131,13 @@ function Config:set(cfg)
 end
 
 ---Get the config
----@return Config
+---@return CommentConfig
+---@usage `require('Comment.config'):get()`
 function Config:get()
     return self.config
 end
 
+---@export Config
 return setmetatable(Config, {
     __index = function(this, k)
         return this.state[k]
