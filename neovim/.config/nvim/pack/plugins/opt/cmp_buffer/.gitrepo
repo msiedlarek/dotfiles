@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = https://github.com/hrsh7th/cmp-buffer.git
-	branch = 12463cfcd9b14052f9effccbf1d84caa7a2d57f0
+	branch = main
 	commit = 12463cfcd9b14052f9effccbf1d84caa7a2d57f0
 	parent = f10cf09286641ecc01e1282e745246cf154b4aa6
 	method = merge
