@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/nvim-tree/nvim-web-devicons.git
 	branch = master
-	commit = bdd43421437f2ef037e0dafeaaaa62b31d35ef2f
-	parent = 9170146a0f5157e3423f3011cc706a5775dda738
+	commit = 9061e2d355ecaa2b588b71a35e7a11358a7e51e1
+	parent = a4250b26afb4902feb9bbe82115e4d476602ec15
 	method = merge
 	cmdver = 0.4.5

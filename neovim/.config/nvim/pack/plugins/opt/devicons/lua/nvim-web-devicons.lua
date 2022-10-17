@@ -51,7 +51,7 @@ local icons = {
     cterm_color = "113",
     name = "Bashrc",
   },
-  [".ds_store"] = {
+  [".DS_Store"] = {
     icon = "",
     color = "#41535b",
     cterm_color = "59",
@@ -291,6 +291,12 @@ local icons = {
     cterm_color = "67",
     name = "ClojureJS",
   },
+  ["cljd"] = {
+    icon = "",
+    color = "#519aba",
+    cterm_color = "67",
+    name = "ClojureDart",
+  },
   ["cmake"] = {
     icon = "",
     color = "#6d8086",
@@ -370,9 +376,9 @@ local icons = {
     name = "Cson",
   },
   ["css"] = {
-    icon = "",
-    color = "#563d7c",
-    cterm_color = "60",
+    icon = "",
+    color = "#42a5f5",
+    cterm_color = "39",
     name = "Css",
   },
   ["csv"] = {
@@ -428,6 +434,12 @@ local icons = {
     color = "#384d54",
     cterm_color = "59",
     name = "Dockerfile",
+  },
+  ["drl"] = {
+    icon = "",
+    color = "#ffafaf",
+    cterm_color = "217",
+    name = "Drools",
   },
   ["dropbox"] = {
     icon = "",
@@ -584,6 +596,12 @@ local icons = {
     cterm_color = "66",
     name = "GodotProject",
   },
+  ["graphql"] = {
+    icon = "",
+    color = "#e535ab",
+    cterm_color = "199",
+    name = "GraphQL"
+  },
   ["gruntfile"] = {
     icon = "",
     color = "#e37933",
@@ -651,9 +669,9 @@ local icons = {
     name = "Htm",
   },
   ["html"] = {
-    icon = "",
-    color = "#e34c26",
-    cterm_color = "166",
+    icon = "",
+    color = "#e44d26",
+    cterm_color = "202",
     name = "Html",
   },
   ["hxx"] = {
@@ -716,6 +734,12 @@ local icons = {
     cterm_color = "185",
     name = "Json",
   },
+  ["json5"] = {
+    icon = "ﬥ",
+    color = "#cbcb41",
+    cterm_color = "185",
+    name = "Json5",
+  },
   ["jsx"] = {
     icon = "",
     color = "#519aba",
@@ -729,10 +753,16 @@ local icons = {
     name = "Ksh",
   },
   ["kt"] = {
-    icon = "𝙆",
+    icon = "",
     color = "#F88A02",
     cterm_color = "208",
     name = "Kotlin",
+  },
+  ["kts"] = {
+    icon = "",
+    color = "#F88A02",
+    cterm_color = "208",
+    name = "KotlinScript",
   },
   ["leex"] = {
     icon = "",
@@ -764,6 +794,12 @@ local icons = {
     cterm_color = "74",
     name = "Lua",
   },
+  ["luau"] = {
+    icon = "",
+    color = "#51a0cf",
+    cterm_color = "74",
+    name = "Luau",
+  },
   ["makefile"] = {
     icon = "",
     color = "#6d8086",
@@ -783,13 +819,13 @@ local icons = {
     name = "Material",
   },
   ["md"] = {
-    icon = "",
-    color = "#519aba",
-    cterm_color = "67",
+    icon = "",
+    color = "#ffffff",
+    cterm_color = "white",
     name = "Md",
   },
   ["mdx"] = {
-    icon = "",
+    icon = "",
     color = "#519aba",
     cterm_color = "67",
     name = "Mdx",
@@ -823,6 +859,12 @@ local icons = {
     color = "#e37933",
     cterm_color = "173",
     name = "Mli",
+  },
+  ["mo"] = {
+    icon = "∞",
+    color = "#9772FB",
+    cterm_color = "99",
+    name = "Motoko",
   },
   ["mustache"] = {
     icon = "",
@@ -923,7 +965,7 @@ local icons = {
     cterm_color = "179",
     name = "Prolog",
   },
-  ["procfile"] = {
+  ["Procfile"] = {
     icon = "",
     color = "#a074c4",
     cterm_color = "140",
@@ -970,6 +1012,12 @@ local icons = {
     color = "#ffe291",
     cterm_color = "67",
     name = "Pyo",
+  },
+  ["query"] = {
+    icon = "",
+    color = "#90a850",
+    cterm_color = "154",
+    name = "Query",
   },
   ["r"] = {
     icon = "ﳒ",
@@ -1031,11 +1079,23 @@ local icons = {
     cterm_color = "204",
     name = "Sass",
   },
+  ["sbt"] = {
+    icon = "",
+    color = "#cc3e44",
+    cterm_color = "167",
+    name = "sbt",
+  },
   ["scala"] = {
     icon = "",
     color = "#cc3e44",
     cterm_color = "167",
     name = "Scala",
+  },
+  ["scm"] = {
+    icon = "ﬦ",
+    color = "#000000",
+    cterm_color = "16",
+    name = "Scheme",
   },
   ["scss"] = {
     icon = "",
@@ -1109,11 +1169,23 @@ local icons = {
     cterm_color = "98",
     name = "Suo",
   },
+  ["sv"] = {
+    icon = "",
+    color = "#019833",
+    cterm_color = "29",
+    name = "SystemVerilog",
+  },
   ["svelte"] = {
     icon = "",
     color = "#ff3e00",
     cterm_color = "202",
     name = "Svelte",
+  },
+  ["svh"] = {
+    icon = "",
+    color = "#019833",
+    cterm_color = "29",
+    name = "SystemVerilog",
   },
   ["svg"] = {
     icon = "ﰟ",
@@ -1132,6 +1204,18 @@ local icons = {
     color = "#519aba",
     cterm_color = "67",
     name = "Tor",
+  },
+  ["tbc"] = {
+    icon = "﯑",
+    color = "#1e5cb3",
+    cterm_color = "67",
+    name = "Tcl",
+  },
+  ["tcl"] = {
+    icon = "﯑",
+    color = "#1e5cb3",
+    cterm_color = "67",
+    name = "Tcl",
   },
   ["terminal"] = {
     icon = "",
@@ -1186,6 +1270,30 @@ local icons = {
     color = "#89e051",
     cterm_color = "113",
     name = "Txt",
+  },
+  ["v"] = {
+    icon = "",
+    color = "#019833",
+    cterm_color = "29",
+    name = "Verilog",
+  },
+  ["vh"] = {
+    icon = "",
+    color = "#019833",
+    cterm_color = "29",
+    name = "Verilog",
+  },
+  ["vhd"] = {
+    icon = "",
+    color = "#019833",
+    cterm_color = "29",
+    name = "VHDL",
+  },
+  ["vhdl"] = {
+    icon = "",
+    color = "#019833",
+    cterm_color = "29",
+    name = "VHDL",
   },
   ["vim"] = {
     icon = "",
@@ -1271,6 +1379,30 @@ local icons = {
     cterm_color = "67",
     name = "Solidity",
   },
+  [".env"] = {
+    icon = "",
+    color = "#faf743",
+    cterm_color = "226",
+    name = "Env",
+  },
+  ["prisma"] = {
+    icon = "卑",
+    color = "#ffffff",
+    cterm_color = "white",
+    name = "Prisma",
+  },
+  ["lock"] = {
+    icon = "",
+    color = "#bbbbbb",
+    cterm_color = "250",
+    name = "Lock",
+  },
+  ["log"] = {
+    icon = "",
+    color = "#ffffff",
+    cterm_color = "white",
+    name = "Log",
+  },
 }
 
 -- Map of filetypes -> icon names
@@ -1307,6 +1439,7 @@ local filetypes = {
   ["dockerfile"] = "dockerfile",
   ["dosbatch"] = "bat",
   ["dosini"] = "ini",
+  ["drools"] = "drl",
   ["dropbox"] = "dropbox",
   ["dump"] = "dump",
   ["eex"] = "eex",
@@ -1330,6 +1463,7 @@ local filetypes = {
   ["glb"] = "glb",
   ["go"] = "go",
   ["godot"] = "godot",
+  ["graphql"] = "graphql",
   ["gruntfile"] = "gruntfile",
   ["gulpfile"] = "gulpfile",
   ["haml"] = "haml",
@@ -1347,12 +1481,15 @@ local filetypes = {
   ["jpeg"] = "jpeg",
   ["jpg"] = "jpg",
   ["json"] = "json",
+  ["json5"] = "json5",
   ["julia"] = "jl",
   ["kotlin"] = "kt",
   ["leex"] = "leex",
   ["less"] = "less",
   ["lhaskell"] = "lhs",
   ["license"] = "license",
+  ["log"] = "log",
+  ["lock"] = "lock",
   ["lprolog"] = "sig",
   ["lua"] = "lua",
   ["make"] = "makefile",
@@ -1360,6 +1497,7 @@ local filetypes = {
   ["material"] = "material",
   ["mdx"] = "mdx",
   ["mint"] = "mint",
+  ["motoko"] = "mo",
   ["mustache"] = "mustache",
   ["nim"] = "nim",
   ["nix"] = "nix",
@@ -1375,7 +1513,8 @@ local filetypes = {
   ["png"] = "png",
   ["postscr"] = "ai",
   ["ppt"] = "ppt",
-  ["procfile"] = "procfile",
+  ["prisma"] = "prisma",
+  ["procfile"] = "Procfile",
   ["ps1"] = "ps1",
   ["psb"] = "psb",
   ["psd"] = "psd",
@@ -1384,6 +1523,7 @@ local filetypes = {
   ["pyd"] = "pyd",
   ["pyo"] = "pyo",
   ["python"] = "py",
+  ["query"] = "query",
   ["r"] = "r",
   ["rlib"] = "rlib",
   ["rmd"] = "rmd",
@@ -1391,7 +1531,9 @@ local filetypes = {
   ["ruby"] = "rb",
   ["rust"] = "rs",
   ["sass"] = "sass",
+  ["sbt"] = "sbt",
   ["scala"] = "scala",
+  ["scheme"] = "scm",
   ["scss"] = "scss",
   ["sh"] = "sh",
   ["slim"] = "slim",
@@ -1407,7 +1549,9 @@ local filetypes = {
   ["svelte"] = "svelte",
   ["svg"] = "svg",
   ["swift"] = "swift",
+  ["systemverilog"] = "sv",
   ["tads"] = "t",
+  ["tcl"] = "tcl",
   ["terminal"] = "terminal",
   ["toml"] = "toml",
   ["tres"] = "tres",
@@ -1416,6 +1560,8 @@ local filetypes = {
   ["txt"] = "txt",
   ["typescript"] = "ts",
   ["typescriptreact"] = "tsx",
+  ["verilog"] = "v",
+  ["vhdl"] = "vhd",
   ["vim"] = "vim",
   ["vue"] = "vue",
   ["webp"] = "webp",
@@ -1438,13 +1584,22 @@ local default_icon = {
 local global_opts = {
   override = {},
   default = false,
+  color_icons = true,
 }
 
 local function get_highlight_name(data)
+  if not global_opts.color_icons then
+  	data = default_icon
+  end
+
   return data.name and "DevIcon" .. data.name
 end
 
 local function set_up_highlight(icon_data)
+  if not global_opts.color_icons then
+  	icon_data = default_icon
+  end
+
   local hl_group = get_highlight_name(icon_data)
   if hl_group then
     local highlight_command = "highlight! " .. hl_group
@@ -1471,6 +1626,11 @@ local function highlight_exists(group)
 end
 
 local function set_up_highlights()
+  if not global_opts.color_icons then
+    set_up_highlight(default_icon)
+    return
+  end
+
   for _, icon_data in pairs(icons) do
     local has_color = icon_data.color or icon_data.cterm_color
     local name_valid = icon_data.name and not highlight_exists(get_highlight_name(icon_data))
@@ -1478,6 +1638,23 @@ local function set_up_highlights()
       set_up_highlight(icon_data)
     end
   end
+end
+
+local function get_highlight_foreground(icon_data)
+  if not global_opts.color_icons then
+  	icon_data = default_icon
+  end
+
+  return string.format("#%06x", vim.api.nvim_get_hl_by_name(get_highlight_name(icon_data), true).foreground)
+end
+
+local function get_highlight_ctermfg(icon_data)
+  if not global_opts.color_icons then
+  	icon_data = default_icon
+  end
+
+  local _, _, ctermfg = string.find(vim.fn.execute("highlight " .. get_highlight_name(icon_data)), "ctermfg=(%d+)")
+  return ctermfg
 end
 
 local loaded = false
@@ -1494,6 +1671,8 @@ local function setup(opts)
   if user_icons.default then
     global_opts.default = true
   end
+
+  global_opts.color_icons = vim.F.if_nil(user_icons.color_icons, global_opts.color_icons)
 
   if user_icons.override and user_icons.override.default_icon then
     default_icon = user_icons.override.default_icon
@@ -1519,7 +1698,7 @@ local function get_icon(name, ext, opts)
     setup()
   end
 
-  local has_default = (opts and opts.default) or global_opts.default
+  local has_default = vim.F.if_nil(opts and opts.default, global_opts.default)
   local icon_data = icons[name] or icons[ext] or (has_default and default_icon)
 
   if icon_data then
@@ -1542,11 +1721,17 @@ local function get_icon_colors(name, ext, opts)
     setup()
   end
 
-  local has_default = (opts and opts.default) or global_opts.default
+  local has_default = vim.F.if_nil(opts and opts.default, global_opts.default)
   local icon_data = icons[name] or icons[ext] or (has_default and default_icon)
 
   if icon_data then
-    return icon_data.icon, icon_data.color, icon_data.cterm_color
+    local color = icon_data.color
+    local cterm_color = icon_data.cterm_color
+    if icon_data.name and highlight_exists(get_highlight_name(icon_data)) then
+      color = get_highlight_foreground(icon_data) or color
+      cterm_color = get_highlight_ctermfg(icon_data) or cterm_color
+    end
+    return icon_data.icon, color, cterm_color
   end
 end
 
@@ -1577,6 +1762,10 @@ end
 
 local function set_icon(user_icons)
   icons = vim.tbl_extend("force", icons, user_icons or {})
+  if not global_opts.color_icons then
+  	return
+  end
+
   for _, icon_data in pairs(user_icons) do
     set_up_highlight(icon_data)
   end
