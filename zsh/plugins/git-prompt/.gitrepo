@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/woefe/git-prompt.zsh.git
+	branch = e54665a2f4fb8ba58e3f293678abfd031b65045e
+	commit = e54665a2f4fb8ba58e3f293678abfd031b65045e
+	parent = 53bcf7d15c636e49f1e876a5426f5c57799e3888
+	method = merge
+	cmdver = 0.4.5
