@@ -1,0 +1,69 @@
+*recutils.txt* GNU Recutils support for Vim
+
+Author: Zaid Al-Jarrah
+License: Same terms as Vim itself (see |license|)
+
+INTRODUCTION                                *recutils*
+
+The set of commands below will be available whenever you edit a .rec file.
+
+COMMANDS                                    *recutils-commands*
+
+These commands operate on buffers so you don't have to pass them a filepath as an
+argument (unless you want to run the command on a different file).
+
+:Recsel {args}              Run recsel with the supplied arguments and display
+                            the output in a |location-list| in the current
+                            window.
+
+:Recinf {args}              Run recinf with the supplied arguments and display
+                            the output in a |location-list| in the current
+                            window.
+
+:Recfix {args}              Run recfix with the supplied arguments and display
+                            the output in a |location-list| in the current
+                            window.
+                            If there are no syntax errors in the file then the
+                            |location-list| will not open, otherwise you will be
+                            able to navigate the list and jump to the syntax
+                            errors directly.
+
+:Rec2csv {args}             Run rec2csv with the supplied arguments and
+                            display the output in a split horizontal buffer
+                            in the current window.
+
+:RecNextDescriptor          Jump to the next record descriptor.
+
+:RecPreviousDescriptor      Jump to the previous record descriptor.
+
+:RecPreviewDescriptor       Show the current record descriptor in a
+                            |popup-window| / floating-window / |preview-window|.
+
+MAPS                                        *recutils-maps*
+
+These |recutils-commands| maps are available in the |recutils| buffers only.
+
+<localleader>rf             Invokes `:Recfix --check` on the current buffer.
+<localleader>rn             Populates the command line with :Recinf.
+<localleader>rs             Populates the command line with :Recsel.
+<localleader>rv             Populates the command line with :Rec2csv
+<localleader>r]             Jump to the next record descriptor.
+<localleader>r[             Jump to the previous record descriptor.
+<localleader>r?             Show the current record descriptor in a
+                            popup/floating/preview window.
+
+The above maps can be disabled by setting the g:recutils_no_maps option.
+>
+  let g:recutils_no_maps = 1
+<
+
+AUTO COMPLETION                             *recutils-autocompletion*
+
+Basic support for auto-completing record set properties is available (by using
+C-x C-o while in insert mode).
+
+It can be disabled by setting the g:recutils_no_autocompletion option.
+>
+  let g:recutils_no_autocompletion = 1
+<
+" vim:tw=78:ft=help
