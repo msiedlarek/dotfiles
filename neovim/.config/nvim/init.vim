@@ -142,8 +142,9 @@ packadd! jellybeans
 packadd! papercolor
 packadd! sleuth
 
-packadd! black
 packadd! beancount
+packadd! black
+packadd! rec
 
 runtime! config/*.vim
 
@@ -185,3 +186,7 @@ if has('nvim')
 
   runtime! config/*.lua
 endif
+
+runtime! ftdetect/*.lua
+runtime! ftdetect/*.vim
+
