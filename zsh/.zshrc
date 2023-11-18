@@ -102,3 +102,4 @@ alias bazel=bazelisk
 alias py=ipython
 
 alias mediashell='kubectl exec --context=sigma --namespace=default --tty --stdin deployment/mediatools -- tmux -2 new -As main'
+alias backupshell='kubectl exec --namespace=backup --tty --stdin deployment/backup-shell -- tmux -2 new -As main'
