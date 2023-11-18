@@ -10,7 +10,12 @@ export VISUAL="$EDITOR"
 export PAGER="less -X"
 export MANPAGER="less -X"
 
-export PATH="/opt/local/bin:/usr/local/bin:${PATH}"
+export PATH="/usr/local/bin:${PATH}"
 export PATH="${HOME}/go/bin:${PATH}"
 export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+export PATH="/usr/local/opt/postgresql@15/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="/opt/zig/bin:$PATH"
+export PATH="$PATH:/Users/msiedlarek/.dotnet/tools"
